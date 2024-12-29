@@ -1,5 +1,6 @@
 // src/components/Navigation/Navbar.js
 import React, { useState } from 'react';
+import PropTypes from 'prop-types'; // Import PropTypes
 import { Menu, X } from 'lucide-react';
 
 const NavLink = ({ href, children }) => (
@@ -10,6 +11,11 @@ const NavLink = ({ href, children }) => (
     {children}
   </a>
 );
+
+NavLink.propTypes = {
+  href: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
+};
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

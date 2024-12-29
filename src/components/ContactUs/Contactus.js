@@ -43,7 +43,7 @@ const ContactUs = () => {
           <div className="flex-1 max-w-lg w-full h-full">
             {submitted && (
               <p className="bg-green-100 text-green-800 p-4 rounded-lg mb-4">
-                Thank you for your message! We'll get back to you soon.
+                Thank you for your message! We will get back to you soon.
               </p>
             )}
             {error && (
