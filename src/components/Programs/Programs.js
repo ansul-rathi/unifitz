@@ -1,5 +1,4 @@
 // src/components/Programs/Programs.js
-import React from 'react';
 import { ChevronRight } from 'lucide-react';
 
 const Programs = () => {

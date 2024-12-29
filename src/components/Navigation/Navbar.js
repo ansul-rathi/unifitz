@@ -1,5 +1,5 @@
 // src/components/Navigation/Navbar.js
-import React, { useState } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types'; // Import PropTypes
 import { Menu, X } from 'lucide-react';
 

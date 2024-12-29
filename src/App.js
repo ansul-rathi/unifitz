@@ -1,5 +1,4 @@
 // src/App.js
-import React from 'react';
 import Navbar from './components/Navigation/Navbar';
 import Hero from './components/Hero/Hero';
 import Programs from './components/Programs/Programs';
