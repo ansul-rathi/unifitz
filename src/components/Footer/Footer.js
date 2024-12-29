@@ -13,7 +13,7 @@ const Footer = () => {
             <p className="text-gray-400 leading-relaxed">
               Transform your life through movement. Join our fitness community and discover the best version of yourself.
             </p>
-            <div className="flex space-x-4 mt-4">
+            {/* <div className="flex space-x-4 mt-4">
               <a href="/" target="_blank" className="text-gray-400 hover:text-white transition-colors">
                 <Facebook size={20} />
               </a>
@@ -22,8 +22,9 @@ const Footer = () => {
               </a>
               <a href="/" className="text-gray-400 hover:text-white transition-colors">
                 <Twitter size={20} />
+                <></>dasdas
               </a>
-            </div>
+            </div> */}
           </div>
 
           {/* Quick Links */}
