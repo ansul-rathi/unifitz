@@ -87,7 +87,6 @@ const getRecommendation = () => {
   
   return (
     <div className="space-y-6">
-      {/* Health Status */}
       <div>
         <h4 className="text-xl font-semibold text-orange-500 mb-3">Your Health Status</h4>
         <p className="text-gray-300">
@@ -96,7 +95,6 @@ const getRecommendation = () => {
         </p>
       </div>
 
-      {/* Recommended Program */}
       <div>
         <h4 className="text-xl font-semibold text-orange-500 mb-3">Your Customized Program Includes</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
