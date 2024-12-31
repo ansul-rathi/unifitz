@@ -27,9 +27,9 @@ const TeamSection = () => {
   ];
 
   return (
-    <section id="team" className="py-20 bg-black">
+    <section id="trainers" className="py-20 bg-black">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-bold mb-12 text-center text-white">Our Expert Team</h2>
+        <h2 className="text-4xl font-bold mb-12 text-center text-white">Our Expert Trainers</h2>
         <div className="grid md:grid-cols-4 sm:grid-cols-2 gap-8">
           {team.map((member, index) => (
             <div

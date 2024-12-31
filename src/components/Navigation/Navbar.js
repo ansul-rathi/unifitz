@@ -1,12 +1,12 @@
-// src/components/Navigation/Navbar.js
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types'; // Import PropTypes
 import { Menu, X } from 'lucide-react';
 
-const NavLink = ({ href, children }) => (
+const NavLink = ({ href, children, onClick }) => (
   <a
     href={href}
-    className="text-gray-300 hover:text-orange-500 transition-colors font-medium"
+    onClick={onClick}
+    className="text-gray-300 hover:text-orange-500 transition-colors font-medium block"
   >
     {children}
   </a>
@@ -15,13 +15,31 @@ const NavLink = ({ href, children }) => (
 NavLink.propTypes = {
   href: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
+  onClick: PropTypes.func,
 };
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   return (
-    <nav className="bg-gradient-to-r from-black via-gray-900 to-black/80 fixed w-full z-50 shadow-lg backdrop-blur-md">
+    <nav
+      className={`fixed w-full z-50 shadow-lg backdrop-blur-md transition-colors duration-300 ${
+        isScrolled ? 'bg-transparent' : ''
+      }`}
+    >
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -41,6 +59,7 @@ const Navbar = () => {
           <button
             className="md:hidden text-gray-300 hover:text-orange-500 transition-all"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle Menu"
           >
             {isMenuOpen ? (
               <X className="w-6 h-6 transition-transform duration-200 rotate-180" />

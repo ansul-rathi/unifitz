@@ -27,11 +27,11 @@ const ContactUs = () => {
   };
 
   return (
-    <div className="bg-gray-900 text-white py-12">
-      <div className="container mx-auto px-4 h-[500px] md:h-[600px] flex items-center justify-center">
+    <section id="contact" className="bg-gray-900 text-white py-12">
+      <div className="container mx-auto px-4 flex items-center justify-center">
         <div className="flex flex-col md:flex-row md:justify-between items-center gap-12 w-full">
           {/* Left Side - Image or Info */}
-          <div className="flex-1 h-full">
+          <div className="flex-1 h-full hidden md:block">
             <img
               src="/contactUs/contactUs.png"
               alt="Contact Us"
@@ -41,6 +41,7 @@ const ContactUs = () => {
 
           {/* Right Side - Form */}
           <div className="flex-1 max-w-lg w-full h-full">
+            <h2 className="text-3xl font-bold mb-6 text-center">Contact Us</h2>
             {submitted && (
               <p className="bg-green-100 text-green-800 p-4 rounded-lg mb-4">
                 Thank you for your message! We will get back to you soon.
@@ -109,7 +110,7 @@ const ContactUs = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

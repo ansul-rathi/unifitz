@@ -23,7 +23,7 @@ const App = () => {
           <Programs />
         </ErrorBoundary>
         <ErrorBoundary>
-          <section className="py-20 bg-gray-900">
+          <section className="py-20 bg-black">
             <div className="container mx-auto px-4">
               <h2 className="text-4xl font-bold mb-12 text-center">Calculate Your BMI</h2>
               <BMICalculator />

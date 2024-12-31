@@ -21,7 +21,7 @@ const Programs = () => {
   ];
 
   return (
-    <section id="programs" className="py-20 bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+    <section id="programs" className="py-20 bg-black text-white">
       <div className="container mx-auto px-4">
         <h2 className="text-5xl font-extrabold mb-12 text-center">Our Programs</h2>
         <div className="grid md:grid-cols-3 gap-8">
