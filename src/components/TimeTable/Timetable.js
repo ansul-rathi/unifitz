@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 
 const classTypes = {
   yoga: {
@@ -36,6 +37,16 @@ const ClassBlock = ({ type, time, instructor }) => (
     <div className="text-sm">{instructor}</div>
   </div>
 );
+
+ClassBlock.propTypes = {
+  type: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    subtitle: PropTypes.string.isRequired,
+    bgColor: PropTypes.string.isRequired
+  }).isRequired,
+  time: PropTypes.string.isRequired,
+  instructor: PropTypes.string.isRequired
+};
 
 const YogaTimetable = () => {
   const [filter, setFilter] = useState('All Events');
