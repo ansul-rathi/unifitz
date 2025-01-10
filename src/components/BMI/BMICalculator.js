@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Info } from 'lucide-react';
+import { Info, Activity, Heart, Target, Clock } from 'lucide-react';
 
 const HealthAssessment = () => {
   const [unit, setUnit] = useState('metric');
@@ -16,6 +16,7 @@ const HealthAssessment = () => {
   const [showInfo, setShowInfo] = useState(false);
   const [showRecommendation, setShowRecommendation] = useState(false);
 
+  // Keep existing functions (calculateBMI, getBMICategory, handleUnitChange, getRecommendation)
   const calculateBMI = () => {
     let heightInMeters;
     if (unit === 'metric' && formData.height) {
@@ -50,279 +51,230 @@ const HealthAssessment = () => {
     setShowRecommendation(false);
   };
 
-  // const getRecommendation = () => {
-  //   const bmiCategory = getBMICategory(bmi).category;
-  //   const { goal, profession } = formData;
+  const getRecommendation = () => {
+    const bmiCategory = getBMICategory(bmi).category;
+    const { goal, profession, age } = formData;
     
-  //   let baseMessage = `Based on your BMI of ${bmi} (${bmiCategory}) and your goal of ${goal}, `;
-  //   let recommendations = '';
-    
-  //   if (profession === 'Desk Job') {
-  //     recommendations += "Given your desk job, we'll focus on incorporating regular movement and proper ergonomics. ";
-  //   }
-    
-  //   switch(goal) {
-  //     case 'Weight Loss':
-  //       recommendations += "We'll create a balanced calorie-deficit program combining HIIT, strength training, and nutrition guidance. ";
-  //       break;
-  //     case 'Muscle Gain':
-  //       recommendations += "Our program will focus on progressive overload, proper nutrition, and recovery techniques. ";
-  //       break;
-  //     case 'General Fitness':
-  //       recommendations += "We'll design a well-rounded program with cardio, strength, and flexibility training. ";
-  //       break;
-  //     case 'Stress Relief':
-  //       recommendations += "Your plan will include stress-reducing activities like yoga, meditation, and low-intensity workouts. ";
-  //       break;
-  //   }
+    return (
+      <div className="space-y-8">
+        <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-xl">
+          <h4 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+            <Activity className="text-orange-500" />
+            Your Health Profile
+          </h4>
+          <p className="text-gray-300 leading-relaxed">
+            Based on your BMI of <span className="text-orange-500 font-semibold">{bmi}</span> ({bmiCategory}), 
+            age {age}, and {profession.toLowerCase()} lifestyle, weve crafted a personalized journey 
+            towards your goal of {goal.toLowerCase()}.
+          </p>
+        </div>
 
-  //   return baseMessage + recommendations + "Our certified trainers will guide you every step of the way with personalized attention and regular progress tracking.";
-  // };
-
-  // Previous imports and code remain the same until getRecommendation function
-
-const getRecommendation = () => {
-  const bmiCategory = getBMICategory(bmi).category;
-  const { goal, profession, age } = formData;
-  
-  return (
-    <div className="space-y-6">
-      <div>
-        <h4 className="text-xl font-semibold text-orange-500 mb-3">Your Health Status</h4>
-        <p className="text-gray-300">
-          Based on your BMI of {bmi} ({bmiCategory}), age {age}, and {profession.toLowerCase()} lifestyle, 
-          here is your personalized fitness journey towards {goal.toLowerCase()}.
-        </p>
-      </div>
-
-      <div>
-        <h4 className="text-xl font-semibold text-orange-500 mb-3">Your Customized Program Includes</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-lg">💪</span>
-              </div>
-              <div>
-                <h5 className="font-semibold text-white">Personalized Workouts</h5>
-                <p className="text-sm text-gray-300">Tailored exercise routines updated weekly based on your progress</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-lg">🥗</span>
-              </div>
-              <div>
-                <h5 className="font-semibold text-white">Nutrition Planning</h5>
-                <p className="text-sm text-gray-300">Custom meal plans with grocery lists and recipes</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-lg">👥</span>
-              </div>
-              <div>
-                <h5 className="font-semibold text-white">Dedicated Coach</h5>
-                <p className="text-sm text-gray-300">1-on-1 guidance from certified fitness experts</p>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-xl">
+            <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <Heart className="text-orange-500" />
+              Core Program Features
+            </h4>
+            <div className="space-y-4">
+              {[
+                {
+                  title: 'Personalized Workouts',
+                  desc: 'Custom exercise routines updated weekly',
+                  icon: '💪'
+                },
+                {
+                  title: 'Nutrition Planning',
+                  desc: 'Tailored meal plans and recipes',
+                  icon: '🥗'
+                },
+                {
+                  title: 'Expert Guidance',
+                  desc: '1-on-1 coaching and support',
+                  icon: '👥'
+                }
+              ].map((item, index) => (
+                <div key={index} className="flex items-start gap-4 bg-gray-900 bg-opacity-50 p-4 rounded-lg">
+                  <div className="w-10 h-10 rounded-full bg-orange-500 bg-opacity-20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xl">{item.icon}</span>
+                  </div>
+                  <div>
+                    <h5 className="font-semibold text-white">{item.title}</h5>
+                    <p className="text-sm text-gray-300">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-lg">📚</span>
-              </div>
-              <div>
-                <h5 className="font-semibold text-white">Education Sessions</h5>
-                <p className="text-sm text-gray-300">Weekly workshops on fitness, nutrition, and wellness</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-lg">📱</span>
-              </div>
-              <div>
-                <h5 className="font-semibold text-white">Daily Support</h5>
-                <p className="text-sm text-gray-300">Workout reminders, progress tracking, and motivation messages</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-lg">📊</span>
-              </div>
-              <div>
-                <h5 className="font-semibold text-white">Progress Tracking</h5>
-                <p className="text-sm text-gray-300">Detailed weekly reports and measurements</p>
-              </div>
+          <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-xl">
+            <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <Target className="text-orange-500" />
+              Support Services
+            </h4>
+            <div className="space-y-4">
+              {[
+                {
+                  title: 'Progress Tracking',
+                  desc: 'Weekly measurements and reports',
+                  icon: '📊'
+                },
+                {
+                  title: 'Wellness Education',
+                  desc: 'Regular workshops and seminars',
+                  icon: '📚'
+                },
+                {
+                  title: 'Community Support',
+                  desc: '24/7 access to fitness community',
+                  icon: '🤝'
+                }
+              ].map((item, index) => (
+                <div key={index} className="flex items-start gap-4 bg-gray-900 bg-opacity-50 p-4 rounded-lg">
+                  <div className="w-10 h-10 rounded-full bg-orange-500 bg-opacity-20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xl">{item.icon}</span>
+                  </div>
+                  <div>
+                    <h5 className="font-semibold text-white">{item.title}</h5>
+                    <p className="text-sm text-gray-300">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Additional Benefits */}
-      <div>
-        <h4 className="text-xl font-semibold text-orange-500 mb-3">Additional Benefits</h4>
-        <ul className="list-none grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-300">
-          <li className="flex items-center gap-2">
-            <span className="text-green-500">✓</span>
-            Access to fitness app
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="text-green-500">✓</span>
-            Nutrition consultation
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="text-green-500">✓</span>
-            Community support
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="text-green-500">✓</span>
-            Monthly assessments
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="text-green-500">✓</span>
-            Recipe database
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="text-green-500">✓</span>
-            24/7 support chat
-          </li>
-        </ul>
+        <div className="bg-orange-500 bg-opacity-10 border border-orange-500 p-6 rounded-xl">
+          <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <Clock className="text-orange-500" />
+            Getting Started
+          </h4>
+          <p className="text-gray-300 mb-6">
+            Experience our premium services firsthand with a complimentary session. 
+            Our expert trainers will guide you through a personalized workout and 
+            discuss your fitness journey in detail.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            {['Fitness Assessment', 'Goal Setting', 'Program Design', 'Nutrition Guide'].map((step, index) => (
+              <div key={index} className="bg-gray-900 bg-opacity-50 p-3 rounded-lg text-center">
+                <div className="text-orange-500 font-bold mb-1">Step {index + 1}</div>
+                <div className="text-gray-300">{step}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+    );
+  };
 
-      {/* Call to Action Note */}
-      <div className="bg-gray-700 p-4 rounded-lg">
-        <p className="text-white text-center">
-          Ready to transform your fitness journey? Book a free demo class now and experience our 
-          premium services firsthand!
-        </p>
-      </div>
+  const InputField = ({ label, ...props }) => (
+    <div className="space-y-2">
+      <label className="block text-gray-300 font-medium">{label}</label>
+      <input
+        {...props}
+        className="w-full bg-gray-800 text-white p-3 rounded-lg border border-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition-all"
+      />
     </div>
   );
-};
 
+  const SelectField = ({ label, ...props }) => (
+    <div className="space-y-2">
+      <label className="block text-gray-300 font-medium">{label}</label>
+      <select
+        {...props}
+        className="w-full bg-gray-800 text-white p-3 rounded-lg border border-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition-all"
+      />
+    </div>
+  );
 
   return (
-    <div className="max-w-4xl mx-auto bg-gray-900 p-6 rounded-lg shadow-lg">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-3xl font-bold text-orange-500">Discover Your Fitness Potential</h3>
+    <div className="max-w-4xl mx-auto bg-gradient-to-b from-gray-900 to-gray-800 p-8 rounded-xl shadow-2xl">
+      <div className="flex items-center justify-between mb-8">
+        <h3 className="text-4xl font-bold text-white">
+          <span className="text-orange-500">Fitness</span> Assessment
+        </h3>
         <button
           onClick={() => setShowInfo(!showInfo)}
-          className="text-gray-400 hover:text-orange-500"
+          className="p-2 hover:bg-gray-800 rounded-full transition-colors"
         >
-          <Info size={24} />
+          <Info size={24} className="text-orange-500" />
         </button>
       </div>
 
       {showInfo && (
-        <div className="mb-6 p-4 bg-gray-800 border border-orange-500 rounded-lg text-gray-300">
-          <p className="text-sm">
-            Complete your health assessment to receive personalized recommendations and start your fitness journey with us.
+        <div className="mb-8 p-4 bg-gray-800 border-l-4 border-orange-500 rounded-lg">
+          <p className="text-gray-300">
+            Complete your health assessment to receive personalized recommendations 
+            and begin your transformation journey with us.
           </p>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          {/* Unit Toggle */}
-          <div className="flex gap-4 mb-6">
+      <div className="space-y-8">
+        <div className="flex gap-4 p-1 bg-gray-800 rounded-lg w-fit">
+          {['metric', 'imperial'].map((unitType) => (
             <button
-              onClick={() => handleUnitChange('metric')}
-              className={`flex-1 py-2 rounded-lg transition-colors ${
-                unit === 'metric'
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              key={unitType}
+              onClick={() => handleUnitChange(unitType)}
+              className={`px-6 py-2 rounded-md transition-all ${
+                unit === unitType
+                  ? 'bg-orange-500 text-white shadow-lg'
+                  : 'text-gray-400 hover:text-white'
               }`}
             >
-              Metric (cm)
+              {unitType.charAt(0).toUpperCase() + unitType.slice(1)}
             </button>
-            <button
-              onClick={() => handleUnitChange('imperial')}
-              className={`flex-1 py-2 rounded-lg transition-colors ${
-                unit === 'imperial'
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-              }`}
-            >
-              Imperial (ft)
-            </button>
-          </div>
+          ))}
+        </div>
 
-          {/* Height Input */}
-          {unit === 'metric' ? (
-            <div>
-              <label className="block text-gray-300 mb-2">Height (cm)</label>
-              <input
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            {unit === 'metric' ? (
+              <InputField
+                label="Height (cm)"
                 type="number"
                 value={formData.height}
                 onChange={(e) => setFormData({...formData, height: e.target.value})}
                 placeholder="Enter height in cm"
-                className="w-full bg-gray-800 text-white p-2 rounded border border-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
               />
-            </div>
-          ) : (
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="block text-gray-300 mb-2">Feet</label>
-                <input
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <InputField
+                  label="Feet"
                   type="number"
                   value={formData.feet}
                   onChange={(e) => setFormData({...formData, feet: e.target.value})}
                   placeholder="ft"
-                  className="w-full bg-gray-800 text-white p-2 rounded border border-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                 />
-              </div>
-              <div className="flex-1">
-                <label className="block text-gray-300 mb-2">Inches</label>
-                <input
+                <InputField
+                  label="Inches"
                   type="number"
                   value={formData.inches}
                   onChange={(e) => setFormData({...formData, inches: e.target.value})}
                   placeholder="in"
-                  className="w-full bg-gray-800 text-white p-2 rounded border border-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                 />
               </div>
-            </div>
-          )}
-
-          {/* Weight Input */}
-          <div>
-            <label className="block text-gray-300 mb-2">Weight (kg)</label>
-            <input
+            )}
+            <InputField
+              label="Weight (kg)"
               type="number"
               value={formData.weight}
               onChange={(e) => setFormData({...formData, weight: e.target.value})}
               placeholder="Enter weight in kg"
-              className="w-full bg-gray-800 text-white p-2 rounded border border-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             />
           </div>
-        </div>
 
-        <div className="space-y-4">
-          {/* Age Input */}
-          <div>
-            <label className="block text-gray-300 mb-2">Age</label>
-            <input
+          <div className="space-y-6">
+            <InputField
+              label="Age"
               type="number"
               value={formData.age}
               onChange={(e) => setFormData({...formData, age: e.target.value})}
               placeholder="Enter your age"
-              className="w-full bg-gray-800 text-white p-2 rounded border border-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             />
-          </div>
-
-          {/* Profession Dropdown */}
-          <div>
-            <label className="block text-gray-300 mb-2">Profession</label>
-            <select
+            <SelectField
+              label="Profession"
               value={formData.profession}
               onChange={(e) => setFormData({...formData, profession: e.target.value})}
-              className="w-full bg-gray-800 text-white p-2 rounded border border-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             >
               <option value="">Select your profession</option>
               <option value="Desk Job">Desk Job</option>
@@ -330,78 +282,50 @@ const getRecommendation = () => {
               <option value="Student">Student</option>
               <option value="Homemaker">Homemaker</option>
               <option value="Others">Others</option>
-            </select>
-          </div>
-
-          {/* Fitness Goal Dropdown */}
-          <div>
-            <label className="block text-gray-300 mb-2">Fitness Goal</label>
-            <select
+            </SelectField>
+            <SelectField
+              label="Fitness Goal"
               value={formData.goal}
               onChange={(e) => setFormData({...formData, goal: e.target.value})}
-              className="w-full bg-gray-800 text-white p-2 rounded border border-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             >
               <option value="">Select your goal</option>
               <option value="Weight Loss">Weight Loss</option>
               <option value="Muscle Gain">Muscle Gain</option>
               <option value="General Fitness">General Fitness</option>
               <option value="Stress Relief">Stress Relief</option>
-            </select>
+            </SelectField>
           </div>
         </div>
+
+        <button
+          onClick={calculateBMI}
+          className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
+        >
+          Generate My Fitness Plan
+        </button>
       </div>
 
-      <button
-        onClick={calculateBMI}
-        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg transition-colors mt-6"
-      >
-        Analyze My Health
-      </button>
-
-      {/* {showRecommendation && (
-        <div className="mt-6 p-6 bg-gray-800 rounded-lg border border-orange-500">
-          <div className="mb-4">
-            <p className="text-xl text-white">
-              Your BMI: <span className="font-bold">{bmi}</span>
-              <span className={`ml-2 ${getBMICategory(bmi).color} font-semibold`}>
+      {showRecommendation && (
+        <div className="mt-8 space-y-6">
+          <div className="p-6 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl text-white">
+            <p className="text-2xl font-bold">
+              Your BMI: {bmi}
+              <span className="ml-3 text-xl opacity-90">
                 ({getBMICategory(bmi).category})
               </span>
             </p>
           </div>
           
-          <p className="text-gray-300 mb-6">{getRecommendation()}</p>
+          {getRecommendation()}
           
           <button
             onClick={() => alert('Demo class booking request sent! Our team will contact you shortly.')}
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg transition-colors"
+            className="w-full bg-green-500 hover:bg-green-600 text-white py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
           >
-            Book a Free Demo Class
+            Book Your Free Session Now
           </button>
         </div>
-      )} */}
-
-
-{showRecommendation && (
-  <div className="mt-6 p-6 bg-gray-800 rounded-lg border border-orange-500">
-    <div className="mb-4">
-      <p className="text-xl text-white">
-        Your BMI: <span className="font-bold">{bmi}</span>
-        <span className={`ml-2 ${getBMICategory(bmi).color} font-semibold`}>
-          ({getBMICategory(bmi).category})
-        </span>
-      </p>
-    </div>
-    
-    {getRecommendation()}
-    
-    <button
-      onClick={() => alert('Demo class booking request sent! Our team will contact you shortly.')}
-      className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg transition-colors mt-6"
-    >
-      Book a Free Demo Class
-    </button>
-  </div>
-)}
+      )}
     </div>
   );
 };

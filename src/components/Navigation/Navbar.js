@@ -43,6 +43,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
+          <img src='../../../logo/logo4.png' height={70} width={70}/>
           <h1 className="text-orange-500 text-3xl font-extrabold tracking-wider">
             Unifitz
           </h1>

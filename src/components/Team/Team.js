@@ -1,57 +1,92 @@
+
 const TeamSection = () => {
   const team = [
-    {
-      name: "Ansul Rathi",
-      role: "Zumba Instructor",
-      description: "2+ years of dance and fitness experience",
-      image: "/trainers/ansul.png"
-    },
-    {
-      name: "Sanskriti Sarda",
-      role: "Yoga Master",
-      description: "Certified yoga instructor with focus on mindfulness",
-      image: "/trainers/sanskriti.png"
-    },
-    {
-      name: "Tusharika Maheshwari",
-      role: "Body Weight Training Expert",
-      description: "Former athlete specializing in calisthenics",
-      image: "/trainers/tusharika.png"
-    },
-    {
-      name: "Tejuna Soodhani",
-      role: "Zumba Instructor",
-      description: "6+ years of dance and fitness experience",
-      image: "/trainers/tejuna.png"
-    }
-  ];
+        {
+          name: "Ansul Rathi",
+          role: "Zumba Instructor",
+          specialties: ["Bollywood Dance", "HIIT", "Cardio Dance"],
+          image: "/trainers/ansul.png",
+          schedule: "Mon, Wed, Fri"
+        },
+        {
+          name: "Sanskriti Sarda",
+          role: "Yoga Master",
+          specialties: ["Hatha Yoga", "Meditation", "Breathing"],
+          image: "/trainers/sanskriti.png",
+          schedule: "Tue, Thu, Sat"
+        },
+        {
+          name: "Tusharika Maheshwari",
+          role: "Body Weight Training Expert",
+          specialties: ["Calisthenics", "Strength", "Mobility"],
+          image: "/trainers/tusharika.png",
+          schedule: "Mon, Wed, Fri"
+        },
+        {
+          name: "Tejuna Soodhani",
+          role: "Zumba Instructor",
+          specialties: ["Zumba", "Latin Dance", "Hip Hop"],
+          image: "/trainers/tejuna.png",
+          schedule: "Tue, Thu, Sat"
+        }
+      ];
 
   return (
-    <section id="trainers" className="py-20 bg-black">
+    <section id="trainers" className="py-20 bg-gradient-to-b from-black to-gray-900">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-bold mb-12 text-center text-white">Our Expert Trainers</h2>
-        <div className="grid md:grid-cols-4 sm:grid-cols-2 gap-8">
+        <div className="text-center mb-16">
+          <h2 className="text-5xl font-bold text-white mb-4">Meet Our Expert Trainers</h2>
+        </div>
+
+        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-8">
           {team.map((member, index) => (
             <div
               key={index}
-              className="group relative overflow-hidden rounded-lg shadow-lg bg-gray-800"
+              className="group relative bg-gray-800 rounded-xl overflow-hidden h-[500px]"
             >
-              {/* Image */}
-              <img
-                src={member.image}
-                alt={member.name}
-                className="w-full h-72 object-cover transition-transform group-hover:scale-105"
-              />
-              {/* Static Info */}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent p-4">
-                <h3 className="text-lg font-bold text-orange-500">{member.name}</h3>
-                <p className="text-white font-medium">{member.role}</p>
+              {/* Image Container */}
+              <div className="h-full w-full">
+                <img
+                  src={member.image}
+                  alt={member.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
               </div>
-              {/* Hover Info */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6 flex flex-col justify-end">
-              <h3 className="text-lg font-bold text-orange-500">{member.name}</h3>
-              <p className="text-white font-medium">{member.role}</p>
-                <p className="text-gray-300 text-sm">{member.description}</p>
+
+              {/* Text Content with Slide-up Effect */}
+              <div className="absolute inset-x-0 bottom-0 translate-y-[60px] group-hover:translate-y-0 transition-transform duration-300">
+                <div className="bg-gradient-to-t from-black via-black/80 to-transparent p-6">
+                  <h3 className="text-2xl font-bold text-orange-500 mb-2">{member.name}</h3>
+                  <p className="text-white text-lg">{member.role}</p>
+
+                     {/* Specialties */}
+                     {/* <div className="flex flex-wrap gap-2">
+                       {member.specialties.map((specialty, idx) => (
+                         <span
+                           key={idx}
+                          className="px-3 py-1 bg-orange-500 bg-opacity-20 text-orange-500 rounded-full text-xs font-medium"
+                         >
+                           {specialty}
+                         </span>
+                       ))}
+                     </div> */}
+                     <p className="text-sm mt-4\">
+                       <span className="text-orange-500">Schedule:</span>{' '}
+                       <span className="text-gray-300">{member.schedule}</span>
+                     </p>
+                     {/* <div className="flex gap-4 pt-2">
+                       <a href="#" className="text-gray-400 hover:text-orange-500 transition-colors">
+                         <Instagram size={20} />
+                       </a>
+                       <a href="#" className="text-gray-400 hover:text-orange-500 transition-colors">
+                         <Facebook size={20} />
+                       </a>
+                       <a href="#" className="text-gray-400 hover:text-orange-500 transition-colors">
+                         <Twitter size={20} />
+                       </a>
+                     </div> */}
+                </div>
+
               </div>
             </div>
           ))}

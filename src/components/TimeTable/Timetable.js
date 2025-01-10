@@ -1,318 +1,176 @@
-import { useState } from 'react';
-import PropTypes from 'prop-types';
+// import { useState } from 'react';
+// import { ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 
-const classTypes = {
-  yoga: {
-    name: 'Yoga',
-    subtitle: 'Relaxation & Flexibility',
-    bgColor: 'bg-blue-800',
-  },
-  zumba: {
-    name: 'Zumba',
-    subtitle: 'Dance & Cardio',
-    bgColor: 'bg-red-800',
-  },
-  cardio: {
-    name: 'Cardio',
-    subtitle: 'Endurance & Fitness',
-    bgColor: 'bg-green-800',
-  },
-  weightTraining: {
-    name: 'Weight Training',
-    subtitle: 'Strength & Conditioning',
-    bgColor: 'bg-yellow-700',
-  },
-  meditation: {
-    name: 'Meditation',
-    subtitle: 'Calm & Mental Peace',
-    bgColor: 'bg-purple-800',
-  },
-};
+// const FitnessSchedule = () => {
+//   const today = new Date();
+//   const [currentMonth, setCurrentMonth] = useState(
+//     new Date(today.getFullYear(), today.getMonth(), 1)
+//   );
 
-const ClassBlock = ({ type, time, instructor }) => (
-  <div className={`p-4 ${type.bgColor} rounded-lg shadow-md text-white`}>
-    <div className="font-semibold text-lg">{type.name}</div>
-    <div className="text-sm italic">{type.subtitle}</div>
-    <div className="text-sm mt-2 font-medium">{time}</div>
-    <div className="text-sm">{instructor}</div>
-  </div>
-);
+//   const workouts = {
+//     dance: {
+//       color: 'bg-purple-500',
+//       classes: ['Bollywood Dhamaka', 'Punjabi Tadka', 'South India Special', 'ZUMBA Party', 'Folk Fusion'],
+//       image: '/api/placeholder/400/320'
+//     },
+//     yoga: {
+//       color: 'bg-green-500',
+//       classes: ['Morning Flow', 'Power Yoga', 'Gentle Restore', 'Meditation Flow', 'Ashtanga Practice'],
+//       image: '/api/placeholder/400/320'
+//     },
+//     strength: {
+//       color: 'bg-orange-500',
+//       classes: ['Bottle Workout', 'Bodyweight Power', 'Chair Fitness', 'Towel Training', 'Resistance Band'],
+//       image: '/api/placeholder/400/320'
+//     }
+//   };
 
-ClassBlock.propTypes = {
-  type: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    subtitle: PropTypes.string.isRequired,
-    bgColor: PropTypes.string.isRequired
-  }).isRequired,
-  time: PropTypes.string.isRequired,
-  instructor: PropTypes.string.isRequired
-};
+//   const weeklySchedule = {
+//     0: { type: null, name: 'Holiday', description: 'Rest Day' },
+//     1: { type: 'dance', name: workouts.dance.classes[0], description: 'Dance Fitness', color: workouts.dance.color },
+//     2: { type: 'yoga', name: workouts.yoga.classes[0], description: 'Yoga Session', color: workouts.yoga.color },
+//     3: { type: 'strength', name: workouts.strength.classes[0], description: 'Weight Training', color: workouts.strength.color },
+//     4: { type: 'dance', name: workouts.dance.classes[1], description: 'Dance Fitness', color: workouts.dance.color },
+//     5: { type: 'yoga', name: workouts.yoga.classes[1], description: 'Yoga Session', color: workouts.yoga.color },
+//     6: { type: 'strength', name: workouts.strength.classes[1], description: 'Weight Training', color: workouts.strength.color }
+//   };
 
-const YogaTimetable = () => {
-  const [filter, setFilter] = useState('All Events');
-  const [showFullSchedule, setShowFullSchedule] = useState(true);
-  const [userProfile, setUserProfile] = useState({
-    age: '',
-    gender: '',
-    profession: '',
-    goal: ''
-  });
-  const [customSchedule, setCustomSchedule] = useState([]);
+//   const getClassForDate = (day) => {
+//     const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+//     const weekInMonth = Math.floor((day - 1) / 7);
+//     const baseSchedule = weeklySchedule[date.getDay()];
+    
+//     if (!baseSchedule?.type) return baseSchedule;
 
-  const schedules = {
-    yoga: [
-      { day: 'Monday', time: '06:00 - 07:00', instructor: 'Lily Carter' },
-      { day: 'Wednesday', time: '06:00 - 07:00', instructor: 'Sophia Keat' },
-      { day: 'Friday', time: '06:00 - 07:00', instructor: 'Mary Sheldon' },
-    ],
-    zumba: [
-      { day: 'Tuesday', time: '06:00 - 07:00', instructor: 'Grace Dean' },
-      { day: 'Thursday', time: '06:00 - 07:00', instructor: 'Daniel Brooks' },
-      { day: 'Saturday', time: '06:00 - 07:00', instructor: 'Sophia Keat' },
-    ],
-    cardio: [
-      { day: 'Monday', time: '06:00 - 07:00', instructor: 'John Smith' },
-      { day: 'Wednesday', time: '06:00 - 07:00', instructor: 'Daniel Brooks' },
-      { day: 'Friday', time: '06:00 - 07:00', instructor: 'Grace Dean' },
-    ],
-    weightTraining: [
-      { day: 'Monday', time: '06:00 - 07:00', instructor: 'Daniel Brooks' },
-      { day: 'Wednesday', time: '06:00 - 07:00', instructor: 'Mary Sheldon' },
-      { day: 'Friday', time: '06:00 - 07:00', instructor: 'Grace Dean' },
-    ],
-    meditation: [
-      { day: 'Tuesday', time: '06:00 - 07:00', instructor: 'John Smith' },
-      { day: 'Thursday', time: '06:00 - 07:00', instructor: 'Lily Carter' },
-      { day: 'Saturday', time: '06:00 - 07:00', instructor: 'Sophia Keat' },
-    ],
-  };
+//     const workoutType = baseSchedule.type;
+//     const classIndex = (weekInMonth % workouts[workoutType].classes.length);
+    
+//     return {
+//       ...baseSchedule,
+//       name: workouts[workoutType].classes[classIndex]
+//     };
+//   };
 
-  const allEvents = [
-    ...schedules.yoga.map((event) => ({ ...event, type: classTypes.yoga })),
-    ...schedules.zumba.map((event) => ({ ...event, type: classTypes.zumba })),
-    ...schedules.cardio.map((event) => ({ ...event, type: classTypes.cardio })),
-    ...schedules.weightTraining.map((event) => ({ ...event, type: classTypes.weightTraining })),
-    ...schedules.meditation.map((event) => ({ ...event, type: classTypes.meditation })),
-  ];
+//   const getDaysInMonth = (date) => {
+//     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+//   };
 
-  const generateCustomSchedule = () => {
-    const schedule = [];
-    const { age, goal } = userProfile;
+//   const getFirstDayOfMonth = (date) => {
+//     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+//   };
 
-    if (goal === 'Weight Loss') {
-      schedule.push(
-        { day: 'Monday', type: classTypes.cardio, time: '06:00 - 07:00' },
-        { day: 'Tuesday', type: classTypes.zumba, time: '06:00 - 07:00' },
-        { day: 'Wednesday', type: classTypes.weightTraining, time: '06:00 - 07:00' },
-        { day: 'Thursday', type: classTypes.cardio, time: '06:00 - 07:00' },
-        { day: 'Friday', type: classTypes.zumba, time: '06:00 - 07:00' },
-        { day: 'Saturday', type: classTypes.yoga, time: '06:00 - 07:00' }
-      );
-    } else if (goal === 'Weight Gain') {
-      schedule.push(
-        { day: 'Monday', type: classTypes.weightTraining, time: '06:00 - 07:00' },
-        { day: 'Tuesday', type: classTypes.yoga, time: '06:00 - 07:00' },
-        { day: 'Wednesday', type: classTypes.weightTraining, time: '06:00 - 07:00' },
-        { day: 'Thursday', type: classTypes.cardio, time: '06:00 - 07:00' },
-        { day: 'Friday', type: classTypes.weightTraining, time: '06:00 - 07:00' },
-        { day: 'Saturday', type: classTypes.yoga, time: '06:00 - 07:00' }
-      );
-    } else if (goal === 'Fitness') {
-      schedule.push(
-        { day: 'Monday', type: classTypes.cardio, time: '06:00 - 07:00' },
-        { day: 'Tuesday', type: classTypes.zumba, time: '06:00 - 07:00' },
-        { day: 'Wednesday', type: classTypes.weightTraining, time: '06:00 - 07:00' },
-        { day: 'Thursday', type: classTypes.yoga, time: '06:00 - 07:00' },
-        { day: 'Friday', type: classTypes.cardio, time: '06:00 - 07:00' },
-        { day: 'Saturday', type: classTypes.zumba, time: '06:00 - 07:00' }
-      );
-    } else if (goal === 'Mental Peace') {
-      schedule.push(
-        { day: 'Monday', type: classTypes.meditation, time: '06:00 - 07:00' },
-        { day: 'Tuesday', type: classTypes.yoga, time: '06:00 - 07:00' },
-        { day: 'Wednesday', type: classTypes.meditation, time: '06:00 - 07:00' },
-        { day: 'Thursday', type: classTypes.yoga, time: '06:00 - 07:00' },
-        { day: 'Friday', type: classTypes.meditation, time: '06:00 - 07:00' },
-        { day: 'Saturday', type: classTypes.yoga, time: '06:00 - 07:00' }
-      );
-    }
+//   const isDateDisabled = (day) => {
+//     const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+//     return date < today;
+//   };
 
-    if (parseInt(age) > 50) {
-      schedule.forEach((event) => {
-        if (event.type === classTypes.cardio || event.type === classTypes.zumba) {
-          event.type = classTypes.yoga;
-        }
-      });
-    }
+//   const getMonthYear = (date) => {
+//     return new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(date);
+//   };
 
-    setCustomSchedule(schedule);
-    setShowFullSchedule(false);
-  };
+//   const changeMonth = (offset) => {
+//     setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
+//   };
 
-  return (
-    <section id="schedule" className="max-w-6xl mx-auto p-6 bg-black rounded-lg shadow-lg">
-      <h1 className="text-4xl text-center mb-8 text-white font-extrabold">Classes Timetable</h1>
+//   return (
+//     <div className="w-full p-6 bg-gray-900">
+//       <div className="bg-gray-800 rounded-lg p-6">
+//         <div className="mb-6 bg-gray-700 p-4 rounded-lg flex items-center justify-center gap-2">
+//           <Clock className="text-orange-500" />
+//           <span className="text-white font-semibold">Morning Session: 7:00 AM - 8:00 AM</span>
+//           <span className="text-gray-400">(Sunday Holiday)</span>
+//         </div>
 
-      {/* User Details Form */}
-      <div className="mb-6 bg-gray-800 p-4 rounded-lg">
-        <h2 className="text-2xl text-white mb-4">Customize Your Schedule</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input
-            type="number"
-            placeholder="Age"
-            value={userProfile.age}
-            onChange={(e) => setUserProfile({ ...userProfile, age: e.target.value })}
-            className="p-2 rounded-lg bg-gray-700 text-white focus:outline-none"
-          />
-          <select
-            value={userProfile.gender}
-            onChange={(e) => setUserProfile({ ...userProfile, gender: e.target.value })}
-            className="p-2 rounded-lg bg-gray-700 text-white focus:outline-none"
-          >
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-          <select
-            value={userProfile.profession}
-            onChange={(e) => setUserProfile({ ...userProfile, profession: e.target.value })}
-            className="p-2 rounded-lg bg-gray-700 text-white focus:outline-none"
-          >
-            <option value="">Select Profession</option>
-            <option value="Student">Student</option>
-            <option value="Housewife">Housewife</option>
-            <option value="Working Professional">Working Professional</option>
-            <option value="Business">Business</option>
-          </select>
-          <select
-            value={userProfile.goal}
-            onChange={(e) => setUserProfile({ ...userProfile, goal: e.target.value })}
-            className="p-2 rounded-lg bg-gray-700 text-white focus:outline-none"
-          >
-            <option value="">Select Goal</option>
-            <option value="Weight Loss">Weight Loss</option>
-            <option value="Weight Gain">Weight Gain</option>
-            <option value="Fitness">Fitness</option>
-            <option value="Mental Peace">Mental Peace</option>
-          </select>
-        </div>
-        <div className="mt-4 flex flex-col md:flex-row gap-4">
-          <button
-            onClick={generateCustomSchedule}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
-          >
-            Generate Schedule
-          </button>
-          <button
-            onClick={() => setShowFullSchedule(true)}
-            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-500"
-          >
-            View Full Schedule
-          </button>
-        </div>
-        <div className="mt-4">
-          <button
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-500"
-            onClick={() => alert('Demo class booked successfully!')}
-          >
-            Book a Demo Class
-          </button>
-        </div>
-      </div>
+//         <div className="flex justify-between items-center mb-6">
+//           <button 
+//             onClick={() => changeMonth(-1)}
+//             className="p-2 hover:bg-gray-700 rounded-full"
+//           >
+//             <ChevronLeft className="text-orange-500" />
+//           </button>
+//           <h2 className="text-2xl font-bold text-white">{getMonthYear(currentMonth)}</h2>
+//           <button 
+//             onClick={() => changeMonth(1)}
+//             className="p-2 hover:bg-gray-700 rounded-full"
+//           >
+//             <ChevronRight className="text-orange-500" />
+//           </button>
+//         </div>
 
-      {/* Custom Schedule */}
-      {!showFullSchedule && customSchedule.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-2xl text-white mb-4">Your Custom Schedule</h2>
-          <div className="grid grid-cols-2 md:grid-cols-7 gap-1 mb-2">
-            {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-              <div
-                key={day}
-                className={`p-4 text-center font-semibold bg-gray-700 text-white rounded-lg ${
-                  customSchedule.some((event) => event.day === day) ? '' : 'opacity-50'
-                }`}
-              >
-                {day}
-              </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-7 gap-1">
-            {customSchedule.map((event, index) => (
-              <ClassBlock
-                key={index}
-                type={event.type}
-                time={event.time}
-                instructor="Auto-Assigned"
-              />
-            ))}
-          </div>
-        </div>
-      )}
+//         <div className="grid grid-cols-7 gap-2 mb-4">
+//           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+//             <div key={day} className="text-center text-gray-400 font-medium p-2">
+//               {day}
+//             </div>
+//           ))}
+//         </div>
 
-      {/* Full Schedule */}
-      {showFullSchedule && (
-        <>
-          {/* Filter Tabs */}
-          <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
-            {['All Events', 'Yoga', 'Zumba', 'Cardio', 'Weight Training', 'Meditation'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setFilter(tab)}
-                className={`px-4 py-2 whitespace-nowrap rounded-lg font-medium text-sm transition-all focus:outline-none ${
-                  filter === tab
-                    ? 'bg-white text-black'
-                    : 'bg-gray-700 text-white hover:bg-gray-600'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
+//         <div className="grid grid-cols-7 gap-2">
+//           {Array(getFirstDayOfMonth(currentMonth)).fill(null).map((_, idx) => (
+//             <div key={`empty-${idx}`} className="h-28" />
+//           ))}
+          
+//           {Array(getDaysInMonth(currentMonth)).fill(null).map((_, idx) => {
+//             const day = idx + 1;
+//             const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+//             const disabled = isDateDisabled(day);
+//             const classInfo = getClassForDate(day);
+//             const isSunday = date.getDay() === 0;
+            
+//             return (
+//               <div
+//                 key={day}
+//                 className={`h-28 rounded-lg p-2 flex flex-col relative overflow-hidden ${
+//                   isSunday 
+//                     ? 'bg-gray-700'
+//                     : disabled
+//                       ? `${classInfo.color} opacity-40`
+//                       : classInfo.color
+//                 } transition-all`}
+//               >
+//                 {!isSunday && (
+//                   <img 
+//                     src={workouts[classInfo.type]?.image} 
+//                     alt="" 
+//                     className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30"
+//                   />
+//                 )}
+//               >
+//                 <span className={`text-sm font-medium ${disabled || isSunday ? 'text-gray-500' : 'text-white'}`}>
+//                   {day}
+//                 </span>
+//                 {!disabled && (
+//                   <>
+//                     <span className="text-sm mt-1 font-medium text-white truncate">
+//                       {classInfo.name}
+//                     </span>
+//                     <span className="text-xs text-gray-100 truncate">
+//                       {classInfo.description}
+//                     </span>
+//                   </>
+//                 )}
+//               </div>
+//             );
+//           })}
+//         </div>
 
-          {/* Timetable Grid */}
-          <div className="overflow-x-auto">
-            <div className="min-w-[900px]">
-              {/* Header */}
-              <div className="grid grid-cols-8 gap-1 mb-1">
-                <div className="p-4"></div>
-                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-                  <div key={day} className="p-4 text-center font-semibold bg-gray-700 text-white rounded-lg">
-                    {day}
-                  </div>
-                ))}
-              </div>
+//         <div className="mt-6 flex flex-wrap gap-4">
+//           <div className="flex items-center gap-2">
+//             <div className={`w-3 h-3 rounded-full ${workouts.dance.color}`}></div>
+//             <span className="text-sm text-gray-300">Dance Fitness</span>
+//           </div>
+//           <div className="flex items-center gap-2">
+//             <div className={`w-3 h-3 rounded-full ${workouts.yoga.color}`}></div>
+//             <span className="text-sm text-gray-300">Yoga</span>
+//           </div>
+//           <div className="flex items-center gap-2">
+//             <div className={`w-3 h-3 rounded-full ${workouts.strength.color}`}></div>
+//             <span className="text-sm text-gray-300">Weight Training</span>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
-              {/* Time Slots */}
-              {['06:00'].map((time) => (
-                <div className="grid grid-cols-8 gap-1 mb-2" key={time}>
-                  <div className="p-4 flex items-center font-medium text-white">{time}</div>
-                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
-                    const event = allEvents.find(
-                      (e) => e.day === day && e.time.startsWith(time)
-                    );
-                    return event && (filter === 'All Events' || event.type.name === filter) ? (
-                      <ClassBlock
-                        key={`${day}-${time}`}
-                        type={event.type}
-                        time={event.time}
-                        instructor={event.instructor}
-                      />
-                    ) : (
-                      <div
-                        key={`${day}-${time}`}
-                        className="bg-gray-800 h-full flex items-center justify-center rounded-lg border border-gray-600"
-                      ></div>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-    </section>
-  );
-};
-
-export default YogaTimetable;
+// export default FitnessSchedule;
