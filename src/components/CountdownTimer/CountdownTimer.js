@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable import/no-unused-modules */
 import { useState, useEffect } from 'react';
 
 const CountdownTimer = () => {
