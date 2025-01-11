@@ -60,7 +60,6 @@ const CountdownTimer = () => {
                     />
                 </div>
 
-                {/* Enhanced Launch Text */}
                 <div className={`relative mb-6 min-[320px]:mb-6 min-[375px]:mb-6 sm:mb-16 transition-all duration-1000 transform ${
                     isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                 }`}>
