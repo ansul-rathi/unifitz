@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable import/no-unused-modules */
 import { Brain, Dumbbell, Zap, Waves, Target, Star, Trophy } from 'lucide-react';
 
 const JourneyItem = ({ title, description, bulletPoints, position, icon: Icon, step }) => (

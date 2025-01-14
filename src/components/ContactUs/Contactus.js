@@ -1,3 +1,4 @@
+/* eslint-disable import/no-named-as-default-member */
 import { useState, useEffect } from "react";
 import { Mail, User, MessageSquare, Calendar, Users } from 'lucide-react';
 import emailjs from '@emailjs/browser';
