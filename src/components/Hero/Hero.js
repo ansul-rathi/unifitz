@@ -1,184 +1,94 @@
-import { useState } from 'react';
-import { Copy, Plus, Share2, Trash2, Check } from 'lucide-react';
+import { ArrowRight, Users, Home, Wallet } from 'lucide-react';
 
-const WebPollApp = () => {
-  const [question, setQuestion] = useState('');
-  const [options, setOptions] = useState(['', '']);
-  const [showAlert, setShowAlert] = useState(false);
-  const [savedPolls, setSavedPolls] = useState([
-    {
-      id: '1',
-      question: "What's for dinner tonight?",
-      options: ['Pizza', 'Pasta', 'Salad'],
-      date: '2025-01-09'
-    }
-  ]);
-
-  const addOption = () => {
-    setOptions([...options, '']);
-  };
-
-  const removeOption = (indexToRemove) => {
-    setOptions(options.filter((_, index) => index !== indexToRemove));
-  };
-
-  const updateOption = (text, index) => {
-    const newOptions = [...options];
-    newOptions[index] = text;
-    setOptions(newOptions);
-  };
-
-  const savePoll = () => {
-    const newPoll = {
-      id: Date.now().toString(),
-      question,
-      options: options.filter(opt => opt.trim()),
-      date: new Date().toISOString().split('T')[0]
-    };
-    setSavedPolls([...savedPolls, newPoll]);
-    setQuestion('');
-    setOptions(['', '']);
-  };
-
-  const copyPollToClipboard = async (pollQuestion, pollOptions) => {
-    const pollText = `📊 Family Poll:\n\n${pollQuestion}\n\n${pollOptions
-      .filter(opt => opt.trim())
-      .map((opt, idx) => `${idx + 1}. ${opt}`)
-      .join('\n')}\n\nRespond with your choice number!`;
-    
-    try {
-      await navigator.clipboard.writeText(pollText);
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  };
-
-  const reusePoll = (poll) => {
-    setQuestion(poll.question);
-    setOptions([...poll.options, '']);
-  };
-
+const HeroSection = () => {
   return (
-    <div className="max-w-4xl mx-auto p-6 relative">
-      {/* Custom Tailwind Alert */}
-      {showAlert && (
-        <div className="fixed top-4 right-4 z-50 transform transition-all duration-300 ease-out translate-y-0 opacity-100">
-          <div className="bg-green-50 border-l-4 border-green-500 p-4 flex items-center shadow-lg rounded">
-            <div className="flex-shrink-0">
-              <Check className="h-5 w-5 text-green-500" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-green-700">
-                Poll copied to clipboard successfully!
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Create Poll Section */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h1 className="text-2xl font-bold mb-6">Create Family Poll</h1>
-        
-        <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Poll Question</label>
-          <input
-            type="text"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Enter your question..."
-            className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
-          />
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Options</label>
-          {options.map((option, index) => (
-            <div key={index} className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={option}
-                onChange={(e) => updateOption(e.target.value, index)}
-                placeholder={`Option ${index + 1}`}
-                className="flex-1 p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
-              />
-              {options.length > 2 && (
-                <button
-                  onClick={() => removeOption(index)}
-                  className="p-3 text-red-500 hover:bg-red-50 rounded-md transition-colors duration-200"
-                >
-                  <Trash2 size={20} />
-                </button>
-              )}
-            </div>
-          ))}
-          
-          <button
-            onClick={addOption}
-            className="flex items-center gap-2 mt-2 text-blue-600 hover:text-blue-800 transition-colors duration-200"
-          >
-            <Plus size={20} />
-            Add Option
-          </button>
-        </div>
-
-        <div className="flex gap-4">
-          <button
-            onClick={() => copyPollToClipboard(question, options)}
-            disabled={!question || options.filter(opt => opt.trim()).length < 2}
-            className="flex-1 bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors duration-200"
-          >
-            <Copy size={20} />
-            Copy Poll
-          </button>
-          <button
-            onClick={savePoll}
-            disabled={!question || options.filter(opt => opt.trim()).length < 2}
-            className="flex-1 bg-green-600 text-white p-3 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors duration-200"
-          >
-            <Share2 size={20} />
-            Save Poll
-          </button>
-        </div>
+    <div className="relative min-h-screen w-full overflow-hidden pt-10">
+      {/* Full Screen Background Image */}
+      <div className="absolute inset-0 w-full h-full">
+        <img 
+          src="../../../logo/logo4.png"
+          alt="Hero Background" 
+          className="w-full h-full object-cover"
+        />
+        {/* Multiple Overlay Layers for Better Text Readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/85 to-black/75" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
       </div>
 
-      {/* Saved Polls Section */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-bold mb-4">Saved Polls</h2>
-        <div className="space-y-4">
-          {savedPolls.map((poll) => (
-            <div key={poll.id} className="border rounded-md p-4 hover:shadow-md transition-shadow duration-200">
-              <h3 className="font-semibold mb-2">{poll.question}</h3>
-              <ul className="list-disc list-inside mb-3 text-gray-600">
-                {poll.options.map((opt, idx) => (
-                  <li key={idx} className="ml-4">{opt}</li>
-                ))}
-              </ul>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">Created: {poll.date}</span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => copyPollToClipboard(poll.question, poll.options)}
-                    className="text-blue-600 hover:text-blue-800 p-2 rounded-md hover:bg-blue-50 transition-colors duration-200"
-                  >
-                    <Copy size={18} />
-                  </button>
-                  <button
-                    onClick={() => reusePoll(poll)}
-                    className="text-green-600 hover:text-green-800 p-2 rounded-md hover:bg-green-50 transition-colors duration-200"
-                  >
-                    <Share2 size={18} />
-                  </button>
+      {/* Content */}
+      <div className="relative z-10 w-full min-h-screen flex items-center pt-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl">
+            <div className="space-y-8">
+              <div className="inline-block">
+                <span className="bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600 text-black px-6 py-2 rounded-full text-sm font-bold flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Online Family Fitness
+                </span>
+              </div>
+              
+              <div className="relative">
+                <h1 className="text-6xl md:text-7xl font-bold leading-tight">
+                  <span className="block bg-gradient-to-r from-gray-300 via-white to-gray-300 bg-clip-text text-transparent">
+                    Where Strength
+                  </span>
+                  <span className="block bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 bg-clip-text text-transparent">
+                    Meets Style
+                  </span>
+                </h1>
+              </div>
+              
+              <p className="text-xl text-gray-300 max-w-lg border-l-4 border-yellow-500 pl-4">
+                Transform your fitness journey with your entire family at UNIFITZ. 
+                Experience premium fitness training from the comfort of your home.
+              </p>
+              
+              <button className="group flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600 hover:from-yellow-500 hover:via-yellow-400 hover:to-yellow-500 text-black px-8 py-4 rounded-lg font-bold transition-all duration-300 shadow-lg hover:shadow-yellow-500/20">
+                Start Your Journey
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+              
+              {/* Key Benefits */}
+              <div className="grid md:grid-cols-3 gap-6 mt-12">
+                {/* Family Fitness */}
+                <div className="bg-black/50 backdrop-blur-sm border border-yellow-500/20 rounded-lg p-6 hover:border-yellow-500/40 transition-colors">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Users className="text-yellow-500" size={24} />
+                    <h3 className="text-yellow-500 font-bold">Family Fitness</h3>
+                  </div>
+                  <p className="text-gray-300 text-sm">
+                    Train together, grow together. Perfect for all age groups.
+                  </p>
+                </div>
+
+                {/* Your Space */}
+                <div className="bg-black/50 backdrop-blur-sm border border-yellow-500/20 rounded-lg p-6 hover:border-yellow-500/40 transition-colors">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Home className="text-yellow-500" size={24} />
+                    <h3 className="text-yellow-500 font-bold">Your Space</h3>
+                  </div>
+                  <p className="text-gray-300 text-sm">
+                    Train comfortably without feeling judged. Your home, your rules.
+                  </p>
+                </div>
+
+                {/* Smart Savings */}
+                <div className="bg-black/50 backdrop-blur-sm border border-yellow-500/20 rounded-lg p-6 hover:border-yellow-500/40 transition-colors">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Wallet className="text-yellow-500" size={24} />
+                    <h3 className="text-yellow-500 font-bold">Smart Savings</h3>
+                  </div>
+                  <p className="text-gray-300 text-sm">
+                    One subscription for the whole family. No hidden costs.
+                  </p>
                 </div>
               </div>
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default WebPollApp;
+export default HeroSection;
