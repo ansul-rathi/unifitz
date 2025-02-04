@@ -31,7 +31,7 @@ const VideoDisplay = () => {
                         src={videoData.driveUrl}
                         className="absolute inset-0 w-full h-full"
                         allow="autoplay; encrypted-media"
-                        allowFullScreen
+                        // allowFullScreen
                         loading="lazy"
                     ></iframe>
                 </div>
