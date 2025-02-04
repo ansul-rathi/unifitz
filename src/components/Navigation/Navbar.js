@@ -1,5 +1,6 @@
 /* eslint-disable import/no-unused-modules */
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 // import ContactForm from './ContactForm'; // Make sure to import your ContactForm component
 
 const Navbar = () => {
@@ -25,7 +26,7 @@ const Navbar = () => {
         }`}
       >
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center">
+          <Link className="flex justify-between items-center" to={'/'}>
             {/* Logo Section */}
             <div className="flex items-center gap-2">
               <img 
@@ -46,7 +47,7 @@ const Navbar = () => {
             >
               Join Now
             </button> */}
-          </div>
+          </Link>
         </div>
       </nav>
 
