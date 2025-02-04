@@ -2,16 +2,14 @@
 const VideoDisplay = () => {
     const videoData = {
         title: "Body Weight Training Session",
-        // Convert Google Drive URL to embedded format
         driveUrl: "https://drive.google.com/file/d/1TloKBUyEhQwbxxzgSsrWHx2qJvgSv7AH/preview",
-        description: "Unlock the full potential of bodyweight exercises with this focused 15-minute training session designed to enhance strength and endurance. In this video, we cover:",
+        description: "Unlock the full potential of bodyweight exercises with this focused 50-minute training session designed to enhance strength and endurance. In this video, we cover:",
         highlights: [
             "Master the proper form for push-ups to optimize strength development",
             "Engage in bodyweight squats to build lower body and core strength",
             "Incorporate planks to strengthen and stabilize the core",
             "Complete full-body workout routine aimed at improving overall strength and endurance"
         ],
-        
         trainer: "Ansul Rathi",
         duration: "48 minutes",
         level: "Beginner"
@@ -31,8 +29,10 @@ const VideoDisplay = () => {
                         src={videoData.driveUrl}
                         className="absolute inset-0 w-full h-full"
                         allow="autoplay; encrypted-media"
-                        // allowFullScreen
                         loading="lazy"
+                        allowFullScreen={false}
+                        webkitallowfullscreen="false"
+                        mozallowfullscreen="false"
                     ></iframe>
                 </div>
 
@@ -80,10 +80,10 @@ const VideoDisplay = () => {
                             <h3 className="text-black font-semibold mb-2">Join Our Classes</h3>
                             <p className="text-zinc-900 mb-4">Experience personalized training sessions with expert guidance.</p>
                             <a 
-                                // onClick={() => window.location.href = '/contact'}
                                 href="https://wa.me/918107505074?text=I%20want%20to%20join%20!!!"
-                                onClick={()=> 'https://wa.me/918107505074?text=I%20want%20to%20join%20!!!'}
-                                className="w-full bg-black text-white py-2 px-2 rounded-lg hover:bg-zinc-800 transition-colors"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block w-full bg-black text-white py-2 px-2 rounded-lg hover:bg-zinc-800 transition-colors text-center"
                             >
                                 Book Trial Class
                             </a>
