@@ -27,7 +27,7 @@ const Home = () => {
         <ErrorBoundary>
           {/* <PDFExtractor /> */}
           {/* <BeforeAfterSlider /> */}
-          <Hero />
+          <Hero /> 
         </ErrorBoundary>
         <ErrorBoundary>
         {/* <Testimonials /> */}

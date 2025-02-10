@@ -1,0 +1,216 @@
+[
+  {
+    "id": 1,
+    "name": "Moong Dal Chilla",
+    "image": "/recipes/moong-dal-chilla.png",
+    "calories": 180,
+    "protein": 12,
+    "carbs": 28,
+    "fats": 3,
+    "fiber": 4,
+    "ingredients": [
+      "½ cup moong dal (soaked overnight)",
+      "½ tsp turmeric",
+      "½ tsp cumin powder",
+      "½ tsp salt",
+      "1 green chili (chopped)",
+      "½ onion (finely chopped)",
+      "Water (as needed)",
+      "Ghee or oil for cooking"
+    ],
+    "instructions": [
+      "Blend moong dal with water to make a smooth batter.",
+      "Add chopped onions, green chili, turmeric, and cumin.",
+      "Heat a non-stick pan, spread batter like a pancake, and cook both sides with little ghee.",
+      "Serve with mint chutney or curd."
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Oats & Dry Fruit Smoothie",
+    "image": "/recipes/oats-smoothie.png",
+    "calories": 250,
+    "protein": 10,
+    "carbs": 40,
+    "fats": 8,
+    "fiber": 6,
+    "ingredients": [
+      "½ cup rolled oats (lightly roasted)",
+      "1 banana",
+      "1 tbsp almonds & walnuts",
+      "1 tsp chia or flaxseeds",
+      "1 cup milk (or almond milk)",
+      "1 tsp honey (optional)"
+    ],
+    "instructions": [
+      "Blend oats, banana, nuts, and seeds with milk.",
+      "Pour into a glass and drink fresh!"
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Poha with Peanuts & Veggies",
+    "image": "/recipes/poha.png",
+    "calories": 220,
+    "protein": 6,
+    "carbs": 35,
+    "fats": 7,
+    "fiber": 5,
+    "ingredients": [
+      "1 cup poha (flattened rice, washed & drained)",
+      "1 tsp mustard seeds",
+      "½ onion (chopped)",
+      "½ carrot (grated)",
+      "2 tbsp peanuts",
+      "1 tsp turmeric",
+      "1 tsp lemon juice",
+      "Curry leaves & green chilies"
+    ],
+    "instructions": [
+      "Heat oil, add mustard seeds, curry leaves & onions.",
+      "Add peanuts, carrots, and poha. Cook for 2-3 minutes.",
+      "Squeeze lemon juice on top & serve hot!"
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Ragi Dosa",
+    "image": "/recipes/ragi-dosa.png",
+    "calories": 190,
+    "protein": 8,
+    "carbs": 32,
+    "fats": 2,
+    "fiber": 5,
+    "ingredients": [
+      "½ cup ragi flour",
+      "¼ cup rice flour",
+      "½ cup curd",
+      "½ tsp cumin seeds",
+      "Salt as per taste",
+      "Water as needed"
+    ],
+    "instructions": [
+      "Mix ragi flour, rice flour, curd, salt, and water to make a smooth batter.",
+      "Let it rest for 5 min.",
+      "Heat a tawa, spread the batter thin like dosa, cook both sides.",
+      "Serve with coconut chutney."
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Greek Yogurt with Nuts & Fruits",
+    "image": "/recipes/greek-yogurt.png",
+    "calories": 200,
+    "protein": 12,
+    "carbs": 25,
+    "fats": 6,
+    "fiber": 3,
+    "ingredients": [
+      "½ cup Greek yogurt (or hung curd)",
+      "1 tbsp almonds & walnuts",
+      "1 tsp flaxseeds",
+      "½ apple (chopped)",
+      "1 tsp honey (optional)"
+    ],
+    "instructions": [
+      "Mix all ingredients in a bowl.",
+      "Enjoy a refreshing, protein-rich breakfast!"
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Besan Chilla",
+    "image": "/recipes/besan-chilla.png",
+    "calories": 190,
+    "protein": 10,
+    "carbs": 28,
+    "fats": 5,
+    "fiber": 4,
+    "ingredients": [
+      "½ cup besan (gram flour)",
+      "½ cup water",
+      "½ tsp turmeric",
+      "½ onion (chopped)",
+      "1 green chili (chopped)",
+      "Salt to taste",
+      "Ghee or oil for cooking"
+    ],
+    "instructions": [
+      "Mix besan, turmeric, water, and salt to make a smooth batter.",
+      "Add chopped onions & green chili.",
+      "Heat a pan, pour the batter & cook both sides with little ghee.",
+      "Serve hot with mint chutney."
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Sprouts Salad",
+    "image": "/recipes/sprouts-salad.png",
+    "calories": 150,
+    "protein": 14,
+    "carbs": 30,
+    "fats": 2,
+    "fiber": 6,
+    "ingredients": [
+      "1 cup sprouted moong dal",
+      "½ onion (chopped)",
+      "½ tomato (chopped)",
+      "1 tsp lemon juice",
+      "¼ tsp black salt",
+      "1 tsp chaat masala"
+    ],
+    "instructions": [
+      "Mix all ingredients in a bowl.",
+      "Toss well & serve fresh."
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Vegetable Upma",
+    "image": "/recipes/vegetable-upma.png",
+    "calories": 210,
+    "protein": 7,
+    "carbs": 35,
+    "fats": 5,
+    "fiber": 4,
+    "ingredients": [
+      "½ cup semolina (suji)",
+      "1 cup water",
+      "½ onion (chopped)",
+      "½ carrot (grated)",
+      "1 tsp mustard seeds",
+      "½ tsp salt",
+      "Curry leaves & green chilies"
+    ],
+    "instructions": [
+      "Roast semolina in a dry pan & set aside.",
+      "Heat oil, add mustard seeds, curry leaves & onions.",
+      "Add carrots, water & salt. Mix well.",
+      "Slowly add roasted semolina while stirring.",
+      "Cook for 2 min & serve hot."
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Dalia (Broken Wheat Porridge)",
+    "image": "/recipes/dalia.png",
+    "calories": 230,
+    "protein": 9,
+    "carbs": 38,
+    "fats": 3,
+    "fiber": 5,
+    "ingredients": [
+      "½ cup dalia (broken wheat)",
+      "1 cup milk or water",
+      "1 tsp jaggery or honey",
+      "½ banana (chopped)",
+      "½ tsp cinnamon powder",
+      "1 tbsp nuts & seeds"
+    ],
+    "instructions": [
+      "Cook dalia in water/milk until soft.",
+      "Add jaggery/honey & cinnamon.",
+      "Top with bananas & nuts before serving."
+    ]
+  }
+]
