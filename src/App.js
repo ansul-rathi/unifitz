@@ -6,6 +6,7 @@ import Recipes from './pages/Recipies';
 import RecipeDetail from './components/Recipes/RecipeDetail';
 // import Soumya from './pages/soumya';
 import Birthday from './pages/Birthday';
+import NotFound from './pages/NotFound';
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/recipe/:id" element={<RecipeDetail />} />
           <Route path="/happy-birthday/sona" element={<Birthday />} />
+          <Route path="*" element={<NotFound />} />
 
         </Routes>
       </div>
