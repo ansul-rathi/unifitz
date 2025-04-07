@@ -4,6 +4,8 @@ import Navbar from './components/Navigation/Navbar';
 import VideoDisplay from './pages/api/video';
 import Recipes from './pages/Recipies';
 import RecipeDetail from './components/Recipes/RecipeDetail';
+// import Soumya from './pages/soumya';
+import Birthday from './pages/Birthday';
 
 const App = () => {
   return (
@@ -17,6 +19,7 @@ const App = () => {
           {/* Add more routes as needed */}
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/recipe/:id" element={<RecipeDetail />} />
+          <Route path="/happy-birthday/sona" element={<Birthday />} />
 
         </Routes>
       </div>
