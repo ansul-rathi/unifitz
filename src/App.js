@@ -21,6 +21,7 @@ const App = () => {
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/recipe/:id" element={<RecipeDetail />} />
           <Route path="/happy-birthday/sona" element={<Birthday />} />
+          <Route path="/birthday" element={<Birthday />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>

@@ -17,7 +17,7 @@ const BirthdayCard = () => {
   
   // WhatsApp messages
   const whatsappMessages = [
-    "Miss you Ansu 💋💕😘",
+    "Miss you Ansh 💋💕😘",
     "Thinking of you 😘💋💕",
     "Can't wait to see you! 💋💘😘",
     "Always in my heart 💝💋😘"
@@ -345,7 +345,7 @@ const BirthdayCard = () => {
           <p className="text-white font-medium">
             Hope your special day is filled with all the joy and happiness you deserve!
           </p>
-          <p className="text-right text-white mt-4">With love, Ansu ❤️</p>
+          <p className="text-right text-white mt-4">With love, Ansh ❤️</p>
         </div>
       </div>
       
