@@ -44,8 +44,29 @@ const BirthdayCard = () => {
     {
       title: "Sweetn",
       imageUrl: "/pic-5.jpeg"
+    },
+    {
+      title: "Cuddlebug",
+      imageUrl: "/pic-6.jpeg"
+    },
+    {
+      title: "Angel",
+      imageUrl: "/pic-7.jpeg"
+    },
+    {
+      title: "Honeybunch",
+      imageUrl: "/pic-8.jpeg"
+    },
+    {
+      title: "Sunshine",
+      imageUrl: "/pic-9.jpeg"
+    },
+    {
+      title: "Darling",
+      imageUrl: "/pic-10.jpeg"
     }
   ];
+  
   
   
   useEffect(() => {
@@ -281,21 +302,21 @@ const BirthdayCard = () => {
             </div>
             
             {/* Navigation controls */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center justify-center gap-4 z-20">
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center justify-between gap-4 z-20">
               <button 
-                className="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center"
+                className="w-7 h-7 rounded-full bg-purple-600 text-white flex items-center justify-center"
                 onClick={() => turnPage('prev')}
                 disabled={currentPage === 0}
               >
                 ←
               </button>
               
-              <span className="text-white bg-purple-700 px-3 py-1 rounded-full text-sm">
+              {/* <span className="text-white bg-purple-700 px-3 py-1 rounded-full text-sm">
                 {currentPage + 1} / {photoPages.length}
-              </span>
+              </span> */}
               
               <button 
-                className="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center"
+                className="w-7 h-7 rounded-full bg-purple-600 text-white flex items-center justify-center"
                 onClick={() => turnPage('next')}
                 disabled={currentPage === photoPages.length - 1}
               >
