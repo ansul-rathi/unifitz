@@ -295,9 +295,9 @@ const BirthdayCard = () => {
                 </h3>
                 
                 {/* Page number */}
-                <div className="absolute bottom-2 right-4 text-gray-600 text-sm">
+                {/* <div className="absolute bottom-2 right-4 text-gray-600 text-sm">
                   {currentPage + 1} / {photoPages.length}
-                </div>
+                </div> */}
               </div>
             </div>
             

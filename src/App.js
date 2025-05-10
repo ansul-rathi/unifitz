@@ -7,6 +7,7 @@ import RecipeDetail from './components/Recipes/RecipeDetail';
 // import Soumya from './pages/soumya';
 import Birthday from './pages/Birthday';
 import NotFound from './pages/NotFound';
+import WhatsAppScheduler from './pages/WhatsAppScheduler';
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
           <Route path="/recipe/:id" element={<RecipeDetail />} />
           <Route path="/happy-birthday/sona" element={<Birthday />} />
           <Route path="/birthday" element={<Birthday />} />
+          <Route path="/whatsapp-schedular" element={<WhatsAppScheduler />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>
