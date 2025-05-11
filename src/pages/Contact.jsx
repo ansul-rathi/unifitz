@@ -8,6 +8,13 @@ import { Phone, Mail, Instagram, MapPin, Send, CheckCircle, ArrowRight } from 'l
 import Navbar from '../components/Navigation/Header';
 import Button from '../components/common/Button';
 import Footer from '../components/Footer/Footer';
+import PropTypes from 'prop-types';
+
+FaqItem.propTypes = {
+  question: PropTypes.string.isRequired,
+  answer: PropTypes.string.isRequired
+};
+
 
 const ContactUs = () => {
   // Form state

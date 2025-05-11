@@ -1,17 +1,21 @@
 import { motion } from 'framer-motion';
 import { Calendar, Clock } from 'lucide-react';
+import PropTypes from 'prop-types';
 
-/**
- * Component for displaying a Weight Training class card
- * 
- * @param {Object} props - Component props
- * @param {string} props.title - Class title
- * @param {string} props.level - Difficulty level
- * @param {string} props.description - Class description
- * @param {string} props.days - Days class is offered
- * @param {string} props.time - Time class is offered
- * @param {string} props.badgeVariant - Gradient variant for the level badge
- */
+// At the bottom of the file, add:
+ClassCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  level: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  days: PropTypes.string.isRequired,
+  time: PropTypes.string.isRequired,
+  badgeVariant: PropTypes.string
+};
+
+ClassCard.defaultProps = {
+  badgeVariant: 'default'
+};
+
 const ClassCard = ({
   title,
   level,
