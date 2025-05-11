@@ -2,20 +2,6 @@ import { motion } from 'framer-motion';
 import { Calendar, Clock } from 'lucide-react';
 import PropTypes from 'prop-types';
 
-// At the bottom of the file, add:
-ClassCard.propTypes = {
-  title: PropTypes.string.isRequired,
-  level: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
-  days: PropTypes.string.isRequired,
-  time: PropTypes.string.isRequired,
-  badgeVariant: PropTypes.string
-};
-
-ClassCard.defaultProps = {
-  badgeVariant: 'default'
-};
-
 const ClassCard = ({
   title,
   level,
@@ -67,3 +53,18 @@ const ClassCard = ({
 };
 
 export default ClassCard;
+
+
+// At the bottom of the file, add:
+ClassCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  level: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  days: PropTypes.string.isRequired,
+  time: PropTypes.string.isRequired,
+  badgeVariant: PropTypes.string
+};
+
+ClassCard.defaultProps = {
+  badgeVariant: 'default'
+};

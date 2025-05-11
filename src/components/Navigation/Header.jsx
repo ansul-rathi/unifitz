@@ -16,7 +16,7 @@ import Button from '../common/Button';
 const Header = ({
   navItems = [
     { name: 'Home', path: '/' },
-    { name: 'Programs', path: '/programs' },
+    { name: 'Programs', path: '/challenges' },
     { name: 'About', path: '/about' },
     { name: 'Contact', path: '/contact' }
   ],

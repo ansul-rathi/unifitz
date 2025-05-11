@@ -10,12 +10,6 @@ import Button from '../components/common/Button';
 import Footer from '../components/Footer/Footer';
 import PropTypes from 'prop-types';
 
-FaqItem.propTypes = {
-  question: PropTypes.string.isRequired,
-  answer: PropTypes.string.isRequired
-};
-
-
 const ContactUs = () => {
   // Form state
   const [formState, setFormState] = useState({
@@ -638,3 +632,10 @@ const FaqItem = ({ question, answer }) => {
 };
 
 export default ContactUs;
+
+
+FaqItem.propTypes = {
+  question: PropTypes.string.isRequired,
+  answer: PropTypes.string.isRequired
+};
+

@@ -3,11 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize } from 'lucide-react';
 import PropTypes from 'prop-types';
 
-// At the bottom of the file, add:
-CustomYouTubePlayer.propTypes = {
-  videoId: PropTypes.string.isRequired,
-  title: PropTypes.string.isRequired
-};
 const CustomYouTubePlayer = ({ videoId, title }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -178,3 +173,11 @@ const CustomYouTubePlayer = ({ videoId, title }) => {
 };
 
 export default CustomYouTubePlayer;
+
+
+
+// At the bottom of the file, add:
+CustomYouTubePlayer.propTypes = {
+  videoId: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired
+};

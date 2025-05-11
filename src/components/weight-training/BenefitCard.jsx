@@ -3,20 +3,6 @@ import { Dumbbell, Heart, Trophy, User } from 'lucide-react';
 import SectionHeading from '../common/SectionHeading';
 import PropTypes from 'prop-types';
 
-// At the bottom of the file, add:
-BenefitCard.propTypes = {
-  icon: PropTypes.node.isRequired,
-  title: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
-  delay: PropTypes.number,
-  colorClass: PropTypes.string
-};
-
-// Optional: Add default props
-BenefitCard.defaultProps = {
-  delay: 0,
-  colorClass: ''
-};
 // BenefitCard component for the items
 const BenefitCard = ({ icon, title, description, delay = 0, colorClass }) => {
   return (
@@ -100,3 +86,19 @@ const Benefits = () => {
 };
 
 export default Benefits;
+
+
+// At the bottom of the file, add:
+BenefitCard.propTypes = {
+  icon: PropTypes.node.isRequired,
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  delay: PropTypes.number,
+  colorClass: PropTypes.string
+};
+
+// Optional: Add default props
+BenefitCard.defaultProps = {
+  delay: 0,
+  colorClass: ''
+};
