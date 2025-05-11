@@ -58,7 +58,7 @@ const Header = ({
         {/* Logo */}
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
-            <img src="/logo.png" alt="UNIFITZ" className="h-12 mr-3" />
+            {/* <img src="/logo.png" alt="UNIFITZ" className="h-12 mr-3" /> */}
             <span className="text-2xl font-bold text-white">UNIFITZ</span>
           </Link>
         </div>

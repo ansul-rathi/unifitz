@@ -7,6 +7,11 @@ import RecipeDetail from './components/Recipes/RecipeDetail';
 import ZumbaPage from './pages/Zumba';
 import YogaPage from './pages/Yoga';
 import WeightTrainingPage from './pages/WeightTraiing';
+import AboutUs from './pages/About';
+import ContactUs from './pages/Contact';
+import Challenges from './pages/Challenges';
+import ChallengeDetails from './pages/ChallengeDetails';
+import VideoPlayer from './components/programs/VideoPlayer';
 
 const App = () => {
   return (
@@ -23,6 +28,11 @@ const App = () => {
           <Route path="/zumba" element={<ZumbaPage />} />
           <Route path="/yoga" element={<YogaPage />} />
           <Route path="/weight-training" element={<WeightTrainingPage />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/challenges" element={<Challenges />} />
+          <Route path="/challenges/:challengeId" element={<ChallengeDetails />} />
+          <Route path="/challenges/:challengeId/:videoId" element={<VideoPlayer />} />
         </Routes>
       </div>
     </Router>

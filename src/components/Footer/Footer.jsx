@@ -53,7 +53,7 @@ const Footer = ({
           {/* Logo and company info */}
           <div>
             <div className="flex items-center mb-6">
-              <img src="/logo.png" alt="UNIFITZ" className="h-12 mr-3" />
+              {/* <img src="/logo.png" alt="UNIFITZ" className="h-12 mr-3" /> */}
               <span className="text-2xl font-bold text-white">UNIFITZ</span>
             </div>
             <p className="text-gray-400 mb-6">
