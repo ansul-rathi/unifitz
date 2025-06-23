@@ -49,7 +49,7 @@ const Cta = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <Button to="/weight-training/join" variant="white" size="lg">
+            <Button to="/weight-training/enroll" variant="white" size="lg">
               Start Training Now
             </Button>
             <Button to="/weight-training/trial" variant="outline" size="lg">

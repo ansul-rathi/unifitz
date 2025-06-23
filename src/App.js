@@ -15,11 +15,13 @@ import ContactUs from './pages/Contact';
 import Challenges from './pages/Challenges';
 import ChallengeDetails from './pages/ChallengeDetails';
 import VideoPlayer from './components/programs/VideoPlayer';
+import EnrollmentForm from './pages/Enroll';
+import FitnessToolsPage from './pages/FitnessToolsPage';
 
 const App = () => {
   return (
     <Router>
-      <div>
+      <div className='bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700'>
         <Navbar /> {/* Navigation component */}
         <Routes>
           <Route path="/" element={<Home />} />
@@ -36,9 +38,11 @@ const App = () => {
           <Route path="/weight-training" element={<WeightTrainingPage />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/contact" element={<ContactUs />} />
+          <Route path="/enroll" element={<EnrollmentForm />} />
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/challenges/:challengeId" element={<ChallengeDetails />} />
           <Route path="/challenges/:challengeId/:videoId" element={<VideoPlayer />} />
+          <Route path="/fitness-tools" element={<FitnessToolsPage />} />
         </Routes>
       </div>
     </Router>

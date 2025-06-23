@@ -1,196 +1,328 @@
-import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Play, Users, ChevronRight, CheckCircle2, Heart, Dumbbell, Music } from 'lucide-react';
-import Navbar from '../components/Navigation/Header';
-import Button from '../components/common/Button';
-import Footer from '../components/Footer/Footer';
-
-// Import reusable components
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/no-unescaped-entities */
+import React, { useState, useEffect } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { ArrowRight, Users, ChevronRight, CheckCircle2, Heart, Dumbbell, Target, Flame, Zap, Play, Star, Sparkles, Rocket, Shield, Globe } from 'lucide-react';
 
 const Home = () => {
-  // Animation variants for staggered animations
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3
-      }
-    }
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const { scrollY } = useScroll();
+  const y1 = useTransform(scrollY, [0, 300], [0, 50]);
+  const y2 = useTransform(scrollY, [0, 300], [0, -50]);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Enhanced Button Component
+  const FuturisticButton = ({ children, variant = 'primary', size = 'md', to, icon, iconPosition = 'left', className = '', ...props }) => {
+    const baseClasses = "relative overflow-hidden group transition-all duration-300 transform hover:scale-105 font-bold rounded-2xl flex items-center justify-center gap-3 backdrop-blur-lg border";
+    
+    const variants = {
+      primary: "bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 text-white border-white/20 shadow-[0_0_30px_rgba(59,130,246,0.5)] hover:shadow-[0_0_50px_rgba(59,130,246,0.8)]",
+      secondary: "bg-white/10 text-white border-white/30 hover:bg-white/20 shadow-[0_0_20px_rgba(255,255,255,0.2)]",
+      outline: "bg-transparent text-white border-white/50 hover:bg-white/10 shadow-[0_0_20px_rgba(255,255,255,0.3)]",
+      glow: "bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 text-white border-transparent shadow-[0_0_40px_rgba(168,85,247,0.6)] hover:shadow-[0_0_60px_rgba(168,85,247,0.9)]"
+    };
+    
+    const sizes = {
+      sm: "px-6 py-3 text-sm",
+      md: "px-8 py-4 text-base",
+      lg: "px-10 py-5 text-lg",
+      xl: "px-12 py-6 text-xl"
+    };
+
+    return (
+      <motion.button
+        className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        {...props}
+      >
+        {/* Animated background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+        
+        {/* Content */}
+        <div className="relative flex items-center gap-3">
+          {icon && iconPosition === 'left' && icon}
+          {children}
+          {icon && iconPosition === 'right' && icon}
+        </div>
+      </motion.button>
+    );
   };
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { duration: 0.5 }
-    }
-  };
-
-  // Program cards data
+  // Enhanced Program Cards
   const programCards = [
     {
-      title: "Zumba",
-      icon: <Music className="h-8 w-8 text-white" />,
-      description: "High-energy dance workouts that burn calories while having fun with Latin rhythms.",
-      color: "from-pink-500 to-orange-500",
-      image: "/zumba-card.jpg",
-      path: "/zumba"
+      title: "Ultimate Fitness Program",
+      tagline: "Your All-in-One Path to a Healthier, Fitter You",
+      icon: <Target className="h-8 w-8" />,
+      description: "A balanced fitness journey combining strength, cardio, flexibility, and nutrition. Designed for beginners to intermediate.",
+      features: [
+        "5-day/week workout plan",
+        "Full-body strength & endurance training",
+        "Guided warm-up & mobility routines",
+        "Meal guidance & lifestyle habits",
+        "Weekly challenges & progress tracking"
+      ],
+      bestFor: "Beginners, busy professionals, anyone seeking consistent long-term fitness",
+      ctaText: "Start Your Journey",
+      gradient: "from-cyan-400 via-blue-500 to-purple-600",
+      glowColor: "cyan",
+      path: "/ultimate-fitness"
     },
     {
-      title: "Yoga",
-      icon: <Heart className="h-8 w-8 text-white" />,
-      description: "Find balance and flexibility with mindful practice guided by our expert instructors.",
-      color: "from-purple-500 to-blue-500",
-      image: "/yoga-card.jpg",
-      path: "/yoga"
+      title: "Master Weight Loss Program",
+      tagline: "Burn Fat, Boost Energy, and Feel Confident Again",
+      icon: <Flame className="h-8 w-8" />,
+      description: "A science-based fat loss program focused on sustainable calorie burn, metabolism-boosting workouts, and nutrition coaching.",
+      features: [
+        "4-6 cardio + strength hybrid workouts/week",
+        "Daily step + hydration goals",
+        "Custom low-calorie meal plans",
+        "Weekly accountability check-ins",
+        "Fat-burn focused training (HIIT, Tabata, Circuits)"
+      ],
+      bestFor: "Anyone struggling with weight loss, post-pregnancy moms, office goers",
+      ctaText: "Join Fat Loss Mission",
+      gradient: "from-orange-400 via-red-500 to-pink-600",
+      glowColor: "red",
+      path: "/weight-loss"
     },
     {
-      title: "Weight Training",
-      icon: <Dumbbell className="h-8 w-8 text-white" />,
-      description: "Build strength and tone your body with our structured weight training programs.",
-      color: "from-emerald-500 to-teal-500",
-      image: "/weight-card.jpg",
-      path: "/weight-training"
+      title: "Muscle Building Program",
+      tagline: "Build Lean Muscle and Sculpt a Stronger Physique",
+      icon: <Dumbbell className="h-8 w-8" />,
+      description: "Targeted resistance training plan built for hypertrophy and strength development with proper recovery and nutrition.",
+      features: [
+        "5-6 structured gym workouts/week",
+        "Push-Pull-Legs or Upper-Lower split",
+        "Advanced strength protocols & tracking",
+        "Supplement guidance + high-protein meal support",
+        "Monthly strength test & muscle growth assessment"
+      ],
+      bestFor: "Men & women looking to gain lean muscle, strength athletes, gym lovers",
+      ctaText: "Build Muscle Now",
+      gradient: "from-emerald-400 via-teal-500 to-cyan-600",
+      glowColor: "emerald",
+      path: "/muscle-building"
     }
   ];
 
-  // Benefits data
   const benefits = [
     { 
       title: "Train as a family", 
-      description: "Our programs are designed for all ages and fitness levels, so the whole family can join."
+      description: "Our programs are designed for all ages and fitness levels, so the whole family can join.",
+      icon: <Users className="h-6 w-6" />
     },
     { 
       title: "Expert instructors", 
-      description: "Learn from certified professionals who are passionate about helping you reach your goals." 
+      description: "Learn from certified professionals who are passionate about helping you reach your goals.",
+      icon: <Star className="h-6 w-6" />
     },
     { 
       title: "Flexible scheduling", 
-      description: "Access classes anytime, anywhere – fitting perfectly into your busy lifestyle." 
+      description: "Access classes anytime, anywhere – fitting perfectly into your busy lifestyle.",
+      icon: <Globe className="h-6 w-6" />
     },
     { 
       title: "Personalized approach", 
-      description: "Workouts designed for all fitness levels with modifications to match your needs." 
+      description: "Workouts designed for all fitness levels with modifications to match your needs.",
+      icon: <Target className="h-6 w-6" />
     }
   ];
 
-  // Testimonials data
   const testimonials = [
     {
       name: "Priya Sharma",
       role: "Working Mom",
-      quote: "UNIFITZ has transformed our family routine! My kids love the energy of Zumba, while I prefer yoga. We've all become more active together.",
+      quote: "UNIFITZ has transformed our family routine! My kids love the energy of our workouts, while I prefer the structured programs.",
+      rating: 5,
       image: "/avatar-1.jpg"
     },
     {
       name: "Vikram Mehta",
       role: "IT Professional",
-      quote: "The flexibility of online classes means I can fit weight training into my schedule no matter how busy work gets. The results speak for themselves!",
+      quote: "The Ultimate Fitness Program changed my life! The flexibility of online classes means I can fit training into my schedule.",
+      rating: 5,
       image: "/avatar-2.jpg"
     }
   ];
 
   return (
-    <div className="min-h-screen overflow-hidden bg-gradient-to-b from-indigo-900 via-purple-900 to-violet-900">
-      <Navbar />
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      {/* Animated background */}
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-cyan-900/20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1)_0%,transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,transparent_0deg,rgba(168,85,247,0.1)_60deg,transparent_120deg)]"></div>
+      </div>
+
+      {/* Floating particles */}
+      <div className="fixed inset-0 pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-cyan-400 rounded-full"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              y: [0, -30, 0],
+              opacity: [0, 1, 0],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 2,
+              repeat: Infinity,
+              delay: Math.random() * 3,
+            }}
+          />
+        ))}
+      </div>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden">
-        {/* Background decorative elements */}
-        <div className="absolute top-0 right-0 w-full md:w-1/2 h-full bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-bl-[100px] -z-10"></div>
-        <div className="absolute -top-24 right-0 w-96 h-96 bg-gradient-to-br from-pink-500 to-orange-400 rounded-full filter blur-3xl opacity-20 -z-10"></div>
-        <div className="absolute top-1/3 -left-24 w-80 h-80 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full filter blur-3xl opacity-20 -z-10"></div>
+      <section className="relative min-h-screen flex items-center justify-center pt-20 pb-20 overflow-hidden">
+        {/* Hero background effects */}
+        <motion.div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(59,130,246,0.3) 0%, transparent 50%)`,
+          }}
+        />
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
+          <div className="flex flex-col lg:flex-row items-center gap-16">
+            {/* Left Content */}
             <motion.div 
-              className="lg:w-1/2"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              className="lg:w-1/2 text-center lg:text-left"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
             >
-              <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full mb-6">
-                <span className="text-pink-300 font-medium mr-2">Online Family Fitness</span>
-                <span className="w-2 h-2 rounded-full bg-pink-400 animate-pulse"></span>
-              </div>
+              {/* Badge */}
+              <motion.div 
+                className="inline-flex items-center px-6 py-3 bg-white/10 backdrop-blur-lg rounded-full mb-8 border border-white/20"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <Sparkles className="w-5 h-5 text-cyan-400 mr-2" />
+                <span className="text-cyan-300 font-medium">Next-Gen Family Fitness</span>
+                <div className="w-2 h-2 bg-cyan-400 rounded-full ml-2 animate-pulse"></div>
+              </motion.div>
 
-              <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
-                <span className="block text-white">Where </span>
-                <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 text-transparent bg-clip-text">Strength</span>
-                <span className="block text-white">Meets </span>
-                <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-400 text-transparent bg-clip-text">Style</span>
-              </h1>
+              {/* Main Heading */}
+              <motion.h1 
+                className="text-6xl md:text-8xl font-black leading-none mb-8"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <span className="block bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 text-transparent bg-clip-text">
+                  Where
+                </span>
+                <span className="block text-white">
+                  Future
+                </span>
+                <span className="block bg-gradient-to-r from-pink-400 via-purple-500 to-cyan-400 text-transparent bg-clip-text">
+                  Meets
+                </span>
+                <span className="block text-white">
+                  Fitness
+                </span>
+              </motion.h1>
 
-              <p className="text-xl text-gray-200 mb-8 max-w-xl">
-                Transform your fitness journey with your entire family at UNIFITZ. Experience premium fitness training from the comfort of your home.
-              </p>
+              {/* Subtitle */}
+              <motion.p 
+                className="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl mx-auto lg:mx-0"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                Experience revolutionary fitness training powered by cutting-edge technology. 
+                <span className="text-cyan-400"> Transform your family's health</span> in the digital age.
+              </motion.p>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  to="/join" 
-                  variant="primary" 
-                  size="lg" 
-                  icon={<ArrowRight />}
-                  iconPosition="right"
-                >
-                  Start Your Journey
-                </Button>
+              {/* CTA Buttons */}
+              <motion.div 
+                className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+              >
+                <FuturisticButton variant="glow" size="xl" icon={<Rocket className="w-6 h-6" />}>
+                  Launch Your Journey
+                </FuturisticButton>
                 
-                <div className="flex items-center cursor-pointer group">
-                  <div className="flex items-center justify-center w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full mr-4 group-hover:bg-white/20 transition-all">
-                    <Play className="h-5 w-5 text-white fill-white" />
-                  </div>
-                  <span className="text-white font-medium group-hover:text-pink-300 transition-colors">
-                    Watch how it works
-                  </span>
-                </div>
-              </div>
+                <FuturisticButton variant="outline" size="xl" icon={<Play className="w-6 h-6" />}>
+                  Watch Demo
+                </FuturisticButton>
+              </motion.div>
             </motion.div>
 
+            {/* Right Content - Hero Visual */}
             <motion.div 
-              className="lg:w-1/2 relative mt-12 lg:mt-0"
+              className="lg:w-1/2 relative"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+              transition={{ duration: 1, delay: 0.4 }}
+              style={{ y: y1 }}
             >
               <div className="relative">
-                {/* Main image with gradient border */}
-                <div className="relative p-2 rounded-3xl bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 shadow-2xl">
-                  <img 
-                    src="/hero-image.jpg" 
-                    alt="Family working out together" 
-                    className="rounded-2xl w-full object-cover"
-                    style={{ height: '550px' }}
-                  />
-                </div>
-                
-                {/* Floating badges */}
-                <motion.div 
-                  className="absolute -bottom-8 -left-8 bg-white rounded-2xl shadow-xl p-4 flex items-center"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.8, duration: 0.5 }}
-                >
-                  <div className="rounded-full bg-pink-100 p-3 mr-3">
-                    <Users className="h-6 w-6 text-pink-600" />
+                {/* Main hero card */}
+                <div className="relative p-1 rounded-3xl bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500">
+                  <div className="bg-black/80 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
+                    <div className="aspect-video bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-2xl mb-6 flex items-center justify-center">
+                      <motion.div 
+                        className="w-20 h-20 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                      >
+                        <Play className="w-10 h-10 text-white ml-1" />
+                      </motion.div>
+                    </div>
+                    
+                    <h3 className="text-2xl font-bold mb-2">AI-Powered Training</h3>
+                    <p className="text-gray-400">Personalized workouts that adapt to your family's progress in real-time.</p>
                   </div>
-                  <div>
-                    <p className="text-gray-600 text-sm">Active Members</p>
-                    <p className="text-gray-900 font-bold">2,500+</p>
+                </div>
+
+                {/* Floating stats */}
+                <motion.div 
+                  className="absolute -top-8 -right-8 bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.2 }}
+                >
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-cyan-400 rounded-full flex items-center justify-center mr-4">
+                      <Users className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm">Active Users</p>
+                      <p className="text-2xl font-bold">10K+</p>
+                    </div>
                   </div>
                 </motion.div>
-                
+
                 <motion.div 
-                  className="absolute -top-6 -right-6 bg-gradient-to-r from-orange-500 to-pink-500 rounded-2xl shadow-xl p-4 text-white"
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1, duration: 0.5 }}
+                  className="absolute -bottom-8 -left-8 bg-gradient-to-r from-orange-500 to-pink-500 rounded-2xl p-6 text-white"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.4 }}
                 >
-                  <p className="font-bold">30% OFF</p>
-                  <p className="text-sm">First Month</p>
+                  <div className="flex items-center">
+                    <Flame className="w-8 h-8 mr-3" />
+                    <div>
+                      <p className="font-bold text-lg">50% OFF</p>
+                      <p className="text-sm opacity-90">Early Access</p>
+                    </div>
+                  </div>
                 </motion.div>
               </div>
             </motion.div>
@@ -198,70 +330,90 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Program Cards Section */}
-      <section className="py-20 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-purple-900/50 to-indigo-900/50 -z-10"></div>
-        
+      {/* Programs Section */}
+      <section className="py-32 relative">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <motion.h2 
-              className="text-4xl md:text-5xl font-bold mb-6 text-white"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              Discover Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">Premium Programs</span>
-            </motion.h2>
-            
-            <motion.p 
-              className="text-xl text-gray-300 max-w-3xl mx-auto"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              Choose from our carefully designed fitness programs that cater to all fitness levels and preferences
-            </motion.p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Section Header */}
+          <motion.div 
+            className="text-center mb-20"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-5xl md:text-6xl font-black mb-6">
+              <span className="bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-400 text-transparent bg-clip-text">
+                Next-Gen Programs
+              </span>
+            </h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Revolutionary fitness experiences powered by advanced AI and personalized coaching
+            </p>
+          </motion.div>
+
+          {/* Program Cards Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {programCards.map((program, index) => (
-              <motion.div 
+              <motion.div
                 key={program.title}
-                className="relative group overflow-hidden rounded-3xl"
-                initial={{ opacity: 0, y: 30 }}
+                className="group relative"
+                initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
+                transition={{ delay: index * 0.2 }}
               >
-                {/* Card Background Image */}
-                <div className="absolute inset-0 z-0">
-                  <img 
-                    src={program.image} 
-                    alt={program.title} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-black/30"></div>
-                </div>
+                {/* Card glow effect */}
+                <div className={`absolute inset-0 bg-gradient-to-r ${program.gradient} opacity-20 blur-xl group-hover:opacity-40 transition-opacity duration-500 rounded-3xl`}></div>
                 
-                {/* Card Content */}
-                <div className="relative z-10 p-8 flex flex-col h-full min-h-[450px]">
-                  <div className={`bg-gradient-to-br ${program.color} w-16 h-16 rounded-2xl flex items-center justify-center mb-6`}>
-                    {program.icon}
+                {/* Main Card */}
+                <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:border-white/20 transition-all duration-500 group-hover:transform group-hover:scale-105">
+                  {/* Header */}
+                  <div className="flex items-center mb-6">
+                    <div className={`w-16 h-16 bg-gradient-to-r ${program.gradient} rounded-2xl flex items-center justify-center mr-4`}>
+                      {program.icon}
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold">{program.title}</h3>
+                      <p className="text-cyan-400 text-sm">{program.tagline}</p>
+                    </div>
                   </div>
-                  
-                  <h3 className="text-3xl font-bold text-white mb-4">{program.title}</h3>
-                  <p className="text-gray-300 mb-8">{program.description}</p>
-                  
-                  <div className="mt-auto">
-                    <Link 
-                      to={program.path}
-                      className="flex items-center text-white group-hover:text-pink-300 transition-colors font-medium"
-                    >
-                      Learn More <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                    </Link>
+
+                  {/* Description */}
+                  <p className="text-gray-300 mb-6 leading-relaxed">{program.description}</p>
+
+                  {/* Features */}
+                  <div className="mb-8">
+                    <h4 className="text-white font-semibold mb-4 flex items-center">
+                      <Sparkles className="w-4 h-4 mr-2 text-cyan-400" />
+                      What's Included:
+                    </h4>
+                    <div className="space-y-3">
+                      {program.features.slice(0, 3).map((feature, idx) => (
+                        <div key={idx} className="flex items-start">
+                          <CheckCircle2 className="w-5 h-5 text-cyan-400 mr-3 mt-0.5 flex-shrink-0" />
+                          <span className="text-gray-300 text-sm">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
+
+                  {/* Best For */}
+                  <div className="mb-8 p-4 bg-white/5 rounded-xl border border-white/10">
+                    <p className="text-cyan-400 font-medium text-sm">
+                      <Target className="w-4 h-4 inline mr-2" />
+                      Perfect For: <span className="text-white">{program.bestFor}</span>
+                    </p>
+                  </div>
+
+                  {/* CTA */}
+                  <FuturisticButton 
+                    variant="glow" 
+                    size="md" 
+                    className="w-full"
+                    icon={<ArrowRight className="w-5 h-5" />}
+                    iconPosition="right"
+                  >
+                    {program.ctaText}
+                  </FuturisticButton>
                 </div>
               </motion.div>
             ))}
@@ -269,239 +421,384 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Family Focus Section */}
-      <section className="py-24 relative overflow-hidden">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900 to-indigo-900 -z-10"></div>
-        {/* Decorative circles */}
-        <div className="absolute top-1/4 right-0 w-64 h-64 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full filter blur-3xl opacity-20 -z-5"></div>
-        <div className="absolute bottom-1/4 left-0 w-64 h-64 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full filter blur-3xl opacity-20 -z-5"></div>
-        
+      {/* Features Section */}
+      <section className="py-32 relative">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
-            <motion.div 
-              className="lg:w-1/2 relative"
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            {/* Left - Features List */}
+            <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
             >
-              <div className="grid grid-cols-2 gap-4 relative">
-                <img 
-                  src="/family-1.jpg" 
-                  alt="Family yoga" 
-                  className="rounded-2xl shadow-xl w-full h-64 object-cover"
-                />
-                <img 
-                  src="/family-2.jpg" 
-                  alt="Kids exercising" 
-                  className="rounded-2xl shadow-xl w-full h-64 object-cover translate-y-8"
-                />
-                <img 
-                  src="/family-3.jpg" 
-                  alt="Parents and children" 
-                  className="rounded-2xl shadow-xl w-full h-64 object-cover -translate-y-8"
-                />
-                <img 
-                  src="/family-4.jpg" 
-                  alt="Family fitness" 
-                  className="rounded-2xl shadow-xl w-full h-64 object-cover"
-                />
-                
-                {/* Stats overlay */}
-                <div className="absolute -bottom-8 -right-8 bg-white rounded-2xl shadow-xl p-5 text-center">
-                  <p className="text-indigo-900 font-bold text-4xl">98%</p>
-                  <p className="text-gray-600 text-sm">Satisfaction Rate</p>
-                </div>
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              className="lg:w-1/2"
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="mb-8">
-                <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-                  Fitness for the <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">Whole Family</span>
-                </h2>
-                <p className="text-xl text-gray-300 mb-6">
-                  At UNIFITZ, we believe fitness should be fun and accessible for everyone, regardless of age or ability. Our family-focused approach lets you:
-                </p>
-              </div>
+              <h2 className="text-5xl font-black mb-8">
+                <span className="bg-gradient-to-r from-cyan-400 to-purple-500 text-transparent bg-clip-text">
+                  Future-Ready
+                </span>
+                <br />
+                Family Fitness
+              </h2>
               
-              <motion.div 
-                className="space-y-6"
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-              >
+              <p className="text-xl text-gray-300 mb-12">
+                Experience next-generation fitness technology designed for the modern family.
+              </p>
+
+              <div className="space-y-8">
                 {benefits.map((benefit, index) => (
-                  <motion.div 
+                  <motion.div
                     key={index}
-                    className="flex items-start"
-                    variants={itemVariants}
+                    className="flex items-start group"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
                   >
-                    <div className="bg-gradient-to-br from-pink-500 to-purple-500 rounded-lg p-2 mr-4 mt-1">
-                      <CheckCircle2 className="h-6 w-6 text-white" />
+                    <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-xl flex items-center justify-center mr-6 group-hover:scale-110 transition-transform">
+                      {benefit.icon}
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white mb-2">{benefit.title}</h3>
-                      <p className="text-gray-300">{benefit.description}</p>
+                      <h3 className="text-xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">
+                        {benefit.title}
+                      </h3>
+                      <p className="text-gray-400">{benefit.description}</p>
                     </div>
                   </motion.div>
                 ))}
-              </motion.div>
+              </div>
+            </motion.div>
+
+            {/* Right - Visual */}
+            <motion.div
+              className="relative"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              style={{ y: y2 }}
+            >
+              <div className="relative">
+                {/* Main dashboard mockup */}
+                <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl p-4 border border-cyan-500/30">
+                      <Heart className="w-8 h-8 text-cyan-400 mb-2" />
+                      <p className="text-sm text-gray-300">Heart Rate</p>
+                      <p className="text-2xl font-bold">142 BPM</p>
+                    </div>
+                    <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-4 border border-purple-500/30">
+                      <Flame className="w-8 h-8 text-purple-400 mb-2" />
+                      <p className="text-sm text-gray-300">Calories</p>
+                      <p className="text-2xl font-bold">1,234</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl p-4 border border-emerald-500/30">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-300">Weekly Progress</span>
+                      <span className="text-emerald-400 font-bold">78%</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <motion.div 
+                        className="h-2 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full"
+                        initial={{ width: 0 }}
+                        whileInView={{ width: "78%" }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 1, duration: 1 }}
+                      ></motion.div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating elements */}
+                <motion.div 
+                  className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full flex items-center justify-center"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                >
+                  <Zap className="w-10 h-10 text-white" />
+                </motion.div>
+
+                <motion.div 
+                  className="absolute -bottom-6 -left-6 bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20"
+                  initial={{ opacity: 0, scale: 0 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 1.5 }}
+                >
+                  <div className="flex items-center">
+                    <Shield className="w-6 h-6 text-cyan-400 mr-2" />
+                    <div>
+                      <p className="text-xs text-gray-400">AI Protection</p>
+                      <p className="font-bold">Active</p>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-indigo-900 to-purple-900 -z-10"></div>
-        
+      <section className="py-32 relative">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-                What Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">Members Say</span>
-              </h2>
-              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                Hear from families who have transformed their fitness journey with UNIFITZ
-              </p>
-            </motion.div>
-          </div>
-          
+          <motion.div 
+            className="text-center mb-20"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-5xl font-black mb-6">
+              <span className="bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-400 text-transparent bg-clip-text">
+                Success Stories
+              </span>
+            </h2>
+            <p className="text-xl text-gray-300">
+              Real families, real transformations
+            </p>
+          </motion.div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {testimonials.map((testimonial, index) => (
-              <motion.div 
+              <motion.div
                 key={testimonial.name}
-                className="bg-white/10 backdrop-blur-sm p-8 rounded-3xl border border-white/20"
+                className="relative group"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
+                transition={{ delay: index * 0.2 }}
               >
-                <div className="flex items-start">
-                  <img 
-                    src={testimonial.image} 
-                    alt={testimonial.name} 
-                    className="w-16 h-16 rounded-full object-cover mr-5 border-2 border-pink-500"
-                  />
-                  <div>
-                    <h3 className="text-xl font-bold text-white">{testimonial.name}</h3>
-                    <p className="text-pink-300">{testimonial.role}</p>
-                  </div>
-                </div>
+                {/* Glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                 
-                <div className="mt-6">
-                  <svg className="h-8 w-8 text-pink-400 mb-4 opacity-50" fill="currentColor" viewBox="0 0 32 32">
-                    <path d="M10 8c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10S15.5 8 10 8zm0 16c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6zm12-16c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10S27.5 8 22 8zm0 16c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z"></path>
-                  </svg>
-                  <p className="text-lg text-gray-200">{testimonial.quote}</p>
+                {/* Testimonial card */}
+                <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 group-hover:border-white/20 transition-all duration-500">
+                  {/* Stars */}
+                  <div className="flex mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+
+                  {/* Quote */}
+                  <p className="text-gray-300 text-lg mb-6 leading-relaxed">"{testimonial.quote}"</p>
+
+                  {/* Author */}
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full mr-4 flex items-center justify-center">
+                      <span className="text-white font-bold">{testimonial.name[0]}</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold">{testimonial.name}</h4>
+                      <p className="text-cyan-400 text-sm">{testimonial.role}</p>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             ))}
-          </div>
-          
-          <div className="mt-12 text-center">
-            <Button 
-              to="/testimonials" 
-              variant="outline" 
-              size="lg"
-            >
-              Read More Success Stories
-            </Button>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 relative overflow-hidden">
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-700 to-indigo-700 opacity-90 -z-10"></div>
-        
-        {/* Decorative background */}
-        <div className="absolute inset-0 opacity-20 -z-5">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-white rounded-full mix-blend-overlay filter blur-3xl"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500 rounded-full mix-blend-overlay filter blur-3xl"></div>
-        </div>
-        
+      <section className="py-32 relative overflow-hidden">
+        {/* Background effects */}
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/50 via-purple-900/50 to-pink-900/50"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.3)_0%,transparent_70%)]"></div>
+
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
+          <motion.div 
+            className="text-center max-w-4xl mx-auto"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-5xl md:text-6xl font-black mb-8">
+              Ready to <span className="bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-400 text-transparent bg-clip-text">Transform</span> Your Future?
+            </h2>
+            
+            <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
+              Join the fitness revolution and experience the future of family health with our AI-powered programs.
+            </p>
+
+            {/* Feature highlights */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+              <motion.div 
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+              >
+                <Shield className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
+                <p className="text-white font-semibold">No Contracts</p>
+                <p className="text-gray-400 text-sm">Cancel anytime</p>
+              </motion.div>
+              
+              <motion.div 
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+              >
+                <Rocket className="w-8 h-8 text-purple-400 mx-auto mb-3" />
+                <p className="text-white font-semibold">30-Day Guarantee</p>
+                <p className="text-gray-400 text-sm">Risk-free trial</p>
+              </motion.div>
+              
+              <motion.div 
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6 }}
+              >
+                <Zap className="w-8 h-8 text-yellow-400 mx-auto mb-3" />
+                <p className="text-white font-semibold">Instant Access</p>
+                <p className="text-gray-400 text-sm">Start immediately</p>
+              </motion.div>
+            </div>
+
+            {/* CTA Buttons */}
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-6 justify-center"
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+              transition={{ delay: 0.8 }}
             >
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-                Ready to Transform Your <span className="text-yellow-300">Familys Fitness</span> Journey?
-              </h2>
+              <FuturisticButton 
+                variant="glow" 
+                size="xl" 
+                icon={<Rocket className="w-6 h-6" />}
+                iconPosition="right"
+              >
+                Start Your Transformation
+              </FuturisticButton>
               
-              <p className="text-xl text-white mb-10 max-w-3xl mx-auto">
-                Join thousands of families who are getting fitter, healthier, and happier together with UNIFITZ is a premium online fitness programs.
-              </p>
-              
-              <div className="bg-white/10 backdrop-blur-sm p-8 rounded-3xl border border-white/20 mb-10">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-                  <div className="flex items-center">
-                    <div className="rounded-full bg-pink-500/20 p-3 mr-3">
-                      <CheckCircle2 className="h-6 w-6 text-pink-400" />
-                    </div>
-                    <span className="text-white">No long-term contracts</span>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <div className="rounded-full bg-purple-500/20 p-3 mr-3">
-                      <CheckCircle2 className="h-6 w-6 text-purple-400" />
-                    </div>
-                    <span className="text-white">30-day money back guarantee</span>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <div className="rounded-full bg-blue-500/20 p-3 mr-3">
-                      <CheckCircle2 className="h-6 w-6 text-blue-400" />
-                    </div>
-                    <span className="text-white">Cancel anytime, hassle-free</span>
-                  </div>
-                </div>
+              <FuturisticButton 
+                variant="secondary" 
+                size="xl" 
+                icon={<Target className="w-6 h-6" />}
+              >
+                Explore Programs
+              </FuturisticButton>
+            </motion.div>
+
+            {/* Trust indicators */}
+            <motion.div 
+              className="mt-16 flex flex-wrap justify-center items-center gap-8 opacity-60"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 0.6 }}
+              viewport={{ once: true }}
+              transition={{ delay: 1 }}
+            >
+              <div className="flex items-center">
+                <Users className="w-5 h-5 text-cyan-400 mr-2" />
+                <span className="text-sm">10,000+ Active Members</span>
               </div>
-              
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <Button 
-                  to="/plans" 
-                  variant="white" 
-                  size="lg"
-                >
-                  View Our Plans
-                </Button>
-                
-                <Button 
-                  to="/start" 
-                  variant="primary" 
-                  size="lg" 
-                  icon={<ArrowRight />} 
-                  iconPosition="right"
-                >
-                  Start Your Journey Now
-                </Button>
+              <div className="flex items-center">
+                <Star className="w-5 h-5 text-yellow-400 mr-2" />
+                <span className="text-sm">4.9/5 Rating</span>
+              </div>
+              <div className="flex items-center">
+                <Shield className="w-5 h-5 text-green-400 mr-2" />
+                <span className="text-sm">Certified Trainers</span>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      <Footer />
+      {/* Footer Section */}
+      <footer className="py-20 relative">
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-gray-900/50 to-transparent"></div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            {/* Logo & Description */}
+            <div className="md:col-span-2">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                <h3 className="text-3xl font-black mb-4">
+                  <span className="bg-gradient-to-r from-cyan-400 to-purple-500 text-transparent bg-clip-text">
+                    UniFitz
+                  </span>
+                </h3>
+                <p className="text-gray-400 mb-6 max-w-md">
+                  Revolutionizing family fitness with AI-powered training programs designed for the future.
+                </p>
+                <div className="flex space-x-4">
+                  {['facebook', 'twitter', 'instagram', 'youtube'].map((social) => (
+                    <div key={social} className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer">
+                      <div className="w-5 h-5 bg-cyan-400 rounded-sm"></div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+              >
+                <h4 className="text-lg font-bold mb-6">Programs</h4>
+                <ul className="space-y-3 text-gray-400">
+                  <li className="hover:text-cyan-400 cursor-pointer transition-colors">Ultimate Fitness</li>
+                  <li className="hover:text-cyan-400 cursor-pointer transition-colors">Weight Loss</li>
+                  <li className="hover:text-cyan-400 cursor-pointer transition-colors">Muscle Building</li>
+                  <li className="hover:text-cyan-400 cursor-pointer transition-colors">Family Plans</li>
+                </ul>
+              </motion.div>
+            </div>
+
+            {/* Support */}
+            <div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+              >
+                <h4 className="text-lg font-bold mb-6">Support</h4>
+                <ul className="space-y-3 text-gray-400">
+                  <li className="hover:text-cyan-400 cursor-pointer transition-colors">Help Center</li>
+                  <li className="hover:text-cyan-400 cursor-pointer transition-colors">Contact Us</li>
+                  <li className="hover:text-cyan-400 cursor-pointer transition-colors">Privacy Policy</li>
+                  <li className="hover:text-cyan-400 cursor-pointer transition-colors">Terms of Service</li>
+                </ul>
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <motion.div 
+            className="border-t border-white/10 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.6 }}
+          >
+            <p className="text-gray-400 text-sm">
+              © 2025 UniFitz. All rights reserved. Powered by AI.
+            </p>
+            <div className="flex items-center mt-4 md:mt-0">
+              <span className="text-gray-400 text-sm mr-2">Secured by</span>
+              <div className="flex items-center">
+                <Shield className="w-4 h-4 text-green-400 mr-1" />
+                <span className="text-green-400 text-sm font-semibold">SSL</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </footer>
     </div>
   );
 };

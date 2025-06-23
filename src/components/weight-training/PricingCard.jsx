@@ -95,7 +95,7 @@ const PricingCard = ({
         variant={buttonVariants[variant]} 
         size="lg" 
         fullWidth
-        href="/weight-training/join"
+        href="/weight-training/enroll"
       >
         Get Started
       </Button>

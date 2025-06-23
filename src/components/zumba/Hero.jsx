@@ -53,7 +53,7 @@ const Hero = () => {
               className="flex flex-col sm:flex-row gap-4"
             >
               <Button 
-                to="/zumba/join" 
+                to="/zumba/enroll" 
                 variant="primary" 
                 size="lg" 
                 icon={<ArrowRight />} 

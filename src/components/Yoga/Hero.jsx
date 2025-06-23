@@ -53,7 +53,7 @@ const Hero = () => {
               className="flex flex-col sm:flex-row gap-4"
             >
               <Button 
-                to="/yoga/join" 
+                to="/yoga/enroll" 
                 variant="secondary" 
                 size="lg" 
                 icon={<ArrowRight />} 

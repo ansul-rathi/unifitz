@@ -563,7 +563,7 @@ const AboutUs = () => {
                 </Button>
                 
                 <Button 
-                  to="/start" 
+                  to="/enroll" 
                   variant="primary" 
                   size="lg" 
                   icon={<ArrowRight />} 

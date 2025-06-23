@@ -48,7 +48,7 @@ const Header = ({
     w-full ${fixed ? 'fixed' : 'relative'} top-0 left-0 z-50
     transition-all duration-300 py-4 md:py-6
     ${scrolled || !transparent || isMenuOpen 
-      ? 'bg-purple-900/90 backdrop-blur-md shadow-lg' 
+      ? 'bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700 backdrop-blur-md shadow-lg' 
       : 'bg-transparent'}
   `;
 
@@ -78,7 +78,7 @@ const Header = ({
 
         {/* Join Button */}
         <div className="hidden md:block">
-          <Button to="/join" variant="primary" size="md">
+          <Button to="/enroll" variant="primary" size="md">
             Join Now
           </Button>
         </div>
@@ -107,7 +107,7 @@ const Header = ({
                 {item.name}
               </Link>
             ))}
-            <Button to="/join" variant="primary" size="md" fullWidth>
+            <Button to="/enroll" variant="primary" size="md" fullWidth>
               Join Now
             </Button>
           </nav>
