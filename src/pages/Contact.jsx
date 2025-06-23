@@ -7,7 +7,6 @@ import { Phone, Mail, Instagram, MapPin, Send, CheckCircle, ArrowRight } from 'l
 // import emailjs from '@emailjs/browser';
 import Navbar from '../components/Navigation/Header';
 import Button from '../components/common/Button';
-import Footer from '../components/Footer/Footer';
 import PropTypes from 'prop-types';
 
 const ContactUs = () => {
@@ -591,7 +590,6 @@ const ContactUs = () => {
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 };

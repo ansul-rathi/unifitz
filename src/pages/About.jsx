@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { Users, Heart, Award, Clock, Target, CheckCircle2, ArrowRight } from 'lucide-react';
 import Navbar from '../components/Navigation/Header';
 import Button from '../components/common/Button';
-import Footer from '../components/Footer/Footer';
 
 const AboutUs = () => {
   // Animation variants for staggered animations
@@ -577,7 +576,6 @@ const AboutUs = () => {
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 };

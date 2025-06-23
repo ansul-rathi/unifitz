@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navigation/Header';
-import Footer from '../components/Footer/Footer';
 import challengeData from '../data/challengeData';
 
 const Challenges = () => {
@@ -287,7 +286,6 @@ const Challenges = () => {
         </div>
       </section>
 
-      <Footer />
     </div>
     );
 }
