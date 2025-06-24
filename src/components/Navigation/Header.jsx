@@ -18,7 +18,13 @@ const Header = ({
     { name: 'Home', path: '/' },
     { name: 'Programs', path: '/challenges' },
     { name: 'About', path: '/about' },
-    { name: 'Contact', path: '/contact' }
+    { name: 'Contact', path: '/contact' },
+    { name: 'Fitness hub', path: '/ai-fitness-hub' },
+    { name: 'Dashboard', path: '/live-studio' },
+    { name: 'Studio', path: '/dashboard' },
+    { name: 'Gamification', path: '/gamification' },
+    { name: 'AIFitnessCoach', path: '/ai-coach' },
+    { name: 'SmartNutritionAI', path: '/nutrition-ai' }
   ],
   transparent = true,
   fixed = true,

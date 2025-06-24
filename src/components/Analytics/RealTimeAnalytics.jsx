@@ -36,9 +36,9 @@ const RealTimeAnalytics = () => {
       scrollDepth: 0,
       timeOnPage: 0,
       interactions: 0,
-      heatmapData: []
+      heatmapData: [] // Initialize as empty array
     },
-    realTimeEvents: [],
+    realTimeEvents: [], // Initialize as empty array
     deviceMetrics: {
       mobile: 0,
       desktop: 0,
@@ -52,9 +52,9 @@ const RealTimeAnalytics = () => {
       fid: 0  // First Input Delay
     },
     userBehavior: {
-      clicks: [],
-      scrollPattern: [],
-      navigation: []
+      clicks: [], // Initialize as empty array
+      scrollPattern: [], // Initialize as empty array
+      navigation: [] // Initialize as empty array
     }
   });
 
@@ -67,7 +67,6 @@ const RealTimeAnalytics = () => {
   // Initialize analytics tracking
   useEffect(() => {
     initializeAnalytics();
-    // startRealTimeTracking();
     
     return () => {
       // Cleanup
@@ -130,7 +129,11 @@ const RealTimeAnalytics = () => {
         }
       });
       
-      observer.observe({ entryTypes: ['navigation', 'paint', 'largest-contentful-paint'] });
+      try {
+        observer.observe({ entryTypes: ['navigation', 'paint', 'largest-contentful-paint'] });
+      } catch (error) {
+        console.warn('Performance observer not supported:', error);
+      }
     }
   };
 
@@ -169,8 +172,7 @@ const RealTimeAnalytics = () => {
 
   const trackMouseMovement = useCallback((e) => {
     // Heatmap data collection
-    if (heatmapCanvas.current) {
-      const rect = heatmapCanvas.current.getBoundingClientRect();
+    if (heatmapCanvas.current && window.innerWidth && window.innerHeight) {
       const x = ((e.clientX / window.innerWidth) * 100).toFixed(1);
       const y = ((e.clientY / window.innerHeight) * 100).toFixed(1);
       
@@ -178,7 +180,8 @@ const RealTimeAnalytics = () => {
         ...prev,
         userEngagement: {
           ...prev.userEngagement,
-          heatmapData: [...prev.userEngagement.heatmapData.slice(-100), { x, y, timestamp: Date.now() }]
+          // Safely handle array operations with fallback
+          heatmapData: [...(prev.userEngagement.heatmapData || []).slice(-100), { x, y, timestamp: Date.now() }]
         }
       }));
     }
@@ -201,7 +204,8 @@ const RealTimeAnalytics = () => {
       ...prev,
       userBehavior: {
         ...prev.userBehavior,
-        clicks: [...prev.userBehavior.clicks.slice(-50), clickData]
+        // Safely handle array operations with fallback
+        clicks: [...(prev.userBehavior.clicks || []).slice(-50), clickData]
       },
       userEngagement: {
         ...prev.userEngagement,
@@ -222,7 +226,8 @@ const RealTimeAnalytics = () => {
       userEngagement: {
         ...prev.userEngagement,
         scrollDepth: Math.max(prev.userEngagement.scrollDepth, scrollPercent),
-        scrollPattern: [...prev.userEngagement.scrollPattern.slice(-20), {
+        // Safely handle array operations with fallback
+        scrollPattern: [...(prev.userEngagement.scrollPattern || []).slice(-20), {
           depth: scrollPercent,
           timestamp: Date.now()
         }]
@@ -250,7 +255,8 @@ const RealTimeAnalytics = () => {
   const handleFocus = () => {
     setAnalyticsData(prev => ({
       ...prev,
-      realTimeEvents: [...prev.realTimeEvents.slice(-20), {
+      // Safely handle array operations with fallback
+      realTimeEvents: [...(prev.realTimeEvents || []).slice(-20), {
         type: 'focus',
         timestamp: Date.now(),
         data: 'User returned to tab'
@@ -261,7 +267,8 @@ const RealTimeAnalytics = () => {
   const handleBlur = () => {
     setAnalyticsData(prev => ({
       ...prev,
-      realTimeEvents: [...prev.realTimeEvents.slice(-20), {
+      // Safely handle array operations with fallback
+      realTimeEvents: [...(prev.realTimeEvents || []).slice(-20), {
         type: 'blur',
         timestamp: Date.now(),
         data: 'User left tab'
@@ -273,7 +280,8 @@ const RealTimeAnalytics = () => {
     const isVisible = !document.hidden;
     setAnalyticsData(prev => ({
       ...prev,
-      realTimeEvents: [...prev.realTimeEvents.slice(-20), {
+      // Safely handle array operations with fallback
+      realTimeEvents: [...(prev.realTimeEvents || []).slice(-20), {
         type: isVisible ? 'visible' : 'hidden',
         timestamp: Date.now(),
         data: isVisible ? 'Page became visible' : 'Page became hidden'
@@ -464,7 +472,8 @@ const RealTimeAnalytics = () => {
             Live Events
           </h4>
           <div className="space-y-1 max-h-20 overflow-y-auto">
-            {analyticsData.realTimeEvents.slice(-3).reverse().map((event, index) => (
+            {/* Safely handle array operations with fallback */}
+            {(analyticsData.realTimeEvents || []).slice(-3).reverse().map((event, index) => (
               <div key={index} className="text-xs text-gray-300 flex justify-between">
                 <span>{event.data}</span>
                 <span className="text-gray-500">
@@ -517,8 +526,8 @@ const RealTimeAnalytics = () => {
       <canvas
         ref={heatmapCanvas}
         className="fixed inset-0 pointer-events-none opacity-0"
-        width={window.innerWidth}
-        height={window.innerHeight}
+        width={typeof window !== 'undefined' ? window.innerWidth : 1920}
+        height={typeof window !== 'undefined' ? window.innerHeight : 1080}
       />
     </>
   );

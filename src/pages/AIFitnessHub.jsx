@@ -23,7 +23,6 @@ import {
   Rocket
 } from 'lucide-react';
 import Navbar from '../components/Navigation/Header';
-import Footer from '../components/Footer/Footer';
 import AIFitnessCoach from '../components/FuturisticFeatures/AIFitnessCoach';
 import SmartNutritionAI from '../components/FuturisticFeatures/SmartNutritionAI';
 import VoiceAssistant from '../components/AI/VoiceAssistant';
@@ -436,7 +435,6 @@ const AIFitnessHub = () => {
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 };
