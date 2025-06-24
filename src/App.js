@@ -27,10 +27,6 @@ const ChallengeDetails = lazy(() => import('./pages/ChallengeDetails'));
 const VideoPlayer = lazy(() => import('./components/programs/VideoPlayer'));
 const Recipes = lazy(() => import('./pages/Recipies'));
 const RecipeDetail = lazy(() => import('./components/Recipes/RecipeDetail'));
-const Birthday = lazy(() => import('./pages/Birthday'));
-const ZumbaPage = lazy(() => import('./pages/Zumba'));
-const YogaPage = lazy(() => import('./pages/Yoga'));
-const WeightTrainingPage = lazy(() => import('./pages/WeightTraiing'));
 const VideoDisplay = lazy(() => import('./pages/api/video'));
 
 // Futuristic features
@@ -80,11 +76,6 @@ const App = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 
-                {/* Fitness Programs */}
-                <Route path="/zumba" element={<ZumbaPage />} />
-                <Route path="/yoga" element={<YogaPage />} />
-                <Route path="/weight-training" element={<WeightTrainingPage />} />
-                
                 {/* Challenges & Videos */}
                 <Route path="/challenges" element={<Challenges />} />
                 <Route path="/challenges/:challengeId" element={<ChallengeDetails />} />
@@ -100,10 +91,6 @@ const App = () => {
                 <Route path="/gamification" element={<ChallengeSystem />} />
                 <Route path="/ai-coach" element={<AIFitnessCoach />} />
                 <Route path="/nutrition-ai" element={<SmartNutritionAI />} />
-                
-                {/* Special Pages */}
-                <Route path="/birthday" element={<Birthday />} />
-                <Route path="/happy-birthday/sona" element={<Birthday />} />
                 
                 {/* 404 */}
                 <Route path="*" element={<NotFound />} />
