@@ -1,7 +1,6 @@
 // src/components/Gamification/ChallengeSystem.jsx
 /* eslint-disable import/named */
 /* eslint-disable no-unused-vars */
-// src/components/Analytics/UserDashboard.jsx
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 

@@ -23,6 +23,8 @@ const Home = lazy(() => import('./pages/Home'));
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Challenges = lazy(() => import('./pages/Challenges'));
+const LiveStudio = lazy(() => import('./pages/LiveStudio'));
+const AIFitnessHub = lazy(() => import('./pages/AIFitnessHub'));
 const ChallengeDetails = lazy(() => import('./pages/ChallengeDetails'));
 const VideoPlayer = lazy(() => import('./components/programs/VideoPlayer'));
 const Recipes = lazy(() => import('./pages/Recipies'));
@@ -30,7 +32,7 @@ const RecipeDetail = lazy(() => import('./components/Recipes/RecipeDetail'));
 const VideoDisplay = lazy(() => import('./pages/api/video'));
 
 // Futuristic features
-const UserDashboard = lazy(() => import('./components/Analytics/UserDashboard'));
+const UserDashboard = lazy(() => import('./components/Analytics/UserDashboard.jsx'));
 const ChallengeSystem = lazy(() => import('./components/Gamification/ChallengeSystem'));
 const AIFitnessCoach = lazy(() => import('./components/FuturisticFeatures/AIFitnessCoach'));
 const SmartNutritionAI = lazy(() => import('./components/FuturisticFeatures/SmartNutritionAI'));
@@ -91,6 +93,8 @@ const App = () => {
                 <Route path="/gamification" element={<ChallengeSystem />} />
                 <Route path="/ai-coach" element={<AIFitnessCoach />} />
                 <Route path="/nutrition-ai" element={<SmartNutritionAI />} />
+                <Route path="/live-studio" element={<LiveStudio />} />
+                <Route path="/ai-fitness-hub" element={<AIFitnessHub />} />
                 
                 {/* 404 */}
                 <Route path="*" element={<NotFound />} />
