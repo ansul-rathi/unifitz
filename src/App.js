@@ -1,3 +1,4 @@
+/* eslint-disable import/no-duplicates */
 /* eslint-disable no-unused-vars */
 // src/App.js - Enhanced with futuristic features
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
