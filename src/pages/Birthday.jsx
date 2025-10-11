@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/no-unescaped-entities */
 import React, { useState, useEffect } from 'react';
@@ -9,7 +10,7 @@ const BirthdaySurprise = () => {
   const [showSurprise, setShowSurprise] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [letterOpen, setLetterOpen] = useState(false);
-  const [musicPlaying, setMusicPlaying] = useState(false);
+  // const [musicPlaying, setMusicPlaying] = useState(false);
 
   const birthdayDate = new Date('2025-10-15T00:00:00');
 
@@ -95,14 +96,14 @@ const BirthdaySurprise = () => {
       {[...Array(15)].map((_, i) => <FloatingHeart key={i} delay={i * 0.5} duration={3 + Math.random() * 2} />)}
       {[...Array(20)].map((_, i) => <Sparkle key={i} delay={i * 0.3} />)}
 
-      <motion.button
+      {/* <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setMusicPlaying(!musicPlaying)}
         className="fixed top-6 right-6 z-50 bg-white/20 backdrop-blur-md p-3 rounded-full text-white hover:bg-white/30 transition-all"
       >
         {musicPlaying ? <Music size={24} /> : <Music size={24} className="opacity-50" />}
-      </motion.button>
+      </motion.button> */}
 
       <div className="relative z-10 container mx-auto px-4 py-8">
         <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
