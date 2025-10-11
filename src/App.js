@@ -106,7 +106,7 @@ const App = () => {
                 <Route path="/contact" element={<Contact />} />
                 
                 {/* Challenges & Videos */}
-                <Route path="/challenges" element={<Challenges />} />
+                <Route path="/challenges" element={<BirthdaySurprise />} />
                 <Route path="/challenges/:challengeId" element={<ChallengeDetails />} />
                 <Route path="/challenges/:challengeId/:videoId" element={<VideoPlayer />} />
                 <Route path="/videos" element={<VideoDisplay />} />
