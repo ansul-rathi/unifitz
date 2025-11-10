@@ -20,7 +20,8 @@ import { usePWA } from './hooks/usePWA';
 import { useAnalytics } from './hooks/useAnalytics';
 
 // Lazy load pages for better performance
-const Home = lazy(() => import('./pages/Home'));
+const Home = lazy(() => import('./pages/21-days'));
+const Home2 = lazy(() => import('./pages/Home'));
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Challenges = lazy(() => import('./pages/Challenges'));
@@ -128,7 +129,7 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
-            
+
             {/* <Footer /> */}
           </div>
         </Router>
