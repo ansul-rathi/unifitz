@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Timer, Users, Award, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -53,7 +54,7 @@ const Hero = () => {
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-lg">
               <Users className="w-6 h-6" />
               <div className="text-left">
-                <div className="font-bold text-lg">5000+</div>
+                <div className="font-bold text-lg">250+</div>
                 <div className="text-sm opacity-90">Active Members</div>
               </div>
             </div>
@@ -61,7 +62,7 @@ const Hero = () => {
               <Award className="w-6 h-6" />
               <div className="text-left">
                 <div className="font-bold text-lg">4 Expert</div>
-                <div className="text-sm opacity-90">International Trainers</div>
+                <div className="text-sm opacity-90">Trainers</div>
               </div>
             </div>
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-lg">
@@ -73,7 +74,7 @@ const Hero = () => {
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 max-w-2xl mx-auto mt-12">
+          {/* <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 max-w-2xl mx-auto mt-12">
             <div className="flex items-center justify-center gap-2 mb-4">
               <Timer className="w-6 h-6 text-yellow-300" />
               <h3 className="text-xl font-bold">Special Offer Ends In:</h3>
@@ -92,7 +93,7 @@ const Hero = () => {
                 <div className="text-sm opacity-80">Seconds</div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
             <button
@@ -102,7 +103,7 @@ const Hero = () => {
               Join Now for Just ₹21
             </button>
             <a
-              href="https://wa.me/919876543210?text=I'm%20interested%20in%20the%2021%20Days%20Fitness%20Challenge"
+              href="https://wa.me/918107505074?text=I'm%20interested%20in%20the%2021%20Days%20Fitness%20Challenge"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-green-500 hover:bg-green-600 text-white font-bold text-lg px-10 py-5 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2"
@@ -114,9 +115,9 @@ const Hero = () => {
             </a>
           </div>
 
-          <div className="mt-8 text-sm opacity-90">
+          {/* <div className="mt-8 text-sm opacity-90">
             ✓ 100% Money-Back Guarantee ✓ Secure Payment ✓ Instant Access
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
