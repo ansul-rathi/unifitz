@@ -28,7 +28,9 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       <Hero />
-      <Sessions />
+      <div id="sessions">
+        <Sessions />
+      </div>
       {/* <Benefits />
       <Trainers />
       <Testimonials /> */}
