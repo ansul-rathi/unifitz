@@ -92,11 +92,11 @@ const App = () => {
             {/* <Navbar /> */}
             
             {/* PWA Components */}
-            <InstallPrompt 
+            {/* <InstallPrompt 
               isVisible={showInstallPrompt} 
               onInstall={handleInstallApp}
               onDismiss={handleDismissPrompt}
-            />
+            /> */}
             <OfflineIndicator isOnline={isOnline} />
             
             <Suspense fallback={<LoadingSpinner />}>
