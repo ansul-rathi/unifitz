@@ -1,0 +1,216 @@
+import { Calendar, Video, ExternalLink } from 'lucide-react';
+
+const Sessions = () => {
+  // Array of sessions - easily update this daily
+  const sessions = [
+    {
+      id: 1,
+      day: "Day 1",
+      title: "Bollywood Fitness Mix",
+      description: "A high-energy workout that blends Bollywood moves with fun",
+      date: "2025-11-21",
+      zoomLink: "https://us06web.zoom.us/rec/share/kq-aiNPjG8BgWKKYQvjp20Gi2V6a556NNp7MYEnbYvUUYBt9PKWr9SB7x1167GAP.VLL9qrZPA1rHsp_A",
+      image: "../21days/day1.png"
+    },
+    // {
+    //   id: 2,
+    //   day: "Day 2",
+    //   tag: "Live Now",
+    //   tagColor: "bg-red-500 animate-pulse",
+    //   title: "Core Strength Basics",
+    //   trainer: "Mike Chen",
+    //   trainerImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    //   date: "2024-01-16",
+    //   time: "06:30 AM",
+    //   duration: "75 mins",
+    //   zoomLink: "https://zoom.us/j/234567890",
+    //   meetingId: "234 567 8901",
+    //   password: "core21",
+    //   description: "Build core strength with fundamental exercises and proper form",
+    //   image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=250&fit=crop"
+    // },
+    // {
+    //   id: 3,
+    //   day: "Day 3",
+    //   tag: "Upcoming",
+    //   tagColor: "bg-blue-500",
+    //   title: "Cardio Blast",
+    //   trainer: "Emma Davis",
+    //   trainerImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    //   date: "2024-01-17",
+    //   time: "07:00 AM",
+    //   duration: "45 mins",
+    //   zoomLink: "https://zoom.us/j/345678901",
+    //   meetingId: "345 678 9012",
+    //   password: "cardio21",
+    //   description: "High-intensity cardio session to boost metabolism and endurance",
+    //   image: "https://images.unsplash.com/photo-1574680178050-55c6a6a96e0a?w=400&h=250&fit=crop"
+    // },
+    // {
+    //   id: 4,
+    //   day: "Day 4",
+    //   tag: "Upcoming",
+    //   tagColor: "bg-purple-500",
+    //   title: "Flexibility & Mobility",
+    //   trainer: "Alex Rodriguez",
+    //   trainerImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    //   date: "2024-01-18",
+    //   time: "06:15 AM",
+    //   duration: "90 mins",
+    //   zoomLink: "https://zoom.us/j/456789012",
+    //   meetingId: "456 789 0123",
+    //   password: "flex21",
+    //   description: "Improve flexibility and joint mobility with guided stretching",
+    //   image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=250&fit=crop"
+    // },
+    // {
+    //   id: 5,
+    //   day: "Day 5",
+    //   tag: "Completed",
+    //   tagColor: "bg-gray-500",
+    //   title: "Full Body Workout",
+    //   trainer: "Sarah Johnson",
+    //   trainerImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+    //   date: "2024-01-14",
+    //   time: "06:00 AM",
+    //   duration: "80 mins",
+    //   zoomLink: "#",
+    //   meetingId: "Completed",
+    //   password: "Completed",
+    //   description: "Comprehensive full body strength training session",
+    //   image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=250&fit=crop"
+    // }
+  ];
+
+  const formatDate = (dateString) => {
+    const options = { weekday: 'long', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+  };
+
+  const joinSession = (session) => {
+    if (session.zoomLink && session.zoomLink !== "#") {
+      window.open(session.zoomLink, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  return (
+    <div id="sessions" className="relative bg-gradient-to-b from-slate-50 to-slate-100 py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
+            Daily <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Sessions</span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Join live sessions with expert trainers. Each day brings new challenges and growth opportunities.
+          </p>
+        </div>
+
+        {/* Sessions Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {sessions.map((session) => (
+            <div 
+              key={session.id}
+              className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group border border-gray-200"
+            >
+              {/* Session Image */}
+              <div className="relative h-48 overflow-hidden">
+                <img 
+                  src={session.image} 
+                  alt={session.title}
+                  className="w-full h-full object-cover  transition-transform duration-300"
+                />
+                
+                {/* Day Tag */}
+                <div className="absolute top-4 left-4">
+                  <span className="bg-black/80 text-white px-3 py-1 rounded-full text-sm font-bold backdrop-blur-sm">
+                    {session.day}
+                  </span>
+                </div>
+                
+                {/* Status Tag */}
+                {/* <div className="absolute top-4 right-4">
+                  <span className={`${session.tagColor} text-white px-3 py-1 rounded-full text-sm font-bold backdrop-blur-sm`}>
+                    {session.tag}
+                  </span>
+                </div> */}
+              </div>
+
+              {/* Session Content */}
+              <div className="p-6">
+                {/* Session Title */}
+                <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+                  {session.title}
+                </h3>
+                
+                {/* Session Description */}
+                <p className="text-gray-600 mb-4 line-clamp-2">
+                  {session.description}
+                </p>
+
+                {/* Session Details */}
+                <div className="space-y-2 mb-6">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Calendar className="w-4 h-4" />
+                    <span className="text-sm font-medium">{formatDate(session.date)}</span>
+                  </div>
+                </div>
+
+                {/* Action Button */}
+                <button
+                  onClick={() => joinSession(session)}
+                  disabled={session.tag === "Completed"}
+                  className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all duration-200 ${
+                    session.tag === "Completed" 
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
+                      : session.tag === "Live Now"
+                      ? "bg-red-500 hover:bg-red-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105"
+                      : "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105"
+                  }`}
+                >
+                  {session.tag === "Completed" ? (
+                    <>Session Completed</>
+                  ) : session.tag === "Live Now" ? (
+                    <>
+                      <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
+                      Join Live Session
+                      <ExternalLink className="w-4 h-4" />
+                    </>
+                  ) : (
+                    <>
+                      <Video className="w-4 h-4" />
+                      Watch Recording
+                      <ExternalLink className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+
+                {/* Meeting Password */}
+                {session.password && session.password !== "Completed" && (
+                  <div className="mt-3 text-center">
+                    <span className="text-xs text-gray-500">
+                      Password: <span className="font-mono font-bold">{session.password}</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer Note */}
+        <div className="text-center mt-12">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 max-w-2xl mx-auto border border-gray-200">
+            <h4 className="font-bold text-gray-900 mb-2">💡 Session Guidelines</h4>
+            <p className="text-gray-600 text-sm">
+              Join 5 minutes early • Have water ready • Wear comfortable clothes • 
+              Stable internet connection required • Sessions are recorded for later viewing
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Sessions;
