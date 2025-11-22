@@ -12,6 +12,16 @@ const Sessions = () => {
       zoomLink: "https://us06web.zoom.us/rec/share/kq-aiNPjG8BgWKKYQvjp20Gi2V6a556NNp7MYEnbYvUUYBt9PKWr9SB7x1167GAP.VLL9qrZPA1rHsp_A",
       image: "../21days/day1.png"
     },
+
+    {
+      id: 2,
+      day: "Day 2",
+      title: "Yoga for Better Digestion",
+      description: "Gentle stretches to boost your gut health. Improve metabolism, reduce bloating, and feel lighter from within.",
+      date: "2025-11-22",
+      zoomLink: "https://us06web.zoom.us/rec/share/N0iL0vJHzqk_A5_duYpDZow-Of_5jsWAgN4pNDR4Dzbl0Hgbx_oZj7G70_3My6bk.tUkZE53ivd7_jo6l",
+      image: "../21days/day2.png"
+    },
     // {
     //   id: 2,
     //   day: "Day 2",
