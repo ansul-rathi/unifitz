@@ -12,7 +12,6 @@ const Sessions = () => {
       zoomLink: "https://us06web.zoom.us/rec/share/kq-aiNPjG8BgWKKYQvjp20Gi2V6a556NNp7MYEnbYvUUYBt9PKWr9SB7x1167GAP.VLL9qrZPA1rHsp_A",
       image: "../21days/day1.png"
     },
-
     {
       id: 2,
       day: "Day 2",
@@ -21,6 +20,15 @@ const Sessions = () => {
       date: "2025-11-22",
       zoomLink: "https://us06web.zoom.us/rec/share/N0iL0vJHzqk_A5_duYpDZow-Of_5jsWAgN4pNDR4Dzbl0Hgbx_oZj7G70_3My6bk.tUkZE53ivd7_jo6l",
       image: "../21days/day2.png"
+    },
+    {
+      id: 3,
+      day: "Day 3",
+      title: "Punjabi Dance Workout",
+      description: "Full-on Punjabi beats ke saath high-energy fitness — jithe step vi fun, te workout vi done",
+      date: "2025-11-23",
+      zoomLink: "https://us06web.zoom.us/rec/share/pUrgwwUefVre8u8DJRpohGcL2bqKz2DkuSVCK8O73KLLrOUOUyt9qZhBCzrOuXQl.SxLpdk3xe21He1bp",
+      image: "../21days/day3.png"
     },
     // {
     //   id: 2,
