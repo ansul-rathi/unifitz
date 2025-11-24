@@ -7,28 +7,41 @@ const Sessions = () => {
       id: 1,
       day: "Day 1",
       title: "Bollywood Fitness Mix",
+      trainer: "Ansul Rathi",
       description: "A high-energy workout that blends Bollywood moves with fun",
       date: "2025-11-21",
       zoomLink: "https://us06web.zoom.us/rec/share/kq-aiNPjG8BgWKKYQvjp20Gi2V6a556NNp7MYEnbYvUUYBt9PKWr9SB7x1167GAP.VLL9qrZPA1rHsp_A",
-      image: "../21days/day1.png"
+      image: "../21days/day1.svg"
     },
     {
       id: 2,
       day: "Day 2",
       title: "Yoga for Better Digestion",
+      trainer: "Mehak Sagatramani",
       description: "Gentle stretches to boost your gut health. Improve metabolism, reduce bloating, and feel lighter from within.",
       date: "2025-11-22",
       zoomLink: "https://us06web.zoom.us/rec/share/N0iL0vJHzqk_A5_duYpDZow-Of_5jsWAgN4pNDR4Dzbl0Hgbx_oZj7G70_3My6bk.tUkZE53ivd7_jo6l",
-      image: "../21days/day2.png"
+      image: "../21days/day2.svg"
     },
     {
       id: 3,
       day: "Day 3",
       title: "Punjabi Dance Workout",
+      trainer: "Ansul Rathi",
       description: "Full-on Punjabi beats ke saath high-energy fitness — jithe step vi fun, te workout vi done",
       date: "2025-11-23",
       zoomLink: "https://us06web.zoom.us/rec/share/pUrgwwUefVre8u8DJRpohGcL2bqKz2DkuSVCK8O73KLLrOUOUyt9qZhBCzrOuXQl.SxLpdk3xe21He1bp",
-      image: "../21days/day3.png"
+      image: "../21days/day3.svg"
+    },
+    {
+      id: 4,
+      day: "Day 3",
+      title: "Quick Power Yoga",
+      trainer: "Mehak Sagatramani",
+      description: "Bas few minutes, aur poora day powerful — Perfect for a quick strength + stretch boost.",
+      date: "2025-11-24",
+      zoomLink: "https://us06web.zoom.us/rec/share/CvjShuMUtG6NQtojF9K7_xjzJkw1QlSrahxNNBLL5fMnx2g1lWWPsBiNHZd_tTk.Ys-iRR-x99W8dl9L",
+      image: "../21days/day4.svg"
     },
     // {
     //   id: 2,
@@ -140,8 +153,8 @@ const Sessions = () => {
                 />
                 
                 {/* Day Tag */}
-                <div className="absolute top-4 left-4">
-                  <span className="bg-black/80 text-white px-3 py-1 rounded-full text-sm font-bold backdrop-blur-sm">
+                <div className="absolute top-[-5px] left-[-5px] z-50">
+                  <span className="bg-black/80 text-white px-3 py-1 rounded-lg text-sm font-bold backdrop-blur-sm">
                     {session.day}
                   </span>
                 </div>
@@ -165,6 +178,13 @@ const Sessions = () => {
                 <p className="text-gray-600 mb-4 line-clamp-2">
                   {session.description}
                 </p>
+
+
+                {/* Session Description */}
+                <p className="text-gray-600 mb-4 line-clamp-2 font-bold">
+                  By : {session.trainer}
+                </p>
+
 
                 {/* Session Details */}
                 <div className="space-y-2 mb-6">
