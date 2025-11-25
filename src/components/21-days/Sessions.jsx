@@ -35,13 +35,23 @@ const Sessions = () => {
     },
     {
       id: 4,
-      day: "Day 3",
+      day: "Day 4",
       title: "Quick Power Yoga",
       trainer: "Mehak Sagatramani",
       description: "Bas few minutes, aur poora day powerful — Perfect for a quick strength + stretch boost.",
       date: "2025-11-24",
       zoomLink: "https://us06web.zoom.us/rec/share/CvjShuMUtG6NQtojF9K7_xjzJkw1QlSrahxNNBLL5fMnx2g1lWWPsBiNHZd_tTk.Ys-iRR-x99W8dl9L",
       image: "../21days/day4.svg"
+    },
+    {
+      id: 4,
+      day: "Day 5",
+      title: "Reiki Introduction Session",
+      trainer: "Neha Jain",
+      description: "Experience the basics of Reiki and understand how energy healing can bring calm, balance, and clarity.",
+      date: "2025-11-25",
+      zoomLink: "https://us06web.zoom.us/rec/share/ZGPP1rbWqGsWfFBpZoi3TVnLYlazNQQeSAcSyvK6wQIEOkErRkImGcz5TGLWT427.4E5Nx6FEzVxAAbpt",
+      image: "../21days/day5.png"
     },
     // {
     //   id: 2,
