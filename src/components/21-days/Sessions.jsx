@@ -44,7 +44,7 @@ const Sessions = () => {
       image: "../21days/day4.svg"
     },
     {
-      id: 4,
+      id: 5,
       day: "Day 5",
       title: "Reiki Introduction Session",
       trainer: "Neha Jain",
@@ -52,6 +52,16 @@ const Sessions = () => {
       date: "2025-11-25",
       zoomLink: "https://us06web.zoom.us/rec/share/ZGPP1rbWqGsWfFBpZoi3TVnLYlazNQQeSAcSyvK6wQIEOkErRkImGcz5TGLWT427.4E5Nx6FEzVxAAbpt",
       image: "../21days/day5.png"
+    },
+    {
+      id: 6,
+      day: "Day 6",
+      title: "Zumba Fitness",
+      trainer: "Ansul Rathi",
+      description: "We’ll hit powerful upper + lower body moves with music that makes you jump, groove & sweat!",
+      date: "2025-11-26",
+      zoomLink: "https://us06web.zoom.us/rec/share/BHluJjYQAEm5Gqyi93sfe7txL2xf-hM8BEbSNSKgfU_a_6UglQL5M-gQZx46ag8n.KH94_lMgMzrCgQyk",
+      image: "../21days/day6.jpeg"
     },
     // {
     //   id: 2,
