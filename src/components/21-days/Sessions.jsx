@@ -1,4 +1,5 @@
 import { Calendar, Video, ExternalLink } from 'lucide-react';
+import { useEffect } from 'react';
 
 const Sessions = () => {
   // Array of sessions - easily update this daily
@@ -63,75 +64,172 @@ const Sessions = () => {
       zoomLink: "https://us06web.zoom.us/rec/share/BHluJjYQAEm5Gqyi93sfe7txL2xf-hM8BEbSNSKgfU_a_6UglQL5M-gQZx46ag8n.KH94_lMgMzrCgQyk",
       image: "../21days/day6.jpeg"
     },
-    // {
-    //   id: 2,
-    //   day: "Day 2",
-    //   tag: "Live Now",
-    //   tagColor: "bg-red-500 animate-pulse",
-    //   title: "Core Strength Basics",
-    //   trainer: "Mike Chen",
-    //   trainerImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    //   date: "2024-01-16",
-    //   time: "06:30 AM",
-    //   duration: "75 mins",
-    //   zoomLink: "https://zoom.us/j/234567890",
-    //   meetingId: "234 567 8901",
-    //   password: "core21",
-    //   description: "Build core strength with fundamental exercises and proper form",
-    //   image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=250&fit=crop"
-    // },
-    // {
-    //   id: 3,
-    //   day: "Day 3",
-    //   tag: "Upcoming",
-    //   tagColor: "bg-blue-500",
-    //   title: "Cardio Blast",
-    //   trainer: "Emma Davis",
-    //   trainerImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-    //   date: "2024-01-17",
-    //   time: "07:00 AM",
-    //   duration: "45 mins",
-    //   zoomLink: "https://zoom.us/j/345678901",
-    //   meetingId: "345 678 9012",
-    //   password: "cardio21",
-    //   description: "High-intensity cardio session to boost metabolism and endurance",
-    //   image: "https://images.unsplash.com/photo-1574680178050-55c6a6a96e0a?w=400&h=250&fit=crop"
-    // },
-    // {
-    //   id: 4,
-    //   day: "Day 4",
-    //   tag: "Upcoming",
-    //   tagColor: "bg-purple-500",
-    //   title: "Flexibility & Mobility",
-    //   trainer: "Alex Rodriguez",
-    //   trainerImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    //   date: "2024-01-18",
-    //   time: "06:15 AM",
-    //   duration: "90 mins",
-    //   zoomLink: "https://zoom.us/j/456789012",
-    //   meetingId: "456 789 0123",
-    //   password: "flex21",
-    //   description: "Improve flexibility and joint mobility with guided stretching",
-    //   image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=250&fit=crop"
-    // },
-    // {
-    //   id: 5,
-    //   day: "Day 5",
-    //   tag: "Completed",
-    //   tagColor: "bg-gray-500",
-    //   title: "Full Body Workout",
-    //   trainer: "Sarah Johnson",
-    //   trainerImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-    //   date: "2024-01-14",
-    //   time: "06:00 AM",
-    //   duration: "80 mins",
-    //   zoomLink: "#",
-    //   meetingId: "Completed",
-    //   password: "Completed",
-    //   description: "Comprehensive full body strength training session",
-    //   image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=250&fit=crop"
-    // }
-  ];
+    {
+    id: 7,
+    day: "Day 7",
+    title: "Yoga for Cervical",
+    trainer: "Mehak Sagatramani",
+    description: "Neck & shoulder relief with gentle, effective cervical stretches.",
+    date: "2025-11-27",
+    time: "Morning 08:30",
+    zoomLink: "https://us06web.zoom.us/rec/share/2cVZeil0YM1FNueyd1gT0DTzHFNEbGoiXS4FLoW1ikHIEwGlldzk3PSKin24N_Qy.5hbtU_SAGRvuug8C",
+    image: "../21days/day7.svg"
+  },
+  {
+    id: 8,
+    day: "Day 8",
+    title: "Heartfulness Relaxation",
+    trainer: "Asha Sharma",
+    description: "A soothing session to relax your mind and release emotional tension.",
+    date: "2025-11-28",
+    time: "Evening 06:30",
+    zoomLink: "",
+    image: "../21days/day8.svg"
+  },
+  {
+    id: 9,
+    day: "Day 9",
+    title: "Yoga for Balanced Hormones",
+    trainer: "Mehak Sagatramani",
+    description: "Yoga sequence to support hormonal balance and reduce stress.",
+    date: "2025-11-29",
+    time: "Morning 08:30",
+    zoomLink: "",
+    image: "../21days/day9.svg"
+  },
+  {
+    id: 10,
+    day: "Day 10",
+    title: "Water Manifesting",
+    trainer: "Neha Jain",
+    description: "A powerful manifestation technique using water intention energy.",
+    date: "2025-11-30",
+    time: "Evening 06:30",
+    zoomLink: "",
+    image: "../21days/day10.svg"
+  },
+  {
+    id: 11,
+    day: "Day 11",
+    title: "Old Is Gold",
+    trainer: "Ansul Rathi",
+    description: "Dance fitness on retro hits—nostalgia with full calorie burn!",
+    date: "2025-12-01",
+    time: "Morning 08:30",
+    zoomLink: "",
+    image: "../21days/day11.svg"
+  },
+  // {
+  //   id: 12,
+  //   day: "Day 12",
+  //   title: "Yoga for Knees",
+  //   trainer: "Mehak Sagatramani",
+  //   description: "Strengthening & mobility-focused yoga routine for knee comfort.",
+  //   date: "2025-12-02",
+  //   time: "Morning 08:30",
+  //   zoomLink: "",
+  //   image: "../21days/day12.svg"
+  // },
+  // {
+  //   id: 13,
+  //   day: "Day 13",
+  //   title: "Heartfulness Relaxation",
+  //   trainer: "Asha Sharma",
+  //   description: "Deep mind–body relaxation for peace, clarity & inner balance.",
+  //   date: "2025-12-03",
+  //   time: "Evening 06:30",
+  //   zoomLink: "",
+  //   image: "../21days/day13.svg"
+  // },
+  // {
+  //   id: 14,
+  //   day: "Day 14",
+  //   title: "Celebrity Special",
+  //   trainer: "Ansul Rathi",
+  //   description: "Bollywood celeb-style choreography with high-energy cardio!",
+  //   date: "2025-12-04",
+  //   time: "Morning 08:30",
+  //   zoomLink: "",
+  //   image: "../21days/day14.svg"
+  // },
+  // {
+  //   id: 15,
+  //   day: "Day 15",
+  //   title: "How to Plan Your Workouts",
+  //   trainer: "Mehak Sagatramani",
+  //   description: "Learn how to plan weekly workouts for consistency & better results.",
+  //   date: "2025-12-05",
+  //   time: "Morning 08:30",
+  //   zoomLink: "",
+  //   image: "../21days/day15.svg"
+  // },
+  // {
+  //   id: 16,
+  //   day: "Day 16",
+  //   title: "Diet and Nutrition",
+  //   trainer: "Mehak Sagatramani",
+  //   description: "Learn simple nutrition tips to improve energy, metabolism & digestion.",
+  //   date: "2025-12-06",
+  //   time: "Morning 08:30",
+  //   zoomLink: "",
+  //   image: "../21days/day16.svg"
+  // },
+  // {
+  //   id: 17,
+  //   day: "Day 17",
+  //   title: "7 Chakras Workshop",
+  //   trainer: "Neha Jain",
+  //   description: "Understand all 7 chakras and how to align your internal energy.",
+  //   date: "2025-12-07",
+  //   time: "Evening 06:30",
+  //   zoomLink: "",
+  //   image: "../21days/day17.svg"
+  // },
+  // {
+  //   id: 18,
+  //   day: "Day 18",
+  //   title: "Meditation",
+  //   trainer: "Asha Sharma",
+  //   description: "A calming meditation experience to deepen awareness & inner peace.",
+  //   date: "2025-12-08",
+  //   time: "Evening 06:30",
+  //   zoomLink: "",
+  //   image: "../21days/day18.svg"
+  // },
+  // {
+  //   id: 19,
+  //   day: "Day 19",
+  //   title: "Surya Namaskar Marathon",
+  //   trainer: "Ansul Rathi",
+  //   description: "A dynamic morning flow of multiple Surya Namaskars for stamina & strength.",
+  //   date: "2025-12-09",
+  //   time: "Morning 08:30",
+  //   zoomLink: "",
+  //   image: "../21days/day19.svg"
+  // },
+  // {
+  //   id: 20,
+  //   day: "Day 20",
+  //   title: "Mix Dance Workout",
+  //   trainer: "Ansul Rathi",
+  //   description: "Bollywood + freestyle + cardio dance for maximum sweat & fun!",
+  //   date: "2025-12-10",
+  //   time: "Morning 08:30",
+  //   zoomLink: "",
+  //   image: "../21days/day20.svg"
+  // },
+  // {
+  //   id: 21,
+  //   day: "Day 21",
+  //   title: "Q & A Session",
+  //   trainer: "Asha Sharma",
+  //   description: "Ask anything about fitness, meditation, lifestyle & well-being.",
+  //   date: "2025-12-11",
+  //   time: "Evening 06:30",
+  //   zoomLink: "",
+  //   image: "../21days/day21.svg"
+  // }
+];
 
   const formatDate = (dateString) => {
     const options = { weekday: 'long', month: 'long', day: 'numeric' };
@@ -144,8 +242,21 @@ const Sessions = () => {
     }
   };
 
+ useEffect(() => {
+  if (window.location.hash) {
+    const id = window.location.hash.replace("#", "");
+    const el = document.getElementById(id);
+    if (el) {
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: "smooth" });
+      }, 200);
+    }
+  }
+}, []);
+
+
   return (
-    <div id="sessions" className="relative bg-gradient-to-b from-slate-50 to-slate-100 py-20">
+    <div id="session" className="relative bg-gradient-to-b from-slate-50 to-slate-100 py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
@@ -162,6 +273,7 @@ const Sessions = () => {
           {sessions.map((session) => (
             <div 
               key={session.id}
+                id={`session-${session.id}`}   // <-- UNIQUE ID
               className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group border border-gray-200"
             >
               {/* Session Image */}
@@ -217,12 +329,12 @@ const Sessions = () => {
                 {/* Action Button */}
                 <button
                   onClick={() => joinSession(session)}
-                  disabled={session.tag === "Completed"}
+                  disabled={session?.zoomLink === ""}
                   className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all duration-200 ${
                     session.tag === "Completed" 
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
-                      : session.tag === "Live Now"
-                      ? "bg-red-500 hover:bg-red-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105"
+                      : session.zoomLink === ""
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
                       : "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105"
                   }`}
                 >
@@ -237,7 +349,7 @@ const Sessions = () => {
                   ) : (
                     <>
                       <Video className="w-4 h-4" />
-                      Watch Recording
+                  {session.zoomLink ==="" ? "Coming Soon" : "Watch Recording"}
                       <ExternalLink className="w-4 h-4" />
                     </>
                   )}

@@ -25,23 +25,13 @@ function App() {
   //   return () => document.removeEventListener('mouseleave', handleMouseLeave);
   // }, []);
 
-  useEffect(() => {
-  if (window.location.hash) {
-    const id = window.location.hash.replace("#", "");
-    const el = document.getElementById(id);
-    if (el) {
-      setTimeout(() => {
-        el.scrollIntoView({ behavior: "smooth" });
-      }, 200);
-    }
-  }
-}, []);
+ 
 
 
   return (
     <div className="min-h-screen bg-white">
       <Hero />
-      <div id="sessions">
+      <div>
         <Sessions />
       </div>
       {/* <Benefits />
