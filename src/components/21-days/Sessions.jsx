@@ -83,7 +83,7 @@ const Sessions = () => {
     description: "A soothing session to relax your mind and release emotional tension.",
     date: "2025-11-28",
     time: "Evening 06:30",
-    zoomLink: "",
+    zoomLink: "https://us06web.zoom.us/rec/share/uaxsQCDBilOzWIbfC3z2SqvRqwjdneESqQeBIC4ik2L7y0QKi5F4dzxvhnJx64qv.ZVVyB6yEQ7OpN0ZZ",
     image: "../21days/day8.svg"
   },
   {
