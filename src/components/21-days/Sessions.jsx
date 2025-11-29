@@ -94,7 +94,7 @@ const Sessions = () => {
     description: "Yoga sequence to support hormonal balance and reduce stress.",
     date: "2025-11-29",
     time: "Morning 08:30",
-    zoomLink: "",
+    zoomLink: "https://us06web.zoom.us/rec/share/y97GT2WNZAlDUi3xeizqKhwjFJpsLN5RUGvzYW0EXQW7X5FAyQcAkWtdLkyLn0RJ.CLXaGSHa4qaj3ecF",
     image: "../21days/day9.svg"
   },
   {
