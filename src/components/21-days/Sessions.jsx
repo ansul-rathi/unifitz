@@ -100,6 +100,16 @@ const Sessions = () => {
   {
     id: 10,
     day: "Day 10",
+    title: "Heartfulness Relaxation",
+    trainer: "Asha Sharma",
+    description: "A soothing session to relax your mind and release emotional tension.",
+    date: "2025-11-30",
+    zoomLink: "https://us06web.zoom.us/rec/share/feBmQ8mBKE1ZygazFbuXJ5Tgwv1il6lf6yUgL3kwy0jKzynS1ZQ0x2ARWxl5RWUw.MbrY1dXo4JHv1l3r",
+    image: "../21days/day8.svg"
+  },
+  {
+    id: 11,
+    day: "Day 10",
     title: "Water Manifesting",
     trainer: "Neha Jain",
     description: "A powerful manifestation technique using water intention energy.",
@@ -109,7 +119,7 @@ const Sessions = () => {
     image: "../21days/day10.svg"
   },
   {
-    id: 11,
+    id: 12,
     day: "Day 11",
     title: "Old Is Gold",
     trainer: "Ansul Rathi",
