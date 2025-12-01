@@ -109,17 +109,6 @@ const Sessions = () => {
   },
   {
     id: 11,
-    day: "Day 10",
-    title: "Water Manifesting",
-    trainer: "Neha Jain",
-    description: "A powerful manifestation technique using water intention energy.",
-    date: "2025-11-30",
-    time: "Evening 06:30",
-    zoomLink: "",
-    image: "../21days/day10.svg"
-  },
-  {
-    id: 12,
     day: "Day 11",
     title: "Old Is Gold",
     trainer: "Ansul Rathi",
@@ -128,6 +117,17 @@ const Sessions = () => {
     zoomLink: "https://us06web.zoom.us/rec/share/poU9iAauKMRxOXRq1eUP996DdxjIjXD4CaHuIBin4Adnj9wyzqK1R3obBG2YReW6.tqZRU0mDp4LDiTur",
     image: "../21days/day11.png"
   },
+  // {
+  //   id: 12,
+  //   day: "Day 12",
+  //   title: "Water Manifesting",
+  //   trainer: "Neha Jain",
+  //   description: "A powerful manifestation technique using water intention energy.",
+  //   date: "2025-11-30",
+  //   time: "Evening 06:30",
+  //   zoomLink: "",
+  //   image: "../21days/day10.svg"
+  // },
   // {
   //   id: 12,
   //   day: "Day 12",
