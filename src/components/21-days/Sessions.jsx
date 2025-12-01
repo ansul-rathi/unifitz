@@ -125,9 +125,8 @@ const Sessions = () => {
     trainer: "Ansul Rathi",
     description: "Dance fitness on retro hits—nostalgia with full calorie burn!",
     date: "2025-12-01",
-    time: "Morning 08:30",
-    zoomLink: "",
-    image: "../21days/day11.svg"
+    zoomLink: "https://us06web.zoom.us/rec/share/poU9iAauKMRxOXRq1eUP996DdxjIjXD4CaHuIBin4Adnj9wyzqK1R3obBG2YReW6.tqZRU0mDp4LDiTur",
+    image: "../21days/day11.png"
   },
   // {
   //   id: 12,
