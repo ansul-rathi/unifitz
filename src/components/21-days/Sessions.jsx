@@ -137,6 +137,16 @@ const Sessions = () => {
     zoomLink: "https://us06web.zoom.us/rec/share/TVQ6RJb4P__etCuc2rzUVdZaVXeM5pRsh_pG6n4tFh5nHvT42kx3Y3LSdMwEwdN4.Uzme739x9nubQNA4",
     image: "../21days/day8.svg"
   },
+  {
+  id: 14,
+  day: "Day 14",
+  title: "Celebrity Special",
+  trainer: "Ansul Rathi",
+  description: "Dance fitness on iconic celebrity tracks—high energy & star-level vibe!",
+  date: "2025-12-04",
+  zoomLink: "https://us06web.zoom.us/rec/share/fDviXKK6l28Ycbd2Gfht1ooxZmn1jXtGYtcTQlOIrkSphR4rKkVPVlCJSfpmXSXa.X4VSw0aKGKx6M6eN",
+  image: "../21days/day14.png"
+}
   // {
   //   id: 12,
   //   day: "Day 12",
