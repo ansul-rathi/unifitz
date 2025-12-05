@@ -146,7 +146,17 @@ const Sessions = () => {
   date: "2025-12-04",
   zoomLink: "https://us06web.zoom.us/rec/share/fDviXKK6l28Ycbd2Gfht1ooxZmn1jXtGYtcTQlOIrkSphR4rKkVPVlCJSfpmXSXa.X4VSw0aKGKx6M6eN",
   image: "../21days/day14.png"
-}
+},
+  {
+    id: 15,
+    day: "Day 15",
+    title: "How to Plan Your Workout",
+    trainer: "Mehak Sagatramani",
+    description: "tart building a routine that actually works for you.",
+    date: "2025-12-05",
+    zoomLink: "https://us06web.zoom.us/rec/share/n4E1iMr0eumyH0Izvwzm6BJQwwj5In8dG68jsuoWBh60Cw0TeVc5lZnvDI6xeUX5.jbsACnvBilid7mI5",
+    image: "../21days/day15.png"
+  },
   // {
   //   id: 12,
   //   day: "Day 12",
