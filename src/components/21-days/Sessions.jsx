@@ -152,7 +152,7 @@ const Sessions = () => {
     day: "Day 15",
     title: "How to Plan Your Workout",
     trainer: "Mehak Sagatramani",
-    description: "tart building a routine that actually works for you.",
+    description: "Start building a routine that actually works for you.",
     date: "2025-12-05",
     zoomLink: "https://us06web.zoom.us/rec/share/n4E1iMr0eumyH0Izvwzm6BJQwwj5In8dG68jsuoWBh60Cw0TeVc5lZnvDI6xeUX5.jbsACnvBilid7mI5",
     image: "../21days/day15.png"
