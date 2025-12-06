@@ -157,6 +157,16 @@ const Sessions = () => {
     zoomLink: "https://us06web.zoom.us/rec/share/n4E1iMr0eumyH0Izvwzm6BJQwwj5In8dG68jsuoWBh60Cw0TeVc5lZnvDI6xeUX5.jbsACnvBilid7mI5",
     image: "../21days/day15.png"
   },
+  {
+    id: 16,
+    day: "Day 16",
+    title: "7 Chakra Activation",
+    trainer: "Neha Jain",
+    description: "Calming 7 Chakra Meditation to activate your inner energy centers and experience deep relaxation & clarity.",
+    date: "2025-12-06",
+    zoomLink: "https://us06web.zoom.us/rec/share/BLHni5FixRHgmwZ1-b_9x-c7-AIedAlmel53R1O8vmz2NZ8--apdN4jwDvBMeu4D.j_Hthb97exSiEsOh",
+    image: "../21days/day16.png"
+  },
   // {
   //   id: 12,
   //   day: "Day 12",
