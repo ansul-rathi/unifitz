@@ -6,7 +6,7 @@ export default function BMICalculator() {
   const [weight, setWeight] = useState("");
   const [feet, setFeet] = useState("");
   const [inches, setInches] = useState("");
-  const [heightUnit, setHeightUnit] = useState("cm");
+  const [heightUnit, setHeightUnit] = useState("ft");
   const [weightUnit, setWeightUnit] = useState("kg");
   const [bmi, setBmi] = useState(null);
   const [category, setCategory] = useState("");
@@ -59,7 +59,7 @@ export default function BMICalculator() {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 p-3 sm:p-6 flex justify-center items-center overflow-auto">
+    <div className="min-h-screen bg-gradient-to-b from-indigo-900 via-purple-900 to-violet-900 p-3 sm:p-6 flex justify-center items-center overflow-auto">
       <motion.div 
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
