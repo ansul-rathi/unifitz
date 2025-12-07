@@ -172,8 +172,8 @@ const Sessions = () => {
     day: "Day 17",
     title: "Diet and Nutrition",
     trainer: "Mehak Sagatramani",
-    description: "A healthier you starts with the right choices.",
-    date: "2025-12-05",
+    description: "An insightful Diet & Nutrition Session, where we’ll discuss simple and practical ways to improve your daily eating habits and overall wellness.",
+    date: "2025-12-07",
     zoomLink: "https://us06web.zoom.us/rec/share/7poHIuRbUjMPMP23XDztNqIww_bYFz78kCOYqIbfOOo1UNLi7s94DDYf9TiuR4Qd.5wMRh_anzAkaGzcF",
     image: "../21days/day17.png"
   },
