@@ -167,6 +167,16 @@ const Sessions = () => {
     zoomLink: "https://us06web.zoom.us/rec/share/BLHni5FixRHgmwZ1-b_9x-c7-AIedAlmel53R1O8vmz2NZ8--apdN4jwDvBMeu4D.j_Hthb97exSiEsOh",
     image: "../21days/day16.png"
   },
+  {
+    id: 17,
+    day: "Day 17",
+    title: "Diet and Nutrition",
+    trainer: "Mehak Sagatramani",
+    description: "A healthier you starts with the right choices.",
+    date: "2025-12-05",
+    zoomLink: "https://us06web.zoom.us/rec/share/7poHIuRbUjMPMP23XDztNqIww_bYFz78kCOYqIbfOOo1UNLi7s94DDYf9TiuR4Qd.5wMRh_anzAkaGzcF",
+    image: "../21days/day17.png"
+  },
   // {
   //   id: 12,
   //   day: "Day 12",
