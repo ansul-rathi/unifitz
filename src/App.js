@@ -33,6 +33,7 @@ const VideoDisplay = lazy(() => import('./pages/api/video'));
 import { prefetchRoutes, registerSW } from './utils/performance';
 import ErrorBoundary from './components/ErrorBoundary';
 import BirthdaySurprise from './pages/Birthday';
+import BMICalculator from './components/common/BMICalculator';
 
 const App = () => {
   const { installPrompt, isOnline, installApp } = usePWA();
@@ -94,6 +95,7 @@ const App = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/bmi" element={<BMICalculator />} />
                 
                 {/* Challenges & Videos */}
                 <Route path="/challenges" element={<BirthdaySurprise />} />
