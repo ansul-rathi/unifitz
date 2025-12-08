@@ -34,6 +34,7 @@ import { prefetchRoutes, registerSW } from './utils/performance';
 import ErrorBoundary from './components/ErrorBoundary';
 import BirthdaySurprise from './pages/Birthday';
 import BMICalculator from './components/common/BMICalculator';
+import AttendancePage from './components/common/AttendancePage';
 
 const App = () => {
   const { installPrompt, isOnline, installApp } = usePWA();
@@ -96,6 +97,7 @@ const App = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/bmi" element={<BMICalculator />} />
+                <Route path="/attendance" element={<AttendancePage />} />
                 
                 {/* Challenges & Videos */}
                 <Route path="/challenges" element={<BirthdaySurprise />} />
