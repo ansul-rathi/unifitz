@@ -177,6 +177,16 @@ const Sessions = () => {
     zoomLink: "https://us06web.zoom.us/rec/share/7poHIuRbUjMPMP23XDztNqIww_bYFz78kCOYqIbfOOo1UNLi7s94DDYf9TiuR4Qd.5wMRh_anzAkaGzcF",
     image: "../21days/day17.png"
   },
+  {
+    id: 18,
+    day: "Day 18",
+    title: "Heartfulness Relaxation",
+    trainer: "Asha Sharma",
+    description: "A soothing session to relax your mind and release emotional tension.",
+    date: "2025-12-08",
+    zoomLink: "https://us06web.zoom.us/rec/share/wGCXmDEkvjCdv7kpGWnyKc2sL8NsdlLZt8H-S0_E4fbsrJII9hUDiHqFLpJyEaAu.nxK8O_MjAwm9H0CY",
+    image: "../21days/day8.svg"
+  },
   // {
   //   id: 12,
   //   day: "Day 12",
