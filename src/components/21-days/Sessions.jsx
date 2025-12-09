@@ -187,6 +187,17 @@ const Sessions = () => {
     zoomLink: "https://us06web.zoom.us/rec/share/wGCXmDEkvjCdv7kpGWnyKc2sL8NsdlLZt8H-S0_E4fbsrJII9hUDiHqFLpJyEaAu.nxK8O_MjAwm9H0CY",
     image: "../21days/day8.svg"
   },
+  {
+  id: 19,
+  day: "Day 19",
+  title: "Surya Namaskar",
+  trainer: "Mehak Sagatramani",
+  description: "A calming and energizing Surya Namaskar session focusing on breath, alignment, and mindful movement to awaken your body and elevate your inner strength.",
+  date: "2025-12-09",
+  zoomLink: "https://us06web.zoom.us/rec/share/_ya5Jf7t7TQ0eXUZk7bp2Hgr0We_TtG52r0UdLny-RckqecEkl26UCma21S6vgs5.X4q1koLCUWehE3M7",
+  image: "../21days/day18.png"
+}
+
   // {
   //   id: 12,
   //   day: "Day 12",
