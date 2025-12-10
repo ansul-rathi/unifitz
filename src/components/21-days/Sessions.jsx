@@ -196,7 +196,17 @@ const Sessions = () => {
   date: "2025-12-09",
   zoomLink: "https://us06web.zoom.us/rec/share/_ya5Jf7t7TQ0eXUZk7bp2Hgr0We_TtG52r0UdLny-RckqecEkl26UCma21S6vgs5.X4q1koLCUWehE3M7",
   image: "../21days/day18.png"
-}
+},
+  {
+  id: 20,
+  day: "Day 20",
+  title: "Dance Dhamaka Special",
+  trainer: "Ansul Rathi",
+  description: "From high-energy hooks to folk fusion, get ready for a session that celebrates every rhythm India loves.",
+  date: "2025-12-10",
+  zoomLink: "https://us06web.zoom.us/rec/share/NdImJHA3DOkrdeycJaeFvszj8l_8Tr1M_kAlsYC2A6VRa4ClsdmDwB2LRgVd8b4F.GJC0KzvUzxIU4aML",
+  image: "../21days/day20.png"
+},
 
   // {
   //   id: 12,
