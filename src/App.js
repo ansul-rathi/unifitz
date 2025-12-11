@@ -35,6 +35,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import BirthdaySurprise from './pages/Birthday';
 import BMICalculator from './components/common/BMICalculator';
 import AttendancePage from './components/common/AttendancePage';
+import PrizeWheel from './components/21-days/Wheel';
 
 const App = () => {
   const { installPrompt, isOnline, installApp } = usePWA();
@@ -98,6 +99,7 @@ const App = () => {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/bmi" element={<BMICalculator />} />
                 <Route path="/attendance" element={<AttendancePage />} />
+                <Route path="/wheel" element={<PrizeWheel />} />
                 
                 {/* Challenges & Videos */}
                 <Route path="/challenges" element={<BirthdaySurprise />} />
