@@ -36,6 +36,7 @@ import BirthdaySurprise from './pages/Birthday';
 import BMICalculator from './components/common/BMICalculator';
 import AttendancePage from './components/common/AttendancePage';
 import PrizeWheel from './components/21-days/Wheel';
+import ZoomVideoPlayer from './pages/ZoomRecording';
 
 const App = () => {
   const { installPrompt, isOnline, installApp } = usePWA();
@@ -95,6 +96,7 @@ const App = () => {
               <Routes>
                 {/* Core Routes */}
                 <Route path="/" element={<Home />} />
+                <Route path="/zoom-recording" element={<ZoomVideoPlayer />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/bmi" element={<BMICalculator />} />
