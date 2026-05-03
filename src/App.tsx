@@ -1,17 +1,18 @@
 import { FC, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-// Lazy load the main page
+const Home = lazy(() => import('./pages/Home'));
 const Day21Challenge = lazy(() => import('./pages/21-days'));
 
 const App: FC = () => {
   return (
     <Router>
       <div className="App min-h-screen">
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen bg-[#180d2c] text-white font-lexend">Loading...</div>}>
           <Routes>
-            <Route path="/" element={<Day21Challenge />} />
-            <Route path="*" element={<Day21Challenge />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/21-days" element={<Day21Challenge />} />
+            <Route path="*" element={<Home />} />
           </Routes>
         </Suspense>
       </div>
