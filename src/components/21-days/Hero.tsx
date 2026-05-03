@@ -1,39 +1,32 @@
-/* eslint-disable no-unused-vars */
-import { Timer, Users, Award, Zap, Check, Star } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { FC, useState, useEffect } from 'react';
+import { Users, Award, Zap, Star, LucideIcon } from 'lucide-react';
 
-const Hero = () => {
-  const [timeLeft, setTimeLeft] = useState({
-    hours: 23,
-    minutes: 59,
-    seconds: 59
-  });
 
-  const [isVisible, setIsVisible] = useState(false);
+
+interface StatItem {
+  icon: LucideIcon;
+  number: string;
+  label: string;
+  sub: string;
+}
+
+const Hero: FC = () => {
+  const [isVisible, setIsVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev.seconds > 0) {
-          return { ...prev, seconds: prev.seconds - 1 };
-        } else if (prev.minutes > 0) {
-          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        } else if (prev.hours > 0) {
-          return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        }
-        return { hours: 23, minutes: 59, seconds: 59 };
-      });
-    }, 1000);
-
     // Animation trigger
-    setTimeout(() => setIsVisible(true), 100);
+    const timeout = setTimeout(() => setIsVisible(true), 100);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearTimeout(timeout);
+    };
   }, []);
 
-  const scrollToPricing = () => {
-    document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const stats: StatItem[] = [
+    { icon: Users, number: "250+", label: "Active Members", sub: "Transforming Lives" },
+    { icon: Award, number: "4 Expert", label: "Trainers", sub: "International Certified" },
+    { icon: Zap, number: "21 Days", label: "Life Changing", sub: "Proven Results" }
+  ];
 
   return (
     <div className="relative bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 text-white overflow-hidden">
@@ -49,12 +42,6 @@ const Hero = () => {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
         <div className={`text-center space-y-10 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           
-          {/* Enhanced Badge */}
-          {/* <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-6 py-3 rounded-full font-bold text-sm mb-4 shadow-lg animate-pulse hover:animate-none transition-all duration-300">
-            <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
-            🔥 LIMITED SPOTS AVAILABLE - Only 50 Left!
-          </div> */}
-
           {/* Improved Main Heading */}
           <div className="space-y-6">
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-tight bg-gradient-to-r from-white to-yellow-200 bg-clip-text text-transparent">
@@ -78,11 +65,7 @@ const Hero = () => {
 
           {/* Improved Stats Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto mt-12">
-            {[
-              { icon: Users, number: "250+", label: "Active Members", sub: "Transforming Lives" },
-              { icon: Award, number: "4 Expert", label: "Trainers", sub: "International Certified" },
-              { icon: Zap, number: "21 Days", label: "Life Changing", sub: "Proven Results" }
-            ].map((stat, index) => (
+            {stats.map((stat, index) => (
               <div 
                 key={index}
                 className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 hover:scale-105 group"
@@ -99,47 +82,8 @@ const Hero = () => {
             ))}
           </div>
 
-          {/* Enhanced Timer Section */}
-          {/* <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 max-w-2xl mx-auto mt-12 border border-white/10 shadow-2xl">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="p-2 bg-red-500 rounded-lg">
-                <Timer className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-yellow-200 bg-clip-text text-transparent">
-                Special Offer Ends In:
-              </h3>
-            </div>
-            <div className="flex justify-center gap-4">
-              {[
-                { value: timeLeft.hours, label: 'Hours' },
-                { value: timeLeft.minutes, label: 'Minutes' },
-                { value: timeLeft.seconds, label: 'Seconds' }
-              ].map((time, index) => (
-                <div key={index} className="text-center">
-                  <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-4 min-w-[100px] border border-white/10 shadow-lg">
-                    <div className="text-3xl md:text-4xl font-black text-white">
-                      {String(time.value).padStart(2, '0')}
-                    </div>
-                  </div>
-                  <div className="text-sm font-medium text-gray-300 mt-2">{time.label}</div>
-                </div>
-              ))}
-            </div>
-          </div> */}
-
           {/* Enhanced CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-5 justify-center items-center mt-12">
-            {/* <button
-              onClick={scrollToPricing}
-              className="group relative bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold text-lg px-12 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-white/20 group-hover:bg-white/0 transition-all duration-300"></div>
-              <span className="relative flex items-center gap-2">
-                Join Now for Just ₹21
-                <Zap className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              </span>
-            </button> */}
-            
             <a
               href="https://wa.me/918107505074?text=I'm%20interested%20in%20the%2021%20Days%20Fitness%20Challenge"
               target="_blank"
@@ -155,33 +99,6 @@ const Hero = () => {
               </span>
             </a>
           </div>
-
-          {/* Enhanced Trust Indicators */}
-          {/* <div className="flex flex-wrap items-center justify-center gap-8 mt-8 text-sm">
-            {[
-              "✓ 100% Money-Back Guarantee",
-              "✓ Secure Payment",
-              "✓ Instant Access",
-              "✓ Certified Experts"
-            ].map((item, index) => (
-              <div key={index} className="flex items-center gap-2 bg-white/5 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10">
-                <Check className="w-4 h-4 text-green-400" />
-                <span className="font-medium">{item}</span>
-              </div>
-            ))}
-          </div> */}
-
-          {/* Rating Section */}
-          {/* <div className="flex items-center justify-center gap-4 mt-6">
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star key={star} className="w-5 h-5 text-yellow-400 fill-current" />
-              ))}
-            </div>
-            <div className="text-gray-300">
-              <span className="font-bold text-white">4.9/5</span> from 250+ participants
-            </div>
-          </div> */}
         </div>
       </div>
     </div>
