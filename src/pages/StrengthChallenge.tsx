@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '../lib/supabase';
+import WhatsAppButton from '../components/landing/WhatsAppButton';
 
 // ─── Schema ────────────────────────────────────────────────────────────────
 const schema = z.object({
@@ -727,15 +728,15 @@ const StrengthChallenge: FC = () => {
                   <li><a href="/" className="hover:text-[#f2ca50] transition-colors">Home</a></li>
                   <li><button onClick={() => scrollTo('challenge')} className="hover:text-[#f2ca50] transition-colors">The Challenge</button></li>
                   <li><button onClick={() => scrollTo('register')} className="hover:text-[#f2ca50] transition-colors">Register</button></li>
-                  <li><a href="/30-days-strength-challenge/results" className="hover:text-[#f2ca50] transition-colors">Results</a></li>
+                  {/* <li><a href="/30-days-strength-challenge/results" className="hover:text-[#f2ca50] transition-colors">Results</a></li> */}
                 </ul>
               </div>
               <div>
                 <h5 className="text-white font-bold mb-3 sm:mb-4 text-sm">Legal</h5>
                 <ul className="space-y-2 text-[#d0c5af] text-sm">
-                  <li><a href="#" className="hover:text-[#f2ca50] transition-colors">Privacy Policy</a></li>
-                  <li><a href="#" className="hover:text-[#f2ca50] transition-colors">Terms of Service</a></li>
-                  <li><a href="#" className="hover:text-[#f2ca50] transition-colors">Support</a></li>
+                  <li><a href="/privacy-policy" className="hover:text-[#f2ca50] transition-colors">Privacy Policy</a></li>
+                  <li><a href="/terms" className="hover:text-[#f2ca50] transition-colors">Terms of Service</a></li>
+                  {/* <li><a href="https://wa.me/917387846841?text=I%20want%20to%20know%20more%20about" target="_blank" rel="noreferrer" className="hover:text-[#f2ca50] transition-colors">Support</a></li> */}
                 </ul>
                 <p className="text-[#99907c] text-xs mt-6">© 2025 Unifitz. All rights reserved.</p>
               </div>
@@ -758,6 +759,8 @@ const StrengthChallenge: FC = () => {
         <div className="md:hidden h-20" />
 
       </div>
+
+      <WhatsAppButton />
     </>
   );
 };

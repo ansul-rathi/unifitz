@@ -26,9 +26,9 @@ const linkGroups = [
   {
     title: 'Support',
     links: [
-      { label: 'Privacy Policy', href: '#' },
-      { label: 'Terms of Service', href: '#' },
-      { label: 'Contact Us', href: '#' },
+      { label: 'Privacy Policy', href: '/privacy-policy' },
+      { label: 'Terms of Service', href: '/terms' },
+      { label: 'Contact Us', href: 'https://wa.me/917387846841?text=I%20want%20to%20know%20more%20about' },
     ],
   },
 ];

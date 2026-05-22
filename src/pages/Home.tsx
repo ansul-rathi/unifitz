@@ -12,7 +12,7 @@ import CommunitySection from '../components/landing/CommunitySection';
 import FAQSection from '../components/landing/FAQSection';
 import FinalCTA from '../components/landing/FinalCTA';
 import Footer from '../components/landing/Footer';
-import WhatsAppButton from '../components/landing/WhatsAppButton';
+
 
 const Home: FC = () => (
   <>
@@ -86,7 +86,6 @@ const Home: FC = () => (
         </section>
       </main>
       <Footer />
-      <WhatsAppButton />
       <StickyCtaBar />
     </div>
   </>

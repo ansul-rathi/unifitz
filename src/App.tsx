@@ -6,6 +6,8 @@ const Home = lazy(() => import('./pages/Home'));
 const Day21Challenge = lazy(() => import('./pages/21-days'));
 const StrengthChallenge = lazy(() => import('./pages/StrengthChallenge'));
 const StrengthChallengeResults = lazy(() => import('./pages/StrengthChallengeResults'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const Terms = lazy(() => import('./pages/Terms'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const App: FC = () => {
@@ -19,6 +21,8 @@ const App: FC = () => {
               <Route path="/21-days" element={<Day21Challenge />} />
               <Route path="/30-days-strength-challenge" element={<StrengthChallenge />} />
               <Route path="/30-days-strength-challenge/results" element={<StrengthChallengeResults />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<Terms />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
