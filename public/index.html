@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en-IN" class="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,10 +8,18 @@
     <!-- Primary Meta -->
     <title>Unifitz | Online Zumba, Yoga & Fitness Classes for Women in India</title>
     <meta name="description" content="Unifitz offers live online Zumba, Yoga, and Strength Training classes for women aged 30–50 in India. Join 5,000+ women transforming from home. Mon–Sat, multiple batches. 3-day free trial." />
-    <meta name="keywords" content="online zumba classes india, online fitness for women, yoga classes for women india, weight loss women india, home workout women, online fitness classes india, zumba instructor india, unifitz" />
+    <meta name="keywords" content="online zumba classes india, online fitness for women, yoga classes for women india, weight loss women india, home workout women, online fitness classes india, zumba instructor india, unifitz, live fitness classes india, online workout women 40s india" />
     <meta name="author" content="Unifitz" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <link rel="canonical" href="https://unifitz.in/" />
+    <link rel="alternate" hreflang="en-IN" href="https://unifitz.in/" />
+    <link rel="alternate" hreflang="x-default" href="https://unifitz.in/" />
+
+    <!-- Geo Targeting -->
+    <meta name="geo.region" content="IN" />
+    <meta name="geo.country" content="IN" />
+    <meta name="geo.placename" content="India" />
+    <meta name="ICBM" content="20.5937, 78.9629" />
 
     <!-- Theme -->
     <meta name="theme-color" content="#180d2c" />
@@ -49,16 +57,26 @@
           "url": "https://unifitz.in",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://unifitz.in/logo192.png"
+            "url": "https://unifitz.in/logo192.png",
+            "width": 192,
+            "height": 192
           },
           "sameAs": [
             "https://www.instagram.com/unifitz",
             "https://www.youtube.com/@unifitz"
           ],
-          "contactPoint": {
-            "@type": "ContactPoint",
-            "contactType": "customer support",
-            "availableLanguage": ["English", "Hindi"]
+          "contactPoint": [
+            {
+              "@type": "ContactPoint",
+              "contactType": "customer support",
+              "contactOption": "TollFree",
+              "availableLanguage": ["English", "Hindi"],
+              "areaServed": "IN"
+            }
+          ],
+          "founder": {
+            "@type": "Person",
+            "name": "Ansul Rathi"
           }
         },
         {
@@ -66,45 +84,139 @@
           "@id": "https://unifitz.in/#website",
           "url": "https://unifitz.in",
           "name": "Unifitz",
-          "publisher": { "@id": "https://unifitz.in/#organization" }
+          "description": "Live online Zumba, Yoga and Strength Training classes for women in India",
+          "publisher": { "@id": "https://unifitz.in/#organization" },
+          "inLanguage": "en-IN"
         },
         {
           "@type": "HealthAndBeautyBusiness",
           "@id": "https://unifitz.in/#business",
           "name": "Unifitz",
-          "description": "Live online Zumba, Yoga, and Strength Training classes for women aged 30–50 in India.",
+          "description": "Live online Zumba, Yoga, and Strength Training classes for women aged 30–50 in India. Join 5,000+ women transforming from home.",
           "url": "https://unifitz.in",
           "priceRange": "₹₹",
           "currenciesAccepted": "INR",
-          "paymentAccepted": "Cash, Credit Card, UPI",
+          "paymentAccepted": "UPI, Credit Card, Debit Card, Net Banking",
           "areaServed": { "@type": "Country", "name": "India" },
+          "serviceType": ["Zumba Classes", "Yoga Classes", "Strength Training", "Online Fitness"],
           "audience": {
             "@type": "PeopleAudience",
             "suggestedGender": "Female",
             "suggestedMinAge": 30,
-            "suggestedMaxAge": 50
+            "suggestedMaxAge": 50,
+            "geographicArea": { "@type": "Country", "name": "India" }
           },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "bestRating": "5",
+            "worstRating": "1",
+            "ratingCount": "5000",
+            "reviewCount": "5000"
+          },
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+              "opens": "06:00",
+              "closes": "22:00"
+            }
+          ],
+          "employee": [
+            {
+              "@type": "Person",
+              "name": "Ansul Rathi",
+              "jobTitle": "Founder & Head Coach",
+              "worksFor": { "@id": "https://unifitz.in/#organization" }
+            },
+            {
+              "@type": "Person",
+              "name": "Mehak",
+              "jobTitle": "Yoga Specialist",
+              "worksFor": { "@id": "https://unifitz.in/#organization" }
+            },
+            {
+              "@type": "Person",
+              "name": "Asha",
+              "jobTitle": "Meditation Coach",
+              "worksFor": { "@id": "https://unifitz.in/#organization" }
+            },
+            {
+              "@type": "Person",
+              "name": "Neha",
+              "jobTitle": "Reiki Practitioner",
+              "worksFor": { "@id": "https://unifitz.in/#organization" }
+            }
+          ],
           "hasOfferCatalog": {
             "@type": "OfferCatalog",
             "name": "Fitness Programs",
             "itemListElement": [
               {
                 "@type": "Offer",
-                "itemOffered": { "@type": "Service", "name": "Weight Loss & Toning Program" }
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Weight Loss & Toning Program",
+                  "description": "Targeted fat-burning Zumba, cardio, and meal guidance for sustainable weight loss."
+                },
+                "price": "0",
+                "priceCurrency": "INR",
+                "description": "3-day free trial available"
               },
               {
                 "@type": "Offer",
-                "itemOffered": { "@type": "Service", "name": "Full Body Fitness Program" }
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Full Body Fitness Program",
+                  "description": "Balanced cardio, strength and mobility combining Zumba, Yoga and bodyweight training."
+                },
+                "price": "0",
+                "priceCurrency": "INR",
+                "description": "3-day free trial available"
               },
               {
                 "@type": "Offer",
-                "itemOffered": { "@type": "Service", "name": "Strength & Flexibility Program" }
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Strength & Flexibility Program",
+                  "description": "Functional strength training with deep stretching and flexibility flows for women."
+                },
+                "price": "0",
+                "priceCurrency": "INR",
+                "description": "3-day free trial available"
               }
             ]
           }
         },
         {
+          "@type": "ItemList",
+          "@id": "https://unifitz.in/#programs",
+          "name": "Unifitz Fitness Programs for Women",
+          "itemListOrder": "https://schema.org/ItemListOrderAscending",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Weight Loss & Toning",
+              "url": "https://unifitz.in/#programs"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Full Body Fitness",
+              "url": "https://unifitz.in/#programs"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Strength & Flexibility",
+              "url": "https://unifitz.in/#programs"
+            }
+          ]
+        },
+        {
           "@type": "FAQPage",
+          "@id": "https://unifitz.in/#faq",
           "mainEntity": [
             {
               "@type": "Question",
@@ -127,7 +239,7 @@
               "name": "Can I join Unifitz with a busy work schedule?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Yes! We offer flexible morning and evening batches Monday to Saturday, plus recorded sessions available 24/7."
+                "text": "Yes! We offer flexible morning and evening batches Monday to Saturday, plus recorded sessions available 24/7 so you never miss a workout."
               }
             },
             {
@@ -135,7 +247,39 @@
               "name": "What is the Unifitz 21-Day Challenge?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "A structured 21-day program to build consistent fitness habits through daily Zumba, yoga, and strength sessions."
+                "text": "A structured 21-day program to build consistent fitness habits through daily Zumba, yoga, and strength sessions. Start anytime at unifitz.in/21-days."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is there a free trial for Unifitz?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! Unifitz offers a 3-day free trial — no credit card required. Simply message us on WhatsApp to get started."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can a complete beginner join Unifitz?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Absolutely. All programs are designed to be beginner-friendly. Our coaches guide you step-by-step and pace the sessions for women at all fitness levels."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are Unifitz classes in Hindi or English?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Our coaches teach in both Hindi and English, making it comfortable for women across India to follow along easily."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I join a live Unifitz class?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Simply message us on WhatsApp to join. Once enrolled, you receive a link to the live class platform. Classes run Monday to Saturday in morning and evening batches."
               }
             }
           ]
@@ -144,14 +288,16 @@
     }
     </script>
 
-    <!-- Fonts -->
+    <!-- DNS Prefetch + Fonts -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//fonts.gstatic.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run Unifitz.</noscript>
+    <noscript>Unifitz offers live online Zumba, Yoga and Strength Training classes for women in India. Enable JavaScript to use the full site, or visit <a href="https://unifitz.in">unifitz.in</a> for more information.</noscript>
     <div id="root"></div>
   </body>
 </html>

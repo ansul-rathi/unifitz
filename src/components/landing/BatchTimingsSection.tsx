@@ -1,5 +1,6 @@
 import { FC, useState } from 'react';
 import WhatsAppIcon from './WhatsAppIcon';
+import { WA_BATCH } from '../../constants/contact';
 
 const morningSlots = ['6:00 – 7:00 AM', '7:00 – 8:00 AM', '8:00 – 9:00 AM', '9:00 – 10:00 AM'];
 const eveningSlots = ['4:00 – 5:00 PM', '5:00 – 6:00 PM', '6:00 – 7:00 PM', '7:00 – 8:00 PM', '8:00 – 9:00 PM'];
@@ -111,10 +112,10 @@ const BatchTimingsSection: FC = () => (
           </div>
         </div>
         <a
-          href="https://wa.me/yournumber?text=Hi,%20I%20want%20to%20book%20a%20batch%20at%20Unifitz"
+          href={WA_BATCH}
           target="_blank"
           rel="noreferrer"
-          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary-container text-white px-6 py-3 rounded-full font-lexend text-xs font-bold tracking-widest uppercase glow-pink hover:brightness-110 transition-all"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary-container text-white px-6 py-3 rounded-full font-lexend text-xs font-bold tracking-widest uppercase glow-pink hover:brightness-110 transition-all focus-visible:ring-2 focus-visible:ring-primary-container focus-visible:ring-offset-2 focus-visible:outline-none"
         >
           <WhatsAppIcon size={16} />
           Book via WhatsApp

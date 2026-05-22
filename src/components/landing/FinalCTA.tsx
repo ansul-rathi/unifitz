@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { WA_TRIAL } from '../../constants/contact';
 
 const FinalCTA: FC = () => (
   <section className="py-12 sm:py-xl px-4 sm:px-6 lg:px-xl relative overflow-hidden bg-surface">
@@ -21,12 +22,20 @@ const FinalCTA: FC = () => (
         Stop waiting for the perfect moment. Take the first step towards a healthier, happier you.
       </p>
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center relative z-10">
-        <button className="bg-white text-[#b7006e] px-8 sm:px-12 py-3.5 sm:py-5 rounded-full font-lexend text-xs sm:text-sm font-bold tracking-widest uppercase shadow-[0_8px_30px_rgba(0,0,0,0.25)] hover:scale-105 transition-all">
+        <a
+          href={WA_TRIAL}
+          target="_blank"
+          rel="noreferrer"
+          className="bg-white text-[#b7006e] px-8 sm:px-12 py-3.5 sm:py-5 rounded-full font-lexend text-xs sm:text-sm font-bold tracking-widest uppercase shadow-[0_8px_30px_rgba(0,0,0,0.25)] hover:scale-105 transition-all focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+        >
           Start Free Trial
-        </button>
-        <button className="bg-white/10 border border-white/30 text-white px-8 sm:px-12 py-3.5 sm:py-5 rounded-full font-lexend text-xs sm:text-sm font-bold tracking-widest uppercase hover:bg-white/20 transition-all">
+        </a>
+        <a
+          href="#programs"
+          className="bg-white/10 border border-white/30 text-white px-8 sm:px-12 py-3.5 sm:py-5 rounded-full font-lexend text-xs sm:text-sm font-bold tracking-widest uppercase hover:bg-white/20 transition-all focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
+        >
           View All Programs
-        </button>
+        </a>
       </div>
     </div>
   </section>

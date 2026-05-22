@@ -1,5 +1,6 @@
 import { FC, useState } from 'react';
 import WhatsAppIcon from './WhatsAppIcon';
+import { WA_GENERAL } from '../../constants/contact';
 
 const linkGroups = [
   {
@@ -52,8 +53,8 @@ const Footer: FC = () => {
               <a href="#" aria-label="YouTube" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-neutral-400 hover:text-pink-400 transition-all">
                 <span className="material-symbols-outlined text-sm">movie</span>
               </a>
-              <a href="https://wa.me/yournumber?text=Hi,%20I%20want%20to%20join%20Unifitz" target="_blank" rel="noreferrer" aria-label="WhatsApp"
-                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-neutral-400 hover:text-[#25D366] transition-all">
+              <a href={WA_GENERAL} target="_blank" rel="noreferrer" aria-label="WhatsApp"
+                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-neutral-400 hover:text-[#25D366] transition-all focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:outline-none">
                 <WhatsAppIcon size={14} />
               </a>
             </div>
@@ -81,7 +82,8 @@ const Footer: FC = () => {
             {linkGroups.map((group, i) => (
               <div key={group.title}>
                 <button
-                  className="w-full flex justify-between items-center py-3.5 text-left"
+                  className="w-full flex justify-between items-center py-3.5 text-left focus-visible:ring-2 focus-visible:ring-primary-container focus-visible:outline-none rounded-lg"
+                  aria-expanded={open === i}
                   onClick={() => setOpen(open === i ? null : i)}
                 >
                   <span className="font-lexend text-xs font-bold tracking-widest uppercase text-white/60">{group.title}</span>
@@ -134,7 +136,7 @@ const Footer: FC = () => {
         {/* bottom bar */}
         <div className="border-t border-white/5 pt-4 sm:pt-6 flex flex-col sm:flex-row justify-between items-center gap-2">
           <p className="font-lexend text-[9px] text-neutral-600 uppercase tracking-widest">
-            © 2024 Unifitz. Empowered Transformation.
+            © 2025 Unifitz. Empowered Transformation.
           </p>
           <div className="flex items-center gap-3 sm:hidden">
             {[['verified','5k+'],['star','4.9'],['emoji_events','Free Trial']].map(([icon,label]) => (

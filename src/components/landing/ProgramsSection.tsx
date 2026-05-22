@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import WhatsAppIcon from './WhatsAppIcon';
+import { WA_PROGRAM } from '../../constants/contact';
 
 interface Program {
   icon: string;
@@ -83,10 +84,9 @@ const programs: Program[] = [
   },
 ];
 
-const WA_BASE = 'https://wa.me/yournumber?text=Hi,%20I%20want%20to%20know%20more%20about%20';
 
 const ProgramsSection: FC = () => (
-  <section className="py-12 sm:py-xl px-4 sm:px-6 lg:px-xl bg-surface relative overflow-hidden">
+  <section id="programs" className="py-12 sm:py-xl px-4 sm:px-6 lg:px-xl bg-surface relative overflow-hidden">
     <div className="absolute top-0 left-0 w-48 h-48 sm:w-[400px] sm:h-[400px] bg-primary-container/5 blur-[100px] sm:blur-[200px] rounded-full pointer-events-none" />
     <div className="absolute bottom-0 right-0 w-48 h-48 sm:w-[300px] sm:h-[300px] bg-secondary-container/5 blur-[100px] sm:blur-[200px] rounded-full pointer-events-none" />
 
@@ -140,7 +140,7 @@ const ProgramsSection: FC = () => (
             {/* CTA */}
             <div className="px-5 sm:px-8 pb-5 sm:pb-8">
               <a
-                href={`${WA_BASE}${encodeURIComponent(p.title)}`}
+                href={WA_PROGRAM(p.title)}
                 target="_blank"
                 rel="noreferrer"
                 className={`w-full flex items-center justify-center gap-2 py-3 rounded-full font-lexend text-[10px] sm:text-xs font-bold tracking-widest uppercase transition-all border ${p.ctaClass} ${p.glowClass}`}

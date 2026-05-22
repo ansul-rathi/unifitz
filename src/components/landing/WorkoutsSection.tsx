@@ -1,5 +1,6 @@
-import { FC, useState } from 'react';
+import { FC, useState, useRef } from 'react';
 import WhatsAppIcon from './WhatsAppIcon';
+import { WA_TRIAL } from '../../constants/contact';
 
 interface Tab {
   id: string;
@@ -93,9 +94,22 @@ const tabs: Tab[] = [
 
 const WorkoutsSection: FC = () => {
   const [active, setActive] = useState(0);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const t = tabs[active];
   const isLight = !!t.light;
   const dark = !isLight;
+
+  const handleKeyDown = (e: React.KeyboardEvent, i: number) => {
+    if (e.key === 'ArrowRight') {
+      const next = (i + 1) % tabs.length;
+      setActive(next);
+      tabRefs.current[next]?.focus();
+    } else if (e.key === 'ArrowLeft') {
+      const prev = (i - 1 + tabs.length) % tabs.length;
+      setActive(prev);
+      tabRefs.current[prev]?.focus();
+    }
+  };
 
   return (
     <section id="workouts" className={`relative overflow-hidden transition-colors duration-500 ${t.bg}`}>
@@ -106,12 +120,25 @@ const WorkoutsSection: FC = () => {
 
         {/* tab pills */}
         <div className="flex justify-center mb-6 sm:mb-8">
-          <div className={`flex gap-1 p-1 rounded-full ${dark ? 'bg-white/5 border border-white/10' : 'bg-black/5 border border-black/10'}`}>
+          <div
+            role="tablist"
+            aria-label="Workout types"
+            className={`flex gap-1 p-1 rounded-full ${dark ? 'bg-white/5 border border-white/10' : 'bg-black/5 border border-black/10'}`}
+          >
             {tabs.map((tab, i) => (
               <button
                 key={tab.id}
+                ref={(el) => { tabRefs.current[i] = el; }}
+                role="tab"
+                id={`tab-${tab.id}`}
+                aria-selected={active === i}
+                aria-controls={`panel-${tab.id}`}
+                tabIndex={active === i ? 0 : -1}
                 onClick={() => setActive(i)}
-                className={`flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-full font-lexend text-[10px] sm:text-xs font-bold tracking-widest uppercase transition-all duration-200 ${
+                onKeyDown={(e) => handleKeyDown(e, i)}
+                className={`flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-full font-lexend text-[10px] sm:text-xs font-bold tracking-widest uppercase transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none ${
+                  dark ? 'focus-visible:ring-primary-container focus-visible:ring-offset-[#1A0F2E]' : 'focus-visible:ring-[#484742] focus-visible:ring-offset-[#F5F1EA]'
+                } ${
                   active === i
                     ? `${tab.accentBg} text-white shadow-md`
                     : dark
@@ -127,7 +154,13 @@ const WorkoutsSection: FC = () => {
         </div>
 
         {/* content grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16 items-center">
+        <div
+          key={active}
+          role="tabpanel"
+          id={`panel-${t.id}`}
+          aria-labelledby={`tab-${t.id}`}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16 items-center tab-fade"
+        >
 
           {/* text */}
           <div className={`order-2 lg:${active === 1 ? 'order-2' : 'order-1'}`}>
@@ -159,17 +192,24 @@ const WorkoutsSection: FC = () => {
             </ul>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <button className={`${t.accentBg} text-white px-6 py-3 rounded-full font-lexend text-xs font-bold tracking-widest uppercase ${t.glowClass} hover:brightness-110 active:scale-95 transition-all`}>
-                {t.primaryBtn}
-              </button>
               <a
-                href="https://wa.me/yournumber?text=Hi,%20I%20want%20to%20join%20Unifitz%20free%20trial"
+                href={WA_TRIAL}
                 target="_blank"
                 rel="noreferrer"
-                className={`flex items-center justify-center gap-2 px-6 py-3 rounded-full font-lexend text-xs font-bold tracking-widest uppercase transition-all border ${
+                className={`inline-flex items-center justify-center ${t.accentBg} text-white px-6 py-3 rounded-full font-lexend text-xs font-bold tracking-widest uppercase ${t.glowClass} hover:brightness-110 active:scale-95 transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none ${
+                  dark ? 'focus-visible:ring-primary-container focus-visible:ring-offset-[#1A0F2E]' : 'focus-visible:ring-[#484742] focus-visible:ring-offset-[#F5F1EA]'
+                }`}
+              >
+                {t.primaryBtn}
+              </a>
+              <a
+                href={WA_TRIAL}
+                target="_blank"
+                rel="noreferrer"
+                className={`flex items-center justify-center gap-2 px-6 py-3 rounded-full font-lexend text-xs font-bold tracking-widest uppercase transition-all border focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none ${
                   isLight
-                    ? 'border-[#484742]/20 text-[#484742] hover:bg-[#484742]/10'
-                    : 'border-white/15 text-white hover:bg-white/8'
+                    ? 'border-[#484742]/20 text-[#484742] hover:bg-[#484742]/10 focus-visible:ring-[#484742] focus-visible:ring-offset-[#F5F1EA]'
+                    : 'border-white/15 text-white hover:bg-white/8 focus-visible:ring-primary-container focus-visible:ring-offset-[#1A0F2E]'
                 }`}
               >
                 <WhatsAppIcon size={15} />

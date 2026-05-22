@@ -1,11 +1,12 @@
 import { FC, useState, useEffect } from 'react';
 import WhatsAppIcon from './WhatsAppIcon';
+import { WA_TRIAL } from '../../constants/contact';
 
 const links = [
   { label: 'Workouts', href: '#workouts' },
   { label: 'Coaches', href: '#coaches' },
   { label: 'Community', href: '#community' },
-  { label: 'Pricing', href: '#pricing' },
+  { label: 'Programs', href: '#programs' },
   { label: '21-Day Challenge', href: '/21-days', highlight: true },
 ];
 
@@ -57,15 +58,15 @@ const NavBar: FC = () => {
         {/* Right actions */}
         <div className="flex items-center gap-2 sm:gap-3">
           <a
-            href="https://wa.me/yournumber?text=Hi,%20I%20want%20to%20join%20Unifitz%20free%20trial"
+            href={WA_TRIAL}
             target="_blank"
             rel="noreferrer"
-            className="hidden md:flex items-center gap-1.5 text-white/60 hover:text-white font-lexend text-xs font-bold tracking-widest uppercase transition-colors"
+            className="hidden md:flex items-center gap-1.5 text-white/60 hover:text-white font-lexend text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:ring-primary-container focus-visible:outline-none rounded-full px-2 py-1"
           >
             <WhatsAppIcon size={15} />
             <span className="hidden lg:inline">WhatsApp</span>
           </a>
-          <button className="bg-primary-container text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-full font-lexend text-[10px] sm:text-xs font-bold tracking-widest uppercase glow-pink hover:brightness-110 active:scale-95 transition-all whitespace-nowrap">
+          <button className="bg-primary-container text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-full font-lexend text-[10px] sm:text-xs font-bold tracking-widest uppercase glow-pink hover:brightness-110 active:scale-95 transition-all whitespace-nowrap focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary-container focus-visible:ring-offset-[#0d0820] focus-visible:outline-none">
             Free Trial
           </button>
           <button
@@ -96,10 +97,10 @@ const NavBar: FC = () => {
             </a>
           ))}
           <a
-            href="https://wa.me/yournumber?text=Hi,%20I%20want%20to%20join%20Unifitz%20free%20trial"
+            href={WA_TRIAL}
             target="_blank"
             rel="noreferrer"
-            className="mt-2 flex items-center justify-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-full font-lexend text-xs font-bold tracking-widest uppercase"
+            className="mt-2 flex items-center justify-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-full font-lexend text-xs font-bold tracking-widest uppercase focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 focus-visible:outline-none"
           >
             <WhatsAppIcon size={16} />
             Join Free Trial on WhatsApp
