@@ -54,16 +54,19 @@ const StrengthChallengeResults: FC = () => {
   const fetchData = async () => {
     setLoading(true);
     setError('');
+    console.log('[Results] fetchData called');
+    console.log('[Results] supabase URL:', process.env.REACT_APP_SUPABASE_URL);
     try {
       const { data, error: err } = await supabase
         .from('strength_challenge_registrations')
         .select('*')
         .order('created_at', { ascending: false });
-      if (err) setError(err.message);
-      else setRows(data as Registration[]);
+      console.log('[Results] response:', { data, err });
+      if (err) setError(`Supabase error: ${err.message} (code: ${err.code})`);
+      else setRows((data ?? []) as Registration[]);
     } catch (err) {
-      console.error(err);
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred while fetching registrations.');
+      console.error('[Results] catch:', err);
+      setError(err instanceof Error ? err.message : 'Unexpected error fetching registrations.');
     } finally {
       setLoading(false);
     }
