@@ -2,7 +2,7 @@
   "name": "unifitz",
   "version": "0.1.0",
   "private": true,
-  "homepage": ".",
+  "homepage": "/",
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
     "@supabase/supabase-js": "^2.106.0",
