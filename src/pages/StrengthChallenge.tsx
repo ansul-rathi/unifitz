@@ -6,6 +6,43 @@ import { Helmet } from 'react-helmet-async';
 import { supabase } from '../lib/supabase';
 import WhatsAppButton from '../components/landing/WhatsAppButton';
 
+// ─── Country Config ─────────────────────────────────────────────────────────
+type Country = 'india' | 'bahrain' | 'usa';
+
+const COUNTRY_CONFIG: Record<Country, {
+  label: string;
+  flag: string;
+  batchTime: string;
+  amount: string;
+  paymentNumber: string;
+  paymentMethod: string;
+}> = {
+  india: {
+    label: 'India',
+    flag: '🇮🇳',
+    batchTime: '8:30 AM – 9:30 AM',
+    amount: '₹499',
+    paymentNumber: '8107505074',
+    paymentMethod: 'PhonePe / GPay / Paytm / UPI',
+  },
+  bahrain: {
+    label: 'Bahrain',
+    flag: '🇧🇭',
+    batchTime: '6:00 AM – 7:00 AM',
+    amount: '5 BD',
+    paymentNumber: '+973 3386 2809',
+    paymentMethod: 'Bank Transfer / WhatsApp Pay',
+  },
+  usa: {
+    label: 'USA',
+    flag: '🇺🇸',
+    batchTime: '8:00 AM – 9:00 AM',
+    amount: '₹499',
+    paymentNumber: '8107505074',
+    paymentMethod: 'PhonePe / GPay / Paytm / UPI',
+  },
+};
+
 // ─── Schema ────────────────────────────────────────────────────────────────
 const schema = z.object({
   full_name: z
@@ -15,7 +52,7 @@ const schema = z.object({
   whatsapp_number: z
     .string()
     .min(1, 'WhatsApp number is required')
-    .regex(/^[6-9]\d{9}$/, 'Enter valid 10-digit number (no country code)'),
+    .min(6, 'Enter a valid phone number'),
   age: z.preprocess(
     (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
     z.number({ required_error: 'Age is required', invalid_type_error: 'Age must be a number' })
@@ -49,29 +86,21 @@ type FormValues = z.infer<typeof schema>;
 
 // ─── Constants ─────────────────────────────────────────────────────────────
 const CHALLENGE_START = new Date('June 1, 2026 00:00:00').getTime();
-const BATCH_OPTIONS = [
-  '6:00 AM – 7:00 AM',
-  '7:00 AM – 8:00 AM',
-  '8:00 AM – 9:00 AM',
-  '6:00 PM – 7:00 PM',
-  '7:00 PM – 8:00 PM',
-  '8:00 PM – 9:00 PM',
-];
 const GOALS = ['Weight Loss', 'Muscle Gain', 'Stamina', 'Flexibility'];
 const EXPERIENCE = ['Beginner', 'Intermediate', 'Advanced'];
-const FEATURES = [
-  { icon: 'fitness_center', title: 'Daily Strength Workouts', desc: 'Progressive overload plans for home or gym — no experience needed.' },
-  { icon: 'restaurant', title: 'Nutrition Guidance', desc: 'High-protein Indian meal plans tailored for sustainable fat loss.' },
-  { icon: 'groups', title: 'WhatsApp Community', desc: '24/7 access to coaches and 100+ participants on the same journey.' },
-  { icon: 'verified', title: 'Accountability Check-ins', desc: 'Daily coach check-ins to keep you on track through all 30 days.' },
-  { icon: 'bolt', title: 'Weekly Live Sessions', desc: 'High-energy live calls to boost motivation and correct form.' },
-  { icon: 'trending_up', title: 'Progress Tracking', desc: 'Visual metrics and reward systems to celebrate every milestone.' },
-];
-const PAIN_POINTS = [
-  { q: '"Tired of restarting every Monday?"', a: 'Breaking the cycle of inconsistency requires a system, not willpower. We give you both.' },
-  { q: '"No time for the gym?"', a: 'Our program is 45 mins a day from home — designed for busy schedules.' },
-  { q: '"Confused by diets?"', a: 'No complex jargon. Simple Indian home-cooked meals that work for your body.' },
-];
+// const FEATURES = [
+//   { icon: 'fitness_center', title: 'Daily Strength Workouts', desc: 'Progressive overload plans for home or gym — no experience needed.' },
+//   { icon: 'restaurant', title: 'Nutrition Guidance', desc: 'High-protein Indian meal plans tailored for sustainable fat loss.' },
+//   { icon: 'groups', title: 'WhatsApp Community', desc: '24/7 access to coaches and 100+ participants on the same journey.' },
+//   { icon: 'verified', title: 'Accountability Check-ins', desc: 'Daily coach check-ins to keep you on track through all 30 days.' },
+//   { icon: 'bolt', title: 'Weekly Live Sessions', desc: 'High-energy live calls to boost motivation and correct form.' },
+//   { icon: 'trending_up', title: 'Progress Tracking', desc: 'Visual metrics and reward systems to celebrate every milestone.' },
+// ];
+// const PAIN_POINTS = [
+//   { q: '"Tired of restarting every Monday?"', a: 'Breaking the cycle of inconsistency requires a system, not willpower. We give you both.' },
+//   { q: '"No time for the gym?"', a: 'Our program is 45 mins a day from home — designed for busy schedules.' },
+//   { q: '"Confused by diets?"', a: 'No complex jargon. Simple Indian home-cooked meals that work for your body.' },
+// ];
 // const STEPS = [
 //   { n: '1', label: 'Register', desc: 'Fill out the form below.', active: true },
 //   { n: '2', label: 'Payment', desc: 'Complete your registration fee.' },
@@ -123,6 +152,7 @@ GoldSelect.displayName = 'GoldSelect';
 
 // ─── Main Page ─────────────────────────────────────────────────────────────
 const StrengthChallenge: FC = () => {
+  const [country, setCountry] = useState<Country | null>(null);
   const [countdown, setCountdown] = useState({ d: 0, h: 0, m: 0, s: 0 });
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -137,8 +167,15 @@ const StrengthChallenge: FC = () => {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+  useEffect(() => {
+    if (country) {
+      setValue('batch_timing', COUNTRY_CONFIG[country].batchTime);
+    }
+  }, [country, setValue]);
 
   // Countdown
   useEffect(() => {
@@ -198,14 +235,45 @@ const StrengthChallenge: FC = () => {
 
       if (insertErr) throw new Error(insertErr.message);
       setSubmitStatus('success');
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (e: unknown) {
       setSubmitError(e instanceof Error ? e.message : 'Something went wrong. Please try again.');
       setSubmitStatus('error');
     }
   };
 
+  const cfg = country ? COUNTRY_CONFIG[country] : null;
+
   return (
     <>
+      {/* ── Country Selection Popup ───────────────────────────────────── */}
+      {!country && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="bg-[#1a1a1a] border border-[#d4af37]/30 rounded-3xl p-8 sm:p-10 max-w-sm w-full shadow-[0_0_60px_rgba(212,175,55,0.2)] text-center">
+            <div className="w-14 h-14 rounded-full bg-[#d4af37]/15 border border-[#d4af37]/30 flex items-center justify-center mx-auto mb-5">
+              <span className="material-symbols-outlined text-[#f2ca50] text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>public</span>
+            </div>
+            <h2 className="text-white font-black text-xl sm:text-2xl mb-2">Select Your Country</h2>
+            <p className="text-[#99907c] text-sm mb-7">We will show you the right batch time and payment details.</p>
+            <div className="flex flex-col gap-3">
+              {(Object.keys(COUNTRY_CONFIG) as Country[]).map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setCountry(c)}
+                  className="flex items-center gap-4 bg-[#201f1f] border border-[#99907c]/20 hover:border-[#d4af37]/60 hover:bg-[#d4af37]/5 rounded-xl px-5 py-4 transition-all active:scale-[0.98] group"
+                >
+                  <span className="text-3xl">{COUNTRY_CONFIG[c].flag}</span>
+                  <div className="text-left">
+                    <div className="text-white font-bold text-sm group-hover:text-[#f2ca50] transition-colors">{COUNTRY_CONFIG[c].label}</div>
+                  </div>
+                  <span className="material-symbols-outlined text-[#99907c] group-hover:text-[#d4af37] ml-auto text-sm transition-colors">arrow_forward_ios</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <Helmet>
         <title>30-Day Strength Challenge | Unifitz</title>
         <meta name="description" content="Join the Unifitz 30-Day Strength Challenge. Daily workouts, nutrition guidance and live coaching for Indian women & men. Starting June 1, 2026. Register now." />
@@ -305,12 +373,12 @@ const StrengthChallenge: FC = () => {
                   >
                     Register Now
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => scrollTo('challenge')}
                     className="border border-[#d4af37]/50 text-[#f2ca50] px-8 sm:px-10 py-4 sm:py-5 rounded-xl font-bold text-base hover:bg-[#d4af37]/5 active:scale-95 transition-all"
                   >
                     See Challenge Details
-                  </button>
+                  </button> */}
                 </div>
               </div>
 
@@ -376,7 +444,7 @@ const StrengthChallenge: FC = () => {
         </section> */}
 
         {/* ── Features Grid ─────────────────────────────────────────────── */}
-        <section className="py-16 sm:py-20" id="challenge">
+        {/* <section className="py-16 sm:py-20" id="challenge">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-10">
             <div className="text-center mb-10 sm:mb-16">
               <h2 className="text-[28px] sm:text-[32px] font-bold text-white mb-3">Everything You Need to Succeed</h2>
@@ -392,10 +460,10 @@ const StrengthChallenge: FC = () => {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* ── Is This You? ─────────────────────────────────────────────── */}
-        <section className="py-16 sm:py-20 bg-[#201f1f]">
+        {/* <section className="py-16 sm:py-20 bg-[#201f1f]">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-10 text-center">
             <h2 className="text-[28px] sm:text-[32px] font-bold text-white mb-10 sm:mb-14">Is This You?</h2>
             <div className="flex flex-col sm:flex-row gap-5 sm:gap-6 justify-center items-stretch">
@@ -407,7 +475,7 @@ const StrengthChallenge: FC = () => {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* ── 6-Step Journey ───────────────────────────────────────────── */}
         {/* <section className="py-16 sm:py-20">
@@ -435,14 +503,42 @@ const StrengthChallenge: FC = () => {
           <div className="max-w-3xl mx-auto px-4 sm:px-6">
             <div className="bg-white/5 backdrop-blur-2xl border border-[#d4af37]/20 shadow-[0_0_40px_rgba(212,175,55,0.1)] p-6 sm:p-10 lg:p-12 rounded-3xl border-t-4 border-t-[#d4af37]">
               {submitStatus === 'success' ? (
-                <div className="text-center py-8 sm:py-12">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#d4af37] flex items-center justify-center mx-auto mb-5 shadow-[0_0_30px_rgba(212,175,55,0.4)]">
-                    <span className="material-symbols-outlined text-[#3c2f00] text-3xl sm:text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                <div className="text-center py-10 sm:py-14">
+                  {/* Trophy + green check */}
+                  <div className="relative w-24 h-24 sm:w-28 sm:h-28 mx-auto mb-7">
+                    <div className="absolute inset-0 rounded-full bg-[#d4af37]/20 animate-ping" />
+                    <div className="relative w-full h-full rounded-full bg-gradient-to-br from-[#f2ca50] to-[#b8860b] flex items-center justify-center shadow-[0_0_40px_rgba(212,175,55,0.5)]">
+                      <span className="material-symbols-outlined text-[#3c2f00] text-4xl sm:text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>emoji_events</span>
+                    </div>
+                    {/* Green confirmed tick */}
+                    <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-green-500 border-2 border-[#1a1a1a] flex items-center justify-center shadow-[0_0_12px_rgba(34,197,94,0.6)]">
+                      <span className="material-symbols-outlined text-white text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check</span>
+                    </div>
                   </div>
-                  <h2 className="text-[#f2ca50] text-2xl sm:text-3xl font-black mb-3">You&apos;re In! 🏆</h2>
-                  <p className="text-[#d0c5af] text-sm sm:text-base max-w-md mx-auto leading-relaxed">
-                    Registration received. Our team will verify your payment and add you to the WhatsApp group within 24 hours. Get ready to transform!
+
+                  <p className="text-[#f2ca50] text-xs font-black uppercase tracking-widest mb-3">Registration Confirmed</p>
+                  <h2 className="text-white text-3xl sm:text-4xl font-black mb-2 leading-tight">
+                    Welcome to the<br />
+                    <span className="text-[#f2ca50]">30-Day Challenge!</span>
+                  </h2>
+                  <p className="text-[#d0c5af] text-sm sm:text-base mt-4 max-w-sm mx-auto leading-relaxed">
+                    Your spot is secured. Our team will verify your payment and add you to the WhatsApp group within <span className="text-white font-bold">24 hours</span>.
                   </p>
+
+                  <div className="mt-8 grid grid-cols-3 gap-3 max-w-xs mx-auto">
+                    {[
+                      { icon: 'verified', label: 'Spot Locked' },
+                      { icon: 'groups', label: 'Group Access' },
+                      { icon: 'local_fire_department', label: 'June 1st' },
+                    ].map((item) => (
+                      <div key={item.label} className="bg-[#d4af37]/10 border border-[#d4af37]/20 rounded-xl py-3 px-2 flex flex-col items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[#f2ca50] text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>{item.icon}</span>
+                        <span className="text-[10px] text-[#d0c5af] font-bold text-center">{item.label}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="text-[#99907c] text-xs mt-7">Get ready — your transformation starts soon. 🔥</p>
                 </div>
               ) : (
                 <>
@@ -482,11 +578,12 @@ const StrengthChallenge: FC = () => {
                         <GoldInput {...register('city')} placeholder="Mumbai" error={errors.city?.message} autoComplete="address-level2" />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold tracking-widest uppercase text-[#d0c5af]">Batch Timing *</label>
-                        <GoldSelect {...register('batch_timing')} error={errors.batch_timing?.message} defaultValue="">
-                          <option value="" disabled>Select batch</option>
-                          {BATCH_OPTIONS.map((b) => <option key={b} value={b}>{b}</option>)}
-                        </GoldSelect>
+                        <label className="text-xs font-bold tracking-widest uppercase text-[#d0c5af]">Batch Timing</label>
+                        <div className="flex items-center gap-3 bg-[#201f1f] border border-[#d4af37]/30 rounded-lg px-4 h-[52px]">
+                          <span className="material-symbols-outlined text-[#f2ca50] text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>schedule</span>
+                          <span className="text-[#f2ca50] font-bold text-sm">{cfg?.batchTime ?? '—'}</span>
+                        </div>
+                        <input type="hidden" {...register('batch_timing')} />
                       </div>
                     </div>
 
@@ -529,11 +626,25 @@ const StrengthChallenge: FC = () => {
 
                     {/* Payment Info */}
                     <div className="bg-[#d4af37]/8 border border-[#d4af37]/30 rounded-xl p-4 sm:p-5">
-                      <p className="text-xs font-black uppercase tracking-widest text-[#d0c5af] mb-2">Step 1 — Pay Registration Fee</p>
-                      <p className="text-[#d0c5af] text-sm mb-3">Send payment to the number below via PhonePe / GPay / Paytm / UPI:</p>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-black uppercase tracking-widest text-[#d0c5af]">Step 1 — Pay Registration Fee</p>
+                        {cfg && (
+                          <button
+                            type="button"
+                            onClick={() => setCountry(null)}
+                            className="flex items-center gap-1.5 text-[10px] text-[#99907c] hover:text-[#f2ca50] transition-colors"
+                          >
+                            <span className="text-base">{cfg.flag}</span>
+                            <span>{cfg.label}</span>
+                            <span className="material-symbols-outlined text-xs">edit</span>
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-[#d0c5af] text-sm mb-1">Amount: <span className="text-[#f2ca50] font-black">{cfg?.amount ?? '—'}</span></p>
+                      <p className="text-[#d0c5af] text-sm mb-3">Send via {cfg?.paymentMethod ?? '—'}:</p>
                       <div className="flex items-center gap-3 bg-[#201f1f] border border-[#d4af37]/30 rounded-lg px-4 py-3">
                         <span className="material-symbols-outlined text-[#f2ca50] text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>smartphone</span>
-                        <span className="text-[#f2ca50] font-black text-xl tracking-widest">8107505074</span>
+                        <span className="text-[#f2ca50] font-black text-xl tracking-widest">{cfg?.paymentNumber ?? '—'}</span>
                       </div>
                       <p className="text-[10px] text-[#99907c] mt-2">Then take a screenshot and upload it below.</p>
                     </div>
@@ -605,17 +716,13 @@ const StrengthChallenge: FC = () => {
         </section>
 
         {/* ── Urgency Banner ────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden py-14 sm:py-20">
-          {/* Dark gold gradient bg */}
+        {/* <section className="relative overflow-hidden py-14 sm:py-20">
           <div className="absolute inset-0 bg-gradient-to-br from-[#d4af37] via-[#c49b28] to-[#a87c10]" />
-          {/* Subtle dot pattern overlay */}
           <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #3c2f00 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-          {/* Glow blobs */}
           <div className="absolute -top-20 -right-20 w-72 h-72 bg-[#fff]/10 rounded-full blur-[80px] pointer-events-none" />
           <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-[#3c2f00]/20 rounded-full blur-[80px] pointer-events-none" />
 
           <div className="relative z-10 max-w-[900px] mx-auto px-4 sm:px-10 text-center text-[#3c2f00]">
-            {/* Fire badge */}
             <div className="inline-flex items-center gap-2 bg-[#3c2f00]/15 border border-[#3c2f00]/20 px-4 py-1.5 rounded-full mb-5">
               <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>local_fire_department</span>
               <span className="text-xs font-black uppercase tracking-widest">June Batch — Almost Full</span>
@@ -628,7 +735,6 @@ const StrengthChallenge: FC = () => {
               Don&apos;t watch others transform. Be the transformation.
             </p>
 
-            {/* Slot counters row */}
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-8">
               {[
                 { value: '12', label: 'Slots Left' },
@@ -642,7 +748,6 @@ const StrengthChallenge: FC = () => {
               ))}
             </div>
 
-            {/* Progress bar */}
             <div className="max-w-sm mx-auto mb-8">
               <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-1.5 opacity-70">
                 <span>Spots Filled</span>
@@ -661,7 +766,7 @@ const StrengthChallenge: FC = () => {
               Claim My Spot Now
             </button>
           </div>
-        </section>
+        </section> */}
 
         {/* ── FAQ ──────────────────────────────────────────────────────── */}
         <section className="py-16 sm:py-20" id="faq">
