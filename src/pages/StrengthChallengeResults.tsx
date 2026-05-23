@@ -25,13 +25,29 @@ const STATUS_STYLES: Record<Status, string> = {
   rejected: 'bg-red-500/15 text-red-400 border-red-500/30',
 };
 
+const ADMIN_PASSWORD = process.env.REACT_APP_ADMIN_PASSWORD || 'unifitz@admin';
+
 const StrengthChallengeResults: FC = () => {
+  const [authed, setAuthed] = useState(() => sessionStorage.getItem('admin_authed') === '1');
+  const [pwInput, setPwInput] = useState('');
+  const [pwError, setPwError] = useState(false);
   const [rows, setRows] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState<'all' | Status>('all');
   const [search, setSearch] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pwInput === ADMIN_PASSWORD) {
+      sessionStorage.setItem('admin_authed', '1');
+      setAuthed(true);
+    } else {
+      setPwError(true);
+      setPwInput('');
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -73,6 +89,36 @@ const StrengthChallengeResults: FC = () => {
     verified: rows.filter((r) => r.status === 'verified').length,
     rejected: rows.filter((r) => r.status === 'rejected').length,
   };
+
+  if (!authed) {
+    return (
+      <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center px-4">
+        <div className="bg-[#1a1a1a] border border-[#d4af37]/30 rounded-2xl p-8 w-full max-w-sm shadow-[0_0_40px_rgba(212,175,55,0.1)]">
+          <div className="text-center mb-6">
+            <div className="text-[#f2ca50] font-black text-xl uppercase tracking-tight mb-1">UNIFITZ Admin</div>
+            <div className="text-[#99907c] text-sm">Enter password to continue</div>
+          </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <input
+              type="password"
+              value={pwInput}
+              onChange={(e) => { setPwInput(e.target.value); setPwError(false); }}
+              placeholder="Password"
+              autoFocus
+              className={`w-full bg-[#201f1f] border ${pwError ? 'border-red-400' : 'border-[#99907c]/30'} rounded-lg px-4 h-12 text-[#e5e2e1] placeholder:text-[#99907c] focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] outline-none text-sm font-lexend transition-all`}
+            />
+            {pwError && <p className="text-red-400 text-xs">Wrong password.</p>}
+            <button
+              type="submit"
+              className="w-full bg-[#d4af37] text-[#3c2f00] h-12 rounded-xl font-black text-sm hover:bg-[#e9c349] transition-all"
+            >
+              Enter
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
