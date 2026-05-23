@@ -152,7 +152,11 @@ GoldSelect.displayName = 'GoldSelect';
 
 // ─── Main Page ─────────────────────────────────────────────────────────────
 const StrengthChallenge: FC = () => {
-  const [country, setCountry] = useState<Country | null>(null);
+  const [country, setCountry] = useState<Country | null>(() => {
+    const param = new URLSearchParams(window.location.search).get('country')?.toLowerCase();
+    if (param === 'india' || param === 'bahrain' || param === 'usa') return param as Country;
+    return null;
+  });
   const [countdown, setCountdown] = useState({ d: 0, h: 0, m: 0, s: 0 });
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
