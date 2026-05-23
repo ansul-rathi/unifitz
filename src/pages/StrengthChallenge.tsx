@@ -630,20 +630,7 @@ const StrengthChallenge: FC = () => {
 
                     {/* Payment Info */}
                     <div className="bg-[#d4af37]/8 border border-[#d4af37]/30 rounded-xl p-4 sm:p-5">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs font-black uppercase tracking-widest text-[#d0c5af]">Step 1 — Pay Registration Fee</p>
-                        {cfg && (
-                          <button
-                            type="button"
-                            onClick={() => setCountry(null)}
-                            className="flex items-center gap-1.5 text-[10px] text-[#99907c] hover:text-[#f2ca50] transition-colors"
-                          >
-                            <span className="text-base">{cfg.flag}</span>
-                            <span>{cfg.label}</span>
-                            <span className="material-symbols-outlined text-xs">edit</span>
-                          </button>
-                        )}
-                      </div>
+                      <p className="text-xs font-black uppercase tracking-widest text-[#d0c5af] mb-2">Step 1 — Pay Registration Fee</p>
                       <p className="text-[#d0c5af] text-sm mb-1">Amount: <span className="text-[#f2ca50] font-black">{cfg?.amount ?? '—'}</span></p>
                       <p className="text-[#d0c5af] text-sm mb-3">Send via {cfg?.paymentMethod ?? '—'}:</p>
                       <div className="flex items-center gap-3 bg-[#201f1f] border border-[#d4af37]/30 rounded-lg px-4 py-3">
