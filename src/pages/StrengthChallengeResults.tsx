@@ -32,11 +32,13 @@ const StrengthChallengeResults: FC = () => {
   const [pwInput, setPwInput] = useState('');
   const [pwError, setPwError] = useState(false);
   const [rows, setRows] = useState<Registration[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(authed);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState<'all' | Status>('all');
   const [search, setSearch] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
+
+  const hasEnvConfig = !!(process.env.REACT_APP_SUPABASE_URL && process.env.REACT_APP_SUPABASE_ANON_KEY);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,27 +53,53 @@ const StrengthChallengeResults: FC = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const { data, error: err } = await supabase
-      .from('strength_challenge_registrations')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (err) setError(err.message);
-    else setRows(data as Registration[]);
-    setLoading(false);
+    setError('');
+    try {
+      const { data, error: err } = await supabase
+        .from('strength_challenge_registrations')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (err) setError(err.message);
+      else setRows(data as Registration[]);
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred while fetching registrations.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    if (authed) {
+      fetchData();
+    }
+  }, [authed]);
 
   const updateStatus = async (id: string, status: Status) => {
     setUpdating(id);
-    await supabase.from('strength_challenge_registrations').update({ status }).eq('id', id);
-    setRows((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
-    setUpdating(null);
+    setError('');
+    try {
+      const { error: err } = await supabase.from('strength_challenge_registrations').update({ status }).eq('id', id);
+      if (err) setError(err.message);
+      else setRows((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred while updating status.');
+    } finally {
+      setUpdating(null);
+    }
   };
 
   const getScreenshotUrl = async (path: string) => {
-    const { data } = await supabase.storage.from('payment-screenshots').createSignedUrl(path, 3600);
-    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+    setError('');
+    try {
+      const { data, error: err } = await supabase.storage.from('payment-screenshots').createSignedUrl(path, 3600);
+      if (err) setError(err.message);
+      else if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred while generating screenshot link.');
+    }
   };
 
   const filtered = rows
@@ -98,6 +126,12 @@ const StrengthChallengeResults: FC = () => {
             <div className="text-[#f2ca50] font-black text-xl uppercase tracking-tight mb-1">UNIFITZ Admin</div>
             <div className="text-[#99907c] text-sm">Enter password to continue</div>
           </div>
+          {!hasEnvConfig && (
+            <div className="bg-red-950/40 border border-red-500/30 text-red-300 p-3.5 rounded-xl text-xs leading-relaxed text-left mb-5">
+              <span className="font-bold block mb-1">⚠️ Setup Required</span>
+              Supabase environment variables are missing in this environment. Please configure <code>REACT_APP_SUPABASE_URL</code> and <code>REACT_APP_SUPABASE_ANON_KEY</code> in your hosting settings.
+            </div>
+          )}
           <form onSubmit={handleLogin} className="space-y-4">
             <input
               type="password"
