@@ -70,16 +70,14 @@ const schema = z.object({
   payment_screenshot: z
     .any()
     .refine((files) => {
-      return files && files instanceof FileList && files.length > 0;
-    }, 'Payment screenshot is required')
-    .refine((files) => {
       if (!files || !(files instanceof FileList) || files.length === 0) return true;
       return files[0].size <= 5 * 1024 * 1024;
     }, 'File must be under 5 MB')
     .refine((files) => {
       if (!files || !(files instanceof FileList) || files.length === 0) return true;
       return ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(files[0].type);
-    }, 'Only JPG, PNG or WebP accepted'),
+    }, 'Only JPG, PNG or WebP accepted')
+    .optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -215,16 +213,16 @@ const StrengthChallenge: FC = () => {
     setSubmitError('');
     try {
       let screenshotUrl: string | null = null;
-      const file = data.payment_screenshot[0];
-      const ext = file.name.split('.').pop();
-      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-
-      const { error: upErr } = await supabase.storage
-        .from('payment-screenshots')
-        .upload(path, file, { cacheControl: '3600', upsert: false });
-
-      if (upErr) throw new Error(upErr.message);
-      screenshotUrl = path;
+      const file = data.payment_screenshot?.[0];
+      if (file) {
+        const ext = file.name.split('.').pop();
+        const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from('payment-screenshots')
+          .upload(path, file, { cacheControl: '3600', upsert: false });
+        if (upErr) throw new Error(upErr.message);
+        screenshotUrl = path;
+      }
 
       const { error: insertErr } = await supabase.from('strength_challenge_registrations').insert({
         full_name: data.full_name,
@@ -642,7 +640,7 @@ const StrengthChallenge: FC = () => {
 
                     {/* Payment Screenshot */}
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold tracking-widest uppercase text-[#d0c5af]">Step 2 — Upload Screenshot * <span className="normal-case font-normal text-[#99907c]">(JPG/PNG, max 5 MB)</span></label>
+                      <label className="text-xs font-bold tracking-widest uppercase text-[#d0c5af]">Step 2 — Upload Screenshot <span className="normal-case font-normal text-[#99907c]">(optional · JPG/PNG, max 5 MB)</span></label>
                       <label
                         htmlFor="payment_screenshot"
                         className={`flex flex-col items-center justify-center gap-3 w-full min-h-[120px] p-5 bg-[#d4af37]/5 border-2 border-dashed ${errors.payment_screenshot ? 'border-red-400' : 'border-[#d4af37]/30'} rounded-xl cursor-pointer hover:border-[#d4af37]/60 transition-all`}
