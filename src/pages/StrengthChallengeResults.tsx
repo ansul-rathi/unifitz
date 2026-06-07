@@ -160,7 +160,7 @@ const StrengthChallengeResults: FC = () => {
   return (
     <>
       <Helmet>
-        <title>30-Day Challenge Results | Unifitz Admin</title>
+        <title>21-Day Challenge Results | Unifitz Admin</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
@@ -170,7 +170,7 @@ const StrengthChallengeResults: FC = () => {
           <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-4">
             <div>
               <div className="text-[#f2ca50] font-black text-lg uppercase tracking-tight">UNIFITZ Admin</div>
-              <div className="text-[#d0c5af] text-xs mt-0.5">30-Day Strength Challenge — Registrations</div>
+              <div className="text-[#d0c5af] text-xs mt-0.5">21-Day Strength Challenge — Registrations</div>
             </div>
             <button
               onClick={fetchData}

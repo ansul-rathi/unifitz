@@ -83,14 +83,14 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 // ─── Constants ─────────────────────────────────────────────────────────────
-const CHALLENGE_START = new Date('June 1, 2026 00:00:00').getTime();
+const CHALLENGE_START = new Date('June 10, 2026 00:00:00').getTime();
 const GOALS = ['Weight Loss', 'Muscle Gain', 'Stamina', 'Flexibility'];
 const EXPERIENCE = ['Beginner', 'Intermediate', 'Advanced'];
 // const FEATURES = [
 //   { icon: 'fitness_center', title: 'Daily Strength Workouts', desc: 'Progressive overload plans for home or gym — no experience needed.' },
 //   { icon: 'restaurant', title: 'Nutrition Guidance', desc: 'High-protein Indian meal plans tailored for sustainable fat loss.' },
 //   { icon: 'groups', title: 'WhatsApp Community', desc: '24/7 access to coaches and 100+ participants on the same journey.' },
-//   { icon: 'verified', title: 'Accountability Check-ins', desc: 'Daily coach check-ins to keep you on track through all 30 days.' },
+//   { icon: 'verified', title: 'Accountability Check-ins', desc: 'Daily coach check-ins to keep you on track through all 21 days.' },
 //   { icon: 'bolt', title: 'Weekly Live Sessions', desc: 'High-energy live calls to boost motivation and correct form.' },
 //   { icon: 'trending_up', title: 'Progress Tracking', desc: 'Visual metrics and reward systems to celebrate every milestone.' },
 // ];
@@ -105,7 +105,7 @@ const EXPERIENCE = ['Beginner', 'Intermediate', 'Advanced'];
 //   { n: '3', label: 'Upload', desc: 'Share payment screenshot.' },
 //   { n: '4', label: 'Verify', desc: 'Our team verifies your slot.' },
 //   { n: '5', label: 'Join Group', desc: 'Get added to the community.' },
-//   { n: '6', label: 'Start', desc: 'June 1st, 2026 🔥' },
+//   { n: '6', label: 'Start', desc: 'June 10th, 2026 🔥' },
 // ];
 const FAQS = [
   { q: 'Do I need any equipment?', a: 'Most workouts are bodyweight-focused. A pair of dumbbells or resistance bands helps but is not mandatory.' },
@@ -277,13 +277,13 @@ const StrengthChallenge: FC = () => {
       )}
 
       <Helmet>
-        <title>30-Day Strength Challenge | Unifitz</title>
-        <meta name="description" content="Join the Unifitz 30-Day Strength Challenge. Daily workouts, nutrition guidance and live coaching for Indian women & men. Starting June 1, 2026. Register now." />
-        <link rel="canonical" href="https://unifitz.in/30-days-strength-challenge" />
-        <meta property="og:title" content="30-Day Strength Challenge | Unifitz" />
-        <meta property="og:description" content="Transform in 30 days with daily strength workouts, nutrition plans and WhatsApp community support." />
+        <title>21-Day Strength Challenge | Unifitz</title>
+        <meta name="description" content="Join the Unifitz 21-Day Strength Challenge. Daily workouts, nutrition guidance and live coaching for Indian women & men. Starting June 10, 2026. Register now." />
+        <link rel="canonical" href="https://unifitz.in/21-days-strength-challenge" />
+        <meta property="og:title" content="21-Day Strength Challenge | Unifitz" />
+        <meta property="og:description" content="Transform in 21 days with daily strength workouts, nutrition plans and WhatsApp community support." />
         <meta property="og:image" content="https://unifitz.in/og-image.jpg" />
-        <meta property="og:url" content="https://unifitz.in/30-days-strength-challenge" />
+        <meta property="og:url" content="https://unifitz.in/21-days-strength-challenge" />
       </Helmet>
 
       <div className="bg-[#131313] text-[#e5e2e1] font-lexend min-h-screen">
@@ -295,7 +295,7 @@ const StrengthChallenge: FC = () => {
               UNI<span className="text-white">FITZ</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
-              {[['challenge', 'The Challenge'], ['success', 'Results'], ['register', 'Register'], ['faq', 'FAQ']].map(([id, label]) => (
+              {[['register', 'Register'], ['faq', 'FAQ']].map(([id, label]) => (
                 <button key={id} onClick={() => scrollTo(id)} className="text-[#d0c5af] hover:text-[#f2ca50] transition-colors font-semibold text-sm tracking-wide">{label}</button>
               ))}
             </div>
@@ -317,7 +317,7 @@ const StrengthChallenge: FC = () => {
           </nav>
           {mobileOpen && (
             <div className="md:hidden bg-[#131313]/98 backdrop-blur-2xl border-t border-[#d4af37]/10 px-4 py-4 flex flex-col gap-1">
-              {[['challenge', 'The Challenge'], ['success', 'Transformations'], ['register', 'Register'], ['faq', 'FAQ']].map(([id, label]) => (
+              {[['register', 'Register'], ['faq', 'FAQ']].map(([id, label]) => (
                 <button key={id} onClick={() => scrollTo(id)} className="text-left px-4 py-3 text-[#d0c5af] hover:text-[#f2ca50] font-semibold text-sm rounded-xl hover:bg-white/5 transition-all">
                   {label}
                 </button>
@@ -345,12 +345,12 @@ const StrengthChallenge: FC = () => {
                 </div>
 
                 <h1 className="text-[32px] sm:text-[48px] font-bold leading-[1.15] sm:leading-[1.2] text-white">
-                  30 Days Can Change<br />
+                  21 Days Can Change<br />
                   <span className="text-[#f2ca50]">More Than Your Body</span>
                 </h1>
 
                 <p className="text-[#d0c5af] text-base sm:text-lg leading-relaxed max-w-xl">
-                  Join hundreds starting their transformation journey from June 1st with daily strength workouts, accountability & community support.
+                  Join hundreds starting their transformation journey from June 10th with daily strength workouts, accountability & community support.
                 </p>
 
                 {/* Countdown */}
@@ -405,7 +405,7 @@ const StrengthChallenge: FC = () => {
                     </div>
                     <div>
                       <div className="text-white font-bold text-sm sm:text-base">100+ Participants</div>
-                      <div className="text-[10px] sm:text-xs text-[#d0c5af]">Starting June 1st</div>
+                      <div className="text-[10px] sm:text-xs text-[#d0c5af]">Starting June 10th</div>
                     </div>
                   </div>
                 </div>
@@ -419,7 +419,7 @@ const StrengthChallenge: FC = () => {
           <div className="max-w-[1200px] mx-auto px-4 sm:px-10">
             <div className="text-center mb-10 sm:mb-16">
               <h2 className="text-[28px] sm:text-[32px] font-bold text-white mb-3">Transformations that Inspire</h2>
-              <p className="text-[#d0c5af] max-w-2xl mx-auto text-sm sm:text-base">Real people, real results. See what dedication and professional guidance can achieve in 30 days.</p>
+              <p className="text-[#d0c5af] max-w-2xl mx-auto text-sm sm:text-base">Real people, real results. See what dedication and professional guidance can achieve in 21 days.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {[
@@ -521,7 +521,7 @@ const StrengthChallenge: FC = () => {
                   <p className="text-[#f2ca50] text-xs font-black uppercase tracking-widest mb-3">Registration Confirmed</p>
                   <h2 className="text-white text-3xl sm:text-4xl font-black mb-2 leading-tight">
                     Welcome to the<br />
-                    <span className="text-[#f2ca50]">30-Day Challenge!</span>
+                    <span className="text-[#f2ca50]">21-Day Challenge!</span>
                   </h2>
                   <p className="text-[#d0c5af] text-sm sm:text-base mt-4 max-w-sm mx-auto leading-relaxed">
                     Your spot is secured. Our team will verify your payment and add you to the WhatsApp group within <span className="text-white font-bold">24 hours</span>.
@@ -531,7 +531,7 @@ const StrengthChallenge: FC = () => {
                     {[
                       { icon: 'verified', label: 'Spot Locked' },
                       { icon: 'groups', label: 'Group Access' },
-                      { icon: 'local_fire_department', label: 'June 1st' },
+                      { icon: 'local_fire_department', label: 'June 10th' },
                     ].map((item) => (
                       <div key={item.label} className="bg-[#d4af37]/10 border border-[#d4af37]/20 rounded-xl py-3 px-2 flex flex-col items-center gap-1.5">
                         <span className="material-symbols-outlined text-[#f2ca50] text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>{item.icon}</span>
@@ -727,8 +727,8 @@ const StrengthChallenge: FC = () => {
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-8">
               {[
                 { value: '12', label: 'Slots Left' },
-                { value: 'June 1', label: 'Start Date' },
-                { value: '30', label: 'Day Program' },
+                { value: 'June 10', label: 'Start Date' },
+                { value: '21', label: 'Day Program' },
               ].map((s) => (
                 <div key={s.label} className="bg-[#3c2f00]/15 border border-[#3c2f00]/20 backdrop-blur-sm px-6 py-4 rounded-2xl min-w-[100px]">
                   <div className="text-2xl sm:text-3xl font-black">{s.value}</div>
@@ -796,7 +796,7 @@ const StrengthChallenge: FC = () => {
               onClick={() => scrollTo('register')}
               className="bg-[#d4af37] text-[#3c2f00] px-10 sm:px-14 py-5 sm:py-6 rounded-full font-black text-base sm:text-xl hover:bg-[#e9c349] active:scale-95 transition-all shadow-[0_0_50px_rgba(212,175,55,0.4)]"
             >
-              Join The 30 Days Challenge
+              Join The 21 Days Challenge
             </button>
           </div>
         </section>
@@ -822,7 +822,7 @@ const StrengthChallenge: FC = () => {
                   <li><a href="/" className="hover:text-[#f2ca50] transition-colors">Home</a></li>
                   <li><button onClick={() => scrollTo('challenge')} className="hover:text-[#f2ca50] transition-colors">The Challenge</button></li>
                   <li><button onClick={() => scrollTo('register')} className="hover:text-[#f2ca50] transition-colors">Register</button></li>
-                  {/* <li><a href="/30-days-strength-challenge/results" className="hover:text-[#f2ca50] transition-colors">Results</a></li> */}
+                  {/* <li><a href="/21-days-strength-challenge/results" className="hover:text-[#f2ca50] transition-colors">Results</a></li> */}
                 </ul>
               </div>
               <div>

@@ -19,8 +19,8 @@ const App: FC = () => {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/21-days" element={<Day21Challenge />} />
-              <Route path="/30-days-strength-challenge" element={<StrengthChallenge />} />
-              <Route path="/30-days-strength-challenge/results" element={<StrengthChallengeResults />} />
+              <Route path="/21-days-strength-challenge" element={<StrengthChallenge />} />
+              <Route path="/21-days-strength-challenge/results" element={<StrengthChallengeResults />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="*" element={<NotFound />} />

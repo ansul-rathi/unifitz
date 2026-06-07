@@ -2,12 +2,12 @@ import { FC, useState, useEffect } from 'react';
 import WhatsAppIcon from './WhatsAppIcon';
 import { WA_TRIAL } from '../../constants/contact';
 
-const links = [
+const links: { label: string; href: string; highlight?: boolean }[] = [
   { label: 'Workouts', href: '#workouts' },
   { label: 'Coaches', href: '#coaches' },
   { label: 'Community', href: '#community' },
   { label: 'Programs', href: '#programs' },
-  { label: '21-Day Challenge', href: '/21-days', highlight: true },
+  // { label: '21-Day Challenge', href: '/21-days', highlight: true },
 ];
 
 const NavBar: FC = () => {
