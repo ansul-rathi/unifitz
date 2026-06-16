@@ -167,3 +167,4 @@ src/
     teacher/ Schedule Students Announcements
     admin/   Overview Challenges Users Referrals Badges Leads Revenue
 ```
+### New Plan
