@@ -6,6 +6,7 @@ import Auth from './pages/Auth';
 import Onboarding from './pages/Onboarding';
 import RecipeDetail from './pages/RecipeDetail';
 import StaffProfile from './pages/StaffProfile';
+import NotFound from './pages/NotFound';
 import DashboardLayout from './components/DashboardLayout';
 
 import ClientHome from './pages/client/Home';
@@ -94,7 +95,7 @@ export default function App() {
         <Route path="profile" element={<StaffProfile />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
