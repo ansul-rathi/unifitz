@@ -1,0 +1,27 @@
+// Single source of truth for business contact + social links.
+// Update these once and the landing page, WhatsApp button, footer and
+// SEO/JSON-LD all pick them up.
+
+export const BUSINESS = {
+  name: 'UniFit',
+  // wa.me needs digits only, country code first, no + or spaces.
+  whatsappNumber: '919810000000',
+  phoneDisplay: '+91 98100 00000',
+  email: 'hello@unifit.in',
+  area: 'Jaipur',
+  region: 'Rajasthan',
+  country: 'India',
+  addressLine: 'Jaipur, Rajasthan, India',
+  url: 'https://unifit.in',
+  socials: {
+    instagram: 'https://instagram.com/unifit',
+    facebook: 'https://facebook.com/unifit',
+    youtube: 'https://youtube.com/@unifit',
+  },
+};
+
+export const WA_PREFILL = "Hi UniFit! I'd like to know more about the free fitness challenge.";
+
+export function waLink(text = WA_PREFILL) {
+  return `https://wa.me/${BUSINESS.whatsappNumber}?text=${encodeURIComponent(text)}`;
+}
