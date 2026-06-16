@@ -29,6 +29,7 @@ import AdminReferrals from './pages/admin/Referrals';
 import AdminRevenue from './pages/admin/Revenue';
 import AdminBadges from './pages/admin/Badges';
 import AdminLeads from './pages/admin/Leads';
+import AdminReports from './pages/admin/Reports';
 
 const HOME_BY_ROLE = { admin: '/admin', teacher: '/teacher', client: '/app' };
 
@@ -86,6 +87,7 @@ export default function App() {
 
       <Route path="/admin" element={<Protected role="admin"><DashboardLayout /></Protected>}>
         <Route index element={<AdminOverview />} />
+        <Route path="reports" element={<AdminReports />} />
         <Route path="challenges" element={<AdminChallenges />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="referrals" element={<AdminReferrals />} />

@@ -48,6 +48,7 @@ create table public.challenges (
   start_date date,
   status challenge_status not null default 'upcoming',
   poster_url text,
+  is_published boolean not null default true,
   created_at timestamptz not null default now()
 );
 
@@ -413,7 +414,7 @@ create policy "admin full profiles" on public.profiles
 -- challenges: everyone logged-in can browse (landing/join lists), admin writes,
 -- teacher updates own.
 create policy "challenges readable" on public.challenges
-  for select using (auth.role() = 'authenticated');
+  for select using (is_published = true or get_my_role() = 'admin');
 create policy "admin writes challenges" on public.challenges
   for all using (get_my_role() = 'admin');
 create policy "teacher updates own challenge" on public.challenges

@@ -8,11 +8,6 @@ import { useToast } from '../../context/ToastContext';
 import { payWithRazorpay, payWithCash } from '../../lib/razorpay';
 import { Card, Spinner, ProgressBar, EmptyState, Avatar } from '../../components/ui';
 
-function dayOf(challenge) {
-  if (!challenge.start_date) return 0;
-  const diff = Math.floor((Date.now() - new Date(challenge.start_date)) / 86400_000) + 1;
-  return Math.min(Math.max(diff, 0), challenge.duration_days);
-}
 
 export default function ClientChallenges() {
   const { profile, session } = useAuth();
@@ -21,6 +16,7 @@ export default function ClientChallenges() {
   const [challenges, setChallenges] = useState([]);
   const [enrolled, setEnrolled] = useState(new Set());
   const [pending, setPending] = useState(new Set());      // challenge ids awaiting cash verification
+  const [sessionCounts, setSessionCounts] = useState({}); // challenge_id → { total, done }
   const [payFor, setPayFor] = useState(null);             // series being paid for
   const [collectors, setCollectors] = useState([]);
   const [mode, setMode] = useState(null);                 // 'cash'
@@ -28,14 +24,18 @@ export default function ClientChallenges() {
   const [busy, setBusy] = useState(false);
 
   async function load() {
-    const [{ data: ch }, { data: enr }, { data: pays }] = await Promise.all([
+    const [{ data: ch }, { data: enr }, { data: pays }, { data: ses }] = await Promise.all([
       supabase.from('challenges').select('*').order('start_date'),
       supabase.from('enrollments').select('challenge_id').eq('user_id', profile.id),
       supabase.from('payments').select('challenge_id, status').eq('user_id', profile.id).eq('status', 'pending_verification'),
+      supabase.from('sessions').select('challenge_id, completed'),
     ]);
     setChallenges(ch ?? []);
     setEnrolled(new Set((enr ?? []).map(e => e.challenge_id)));
     setPending(new Set((pays ?? []).map(p => p.challenge_id)));
+    const counts = {};
+    for (const s of ses ?? []) { (counts[s.challenge_id] ??= { total: 0, done: 0 }); counts[s.challenge_id].total++; if (s.completed) counts[s.challenge_id].done++; }
+    setSessionCounts(counts);
     setLoading(false);
   }
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [profile.id]);
@@ -102,7 +102,8 @@ export default function ClientChallenges() {
 
       <div className="grid gap-5 md:grid-cols-2">
         {challenges.map(c => {
-          const day = dayOf(c);
+          const sc = sessionCounts[c.id] ?? { total: 0, done: 0 };
+          const pct = sc.total ? Math.round((sc.done / sc.total) * 100) : 0;
           const isIn = enrolled.has(c.id);
           const isPending = pending.has(c.id);
           return (
@@ -126,10 +127,10 @@ export default function ClientChallenges() {
                 <p className="mt-3 text-xs font-semibold text-slate-500">
                   {c.batch_name && <>Batch: {c.batch_name} · </>}{c.duration_days} days
                 </p>
-                {c.status === 'active' && (
+                {sc.total > 0 && (
                   <div className="mt-3">
-                    <ProgressBar value={day} max={c.duration_days} />
-                    <p className="mt-1 text-xs text-slate-500">{day} / {c.duration_days} days</p>
+                    <ProgressBar value={sc.done} max={sc.total} />
+                    <p className="mt-1 text-xs text-slate-500">{sc.done} / {sc.total} sessions done ({pct}%)</p>
                   </div>
                 )}
                 <div className="mt-5">

@@ -1,6 +1,7 @@
 // Small shared UI primitives used across all dashboards.
 import { useEffect, useState } from 'react';
-import { Loader2, Music, Flower2, Brain, Dumbbell, Weight, Activity } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Loader2, Music, Flower2, Brain, Dumbbell, Weight, Activity, ChevronRight } from 'lucide-react';
 
 // Class types + their at-a-glance icons (tooltip reinforces, icon stands alone).
 export const CLASS_TYPES = [
@@ -44,17 +45,23 @@ export function Card({ children, className = '' }) {
   return <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm ${className}`}>{children}</div>;
 }
 
-export function StatCard({ icon: Icon, label, value, sub, accent = 'text-brand-500', alert = false }) {
-  return (
-    <Card className={`p-4 md:p-5 ${alert ? 'border-red-200 bg-red-50' : ''}`}>
+export function StatCard({ icon: Icon, label, value, sub, accent = 'text-brand-500', alert = false, to, onClick }) {
+  const clickable = !!(to || onClick);
+  const inner = (
+    <>
       <div className="flex items-center gap-2 text-slate-500 text-xs font-semibold uppercase tracking-wide">
         {Icon && <Icon className={`w-4 h-4 ${alert ? 'text-red-500' : accent}`} />}
         {label}
+        {clickable && <ChevronRight className="w-3.5 h-3.5 ml-auto text-slate-300" />}
       </div>
       <p className={`mt-2 font-display text-2xl md:text-3xl font-bold ${alert ? 'text-red-600' : 'text-slate-900'}`}>{value}</p>
       {sub && <p className="text-xs text-slate-500 mt-1">{sub}</p>}
-    </Card>
+    </>
   );
+  const cls = `block p-4 md:p-5 rounded-2xl border bg-white ${alert ? 'border-red-200 bg-red-50' : 'border-slate-200'} ${clickable ? 'shadow-sm hover:shadow-md hover:border-brand-300 transition-all duration-200 cursor-pointer' : 'shadow-sm'}`;
+  if (to) return <Link to={to} className={cls}>{inner}</Link>;
+  if (onClick) return <button onClick={onClick} className={`${cls} text-left w-full`}>{inner}</button>;
+  return <div className={cls}>{inner}</div>;
 }
 
 export function ProgressBar({ value, max, className = '' }) {

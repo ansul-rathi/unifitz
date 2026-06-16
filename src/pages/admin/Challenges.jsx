@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Loader2, X, Video, ImagePlus, Users, IndianRupee, CalendarDays, Layers } from 'lucide-react';
+import { Plus, Pencil, Loader2, X, Video, ImagePlus, Users, IndianRupee, CalendarDays, Layers, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
 import { compressImage } from '../../lib/compressImage';
 import { createZoomMeeting } from '../../lib/zoom';
 import { Card, Spinner, EmptyState, SessionThumb, CLASS_TYPES, Avatar, StatCard } from '../../components/ui';
 
-const EMPTY = { name: '', description: '', duration_days: 30, is_free: true, price: '', currency: 'INR', teacher_id: '', batch_name: '', start_date: '', status: 'upcoming', poster_url: '', teacherIds: [], poster: null };
+const EMPTY = { name: '', description: '', duration_days: 30, is_free: true, price: '', currency: 'INR', teacher_id: '', batch_name: '', start_date: '', status: 'upcoming', poster_url: '', is_published: true, teacherIds: [], poster: null };
 
 // Fresh Add-session defaults — today's date, 7:00 PM start.
 function freshSession() {
   return {
-    day_number: '', title: '', description: '', category: 'Zumba',
+    day_number: '', title: '', description: '', category: 'Zumba', type: 'live',
+    recording_link: '',
     date: new Date().toISOString().slice(0, 10),
     time: '19:00', poster: null,
   };
@@ -36,7 +37,7 @@ export default function AdminChallenges() {
       supabase.from('challenges').select('*').order('created_at'),
       supabase.from('profiles').select('id, full_name').eq('role', 'teacher'),
       supabase.from('enrollments').select('challenge_id'),
-      supabase.from('sessions').select('challenge_id'),
+      supabase.from('sessions').select('challenge_id, completed'),
       supabase.from('payments').select('challenge_id, amount, status'),
       supabase.from('challenge_teachers').select('challenge_id, teacher_id'),
       supabase.from('profiles').select('id, full_name, avatar_url'),
@@ -46,9 +47,9 @@ export default function AdminChallenges() {
 
     const nameMap = Object.fromEntries((profs ?? []).map(p => [p.id, p]));
     const agg = {};
-    for (const c of ch ?? []) agg[c.id] = { enrolled: 0, sessions: 0, gross: 0, teachers: [] };
+    for (const c of ch ?? []) agg[c.id] = { enrolled: 0, sessions: 0, completed: 0, gross: 0, teachers: [] };
     for (const e of enr ?? []) if (agg[e.challenge_id]) agg[e.challenge_id].enrolled++;
-    for (const s of ses ?? []) if (agg[s.challenge_id]) agg[s.challenge_id].sessions++;
+    for (const s of ses ?? []) if (agg[s.challenge_id]) { agg[s.challenge_id].sessions++; if (s.completed) agg[s.challenge_id].completed++; }
     for (const p of pays ?? []) if (agg[p.challenge_id] && ['paid', 'verified'].includes(p.status)) agg[p.challenge_id].gross += Number(p.amount);
     for (const ct of cts ?? []) if (agg[ct.challenge_id]) agg[ct.challenge_id].teachers.push(nameMap[ct.teacher_id]);
     setStats(agg);
@@ -80,6 +81,7 @@ export default function AdminChallenges() {
         teacher_id: ids[0] || null,  // keep legacy lead-teacher in sync
         batch_name: editing.batch_name,
         start_date: editing.start_date || null, status: editing.status,
+        is_published: editing.is_published !== false,
       };
       let challengeId = editing.id;
       if (challengeId) {
@@ -118,6 +120,13 @@ export default function AdminChallenges() {
     }
   }
 
+  async function togglePublish(c) {
+    const { error } = await supabase.from('challenges').update({ is_published: !c.is_published }).eq('id', c.id);
+    if (error) return toast(error.message, 'error');
+    toast(c.is_published ? 'Series hidden from students & teachers' : 'Series published');
+    load();
+  }
+
   async function openSessions(c) {
     setSessionsFor(c);
     const { data } = await supabase.from('sessions').select('*').eq('challenge_id', c.id).order('day_number');
@@ -128,6 +137,7 @@ export default function AdminChallenges() {
     e.preventDefault();
     setBusy(true);
     try {
+      const isRec = newSession.type === 'recording';
       const { data: created, error } = await supabase.from('sessions').insert({
         challenge_id: sessionsFor.id,
         day_number: +newSession.day_number,
@@ -136,7 +146,9 @@ export default function AdminChallenges() {
         category: newSession.category || null,
         scheduled_at: newSession.date && newSession.time ? new Date(`${newSession.date}T${newSession.time}`).toISOString() : null,
         duration_minutes: 60,
-        session_type: 'live',
+        session_type: isRec ? 'recording' : 'live',
+        completed: isRec,
+        recording_link: isRec ? (newSession.recording_link || null) : null,
       }).select('id').single();
       if (error) throw error;
 
@@ -149,11 +161,15 @@ export default function AdminChallenges() {
         await supabase.from('sessions').update({ poster_url: pub.publicUrl }).eq('id', created.id);
       }
 
-      try {
-        await createZoomMeeting(created.id);
-        toast('Session added + Zoom meeting created');
-      } catch {
-        toast('Session added (Zoom not created — check secrets)', 'error');
+      if (isRec) {
+        toast('Recording added');
+      } else {
+        try {
+          await createZoomMeeting(created.id);
+          toast('Session added + Zoom meeting created');
+        } catch {
+          toast('Session added (Zoom not created — check secrets)', 'error');
+        }
       }
       setNewSession(freshSession());
       setSessDragging(false);
@@ -191,13 +207,16 @@ export default function AdminChallenges() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {rows.map(c => {
-            const st = stats[c.id] ?? { enrolled: 0, sessions: 0, gross: 0, teachers: [] };
-            const day = c.start_date ? Math.min(Math.max(Math.floor((Date.now() - new Date(c.start_date)) / 86400000) + 1, 0), c.duration_days) : 0;
+            const st = stats[c.id] ?? { enrolled: 0, sessions: 0, completed: 0, gross: 0, teachers: [] };
+            const pct = st.sessions ? Math.round((st.completed / st.sessions) * 100) : 0;
             return (
-              <Card key={c.id} className="overflow-hidden flex flex-col">
-                {c.poster_url
-                  ? <img src={c.poster_url} alt={c.name} className="w-full aspect-[16/7] object-cover" />
-                  : <div className="w-full aspect-[16/7] bg-gradient-to-br from-brand-400 to-orange-600 flex items-center justify-center"><Layers className="w-8 h-8 text-white/80" /></div>}
+              <Card key={c.id} className={`overflow-hidden flex flex-col ${c.is_published ? '' : 'opacity-70'}`}>
+                <div className="relative">
+                  {c.poster_url
+                    ? <img src={c.poster_url} alt={c.name} className="w-full aspect-[16/7] object-cover" />
+                    : <div className="w-full aspect-[16/7] bg-gradient-to-br from-brand-400 to-orange-600 flex items-center justify-center"><Layers className="w-8 h-8 text-white/80" /></div>}
+                  {!c.is_published && <span className="absolute top-2 left-2 text-[11px] font-bold uppercase tracking-wide bg-slate-900/80 text-white px-2.5 py-1 rounded-full">Hidden</span>}
+                </div>
                 <div className="p-5 flex flex-col flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -211,15 +230,18 @@ export default function AdminChallenges() {
                       <p className="text-xs text-slate-500 mt-1 flex items-center gap-1"><CalendarDays className="w-3.5 h-3.5" /> {c.batch_name || 'No batch'} · {c.duration_days} days · starts {c.start_date ?? 'TBD'}</p>
                     </div>
                     <div className="flex gap-1.5 shrink-0">
+                      <button onClick={() => togglePublish(c)} title={c.is_published ? 'Hide from students & teachers' : 'Publish'} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500">
+                        {c.is_published ? <Eye className="w-4 h-4 text-emerald-500" /> : <EyeOff className="w-4 h-4 text-slate-400" />}
+                      </button>
                       <button onClick={() => openEdit(c)} title="Edit" className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"><Pencil className="w-4 h-4" /></button>
                       <button onClick={() => openSessions(c)} title="Sessions" className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"><Video className="w-4 h-4" /></button>
                     </div>
                   </div>
 
-                  {c.status === 'active' && (
+                  {st.sessions > 0 && (
                     <div className="mt-3">
-                      <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden"><div className="h-full bg-emerald-500 rounded-full" style={{ width: `${c.duration_days ? (day / c.duration_days) * 100 : 0}%` }} /></div>
-                      <p className="mt-1 text-[11px] text-slate-400">Day {day} of {c.duration_days}</p>
+                      <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden"><div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} /></div>
+                      <p className="mt-1 text-[11px] text-slate-400">{st.completed} of {st.sessions} sessions done ({pct}%)</p>
                     </div>
                   )}
 
@@ -270,6 +292,13 @@ export default function AdminChallenges() {
                 {['upcoming', 'active', 'completed'].map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
+
+            {/* Visibility */}
+            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 rounded-xl border border-slate-200 p-3">
+              <input type="checkbox" checked={editing.is_published !== false} onChange={e => setEditing(x => ({ ...x, is_published: e.target.checked }))} className="w-5 h-5 accent-brand-500" />
+              Visible to students &amp; teachers
+              <span className="ml-auto text-xs font-normal text-slate-400">{editing.is_published !== false ? 'Published' : 'Hidden'}</span>
+            </label>
 
             {/* Pricing */}
             <div className="rounded-xl border border-slate-200 p-3">
@@ -354,6 +383,13 @@ export default function AdminChallenges() {
               {sessions.length === 0 && <li className="py-3 text-sm text-slate-400">No sessions yet.</li>}
             </ul>
             <form onSubmit={addSession} className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4">
+              {/* Live vs Recording */}
+              <div className="col-span-2 inline-flex rounded-lg bg-slate-100 p-0.5 text-xs font-bold w-full">
+                {[['live', 'Live (Zoom)'], ['recording', 'Recording']].map(([v, l]) => (
+                  <button type="button" key={v} onClick={() => setNewSession(x => ({ ...x, type: v }))}
+                    className={`flex-1 py-2 rounded-md transition-colors duration-150 ${newSession.type === v ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>{l}</button>
+                ))}
+              </div>
               <input required type="number" min="1" placeholder="Day #" className="input !py-2 text-sm" value={newSession.day_number} onChange={e => setNewSession(x => ({ ...x, day_number: e.target.value }))} />
               <select className="input !py-2 text-sm" value={newSession.category} onChange={e => setNewSession(x => ({ ...x, category: e.target.value }))} aria-label="Class type">
                 {CLASS_TYPES.map(c => <option key={c.value} value={c.value}>{c.value}</option>)}
@@ -361,17 +397,21 @@ export default function AdminChallenges() {
               <input required placeholder="Title" className="input !py-2 text-sm col-span-2" value={newSession.title} onChange={e => setNewSession(x => ({ ...x, title: e.target.value }))} />
               <textarea placeholder="Description (optional)" rows="2" className="input !py-2 text-sm col-span-2" value={newSession.description} onChange={e => setNewSession(x => ({ ...x, description: e.target.value }))} />
               <div>
-                <label className="label !text-xs" htmlFor="admin-date">Date</label>
+                <label className="label !text-xs" htmlFor="admin-date">{newSession.type === 'recording' ? 'Posted date' : 'Date'}</label>
                 <input id="admin-date" required type="date" className="input !py-2 text-sm" value={newSession.date} onChange={e => setNewSession(x => ({ ...x, date: e.target.value }))} />
               </div>
               <div>
-                <label className="label !text-xs" htmlFor="admin-time">Start time</label>
+                <label className="label !text-xs" htmlFor="admin-time">{newSession.type === 'recording' ? 'Time' : 'Start time'}</label>
                 <input id="admin-time" required type="time" className="input !py-2 text-sm" value={newSession.time} onChange={e => setNewSession(x => ({ ...x, time: e.target.value }))} />
               </div>
-              <p className="col-span-2 flex items-center gap-2 text-xs text-slate-500">
-                <Video className="w-4 h-4 text-sky-500 shrink-0" />
-                A Zoom meeting (cloud-recorded, 60 min) is created automatically.
-              </p>
+              {newSession.type === 'recording' ? (
+                <input required type="url" placeholder="Recording link (Zoom/YouTube/Drive)" className="input !py-2 text-sm col-span-2" value={newSession.recording_link} onChange={e => setNewSession(x => ({ ...x, recording_link: e.target.value }))} />
+              ) : (
+                <p className="col-span-2 flex items-center gap-2 text-xs text-slate-500">
+                  <Video className="w-4 h-4 text-sky-500 shrink-0" />
+                  A Zoom meeting (cloud-recorded, 60 min) is created automatically.
+                </p>
+              )}
               <div className="col-span-2">
                 <label className="label !text-xs">Poster image <span className="font-normal text-slate-400">(16:9, optional)</span></label>
                 {newSession.poster ? (

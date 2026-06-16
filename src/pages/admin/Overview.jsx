@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Users, Activity, Percent, AlertTriangle, UserPlus, Download } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Users, Activity, Percent, AlertTriangle, UserPlus, Download, ArrowRight } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
@@ -88,15 +89,18 @@ export default function AdminOverview() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
-        <StatCard icon={Users} label="Total members" value={stats.members} />
-        <StatCard icon={Activity} label="Active this week" value={stats.activeThisWeek} accent="text-emerald-500" />
-        <StatCard icon={Percent} label="Avg attendance" value={`${stats.avgAttendance}%`} accent="text-sky-500" />
-        <StatCard icon={AlertTriangle} label="At-risk members" value={stats.atRisk} alert={stats.atRisk > 0} />
-        <StatCard icon={UserPlus} label="New signups (7d)" value={stats.newSignups} accent="text-violet-500" />
+        <StatCard icon={Users} label="Total members" value={stats.members} to="/admin/users?role=client" />
+        <StatCard icon={Activity} label="Active this week" value={stats.activeThisWeek} accent="text-emerald-500" to="/admin/reports#engagement" />
+        <StatCard icon={Percent} label="Avg attendance" value={`${stats.avgAttendance}%`} accent="text-sky-500" to="/admin/reports#attendance" />
+        <StatCard icon={AlertTriangle} label="At-risk members" value={stats.atRisk} alert={stats.atRisk > 0} to="/admin/reports#at-risk" />
+        <StatCard icon={UserPlus} label="New signups (7d)" value={stats.newSignups} accent="text-violet-500" to="/admin/users?sort=recent" />
       </div>
 
       <Card className="p-5">
-        <h3 className="font-bold mb-3">Attendance trend (per session)</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-bold">Attendance trend (per session)</h3>
+          <Link to="/admin/reports" className="text-sm font-semibold text-brand-600 inline-flex items-center gap-1">Full reports <ArrowRight className="w-4 h-4" /></Link>
+        </div>
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={trend}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />

@@ -3,7 +3,7 @@ import { Outlet, NavLink, Link } from 'react-router-dom';
 import {
   Home, Trophy, TrendingUp, Gift, User, Calendar, Users, Megaphone,
   LayoutDashboard, ListChecks, UserCog, Share2, IndianRupee, Flame, LogOut, Dumbbell,
-  Salad, Medal, Mailbox,
+  Salad, Medal, Mailbox, BarChart3,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -27,6 +27,7 @@ const NAV = {
   ],
   admin: [
     { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
+    { to: '/admin/reports', label: 'Reports', icon: BarChart3 },
     { to: '/admin/challenges', label: 'Series', icon: ListChecks },
     { to: '/admin/users', label: 'Users', icon: UserCog },
     { to: '/admin/referrals', label: 'Referrals', icon: Share2 },

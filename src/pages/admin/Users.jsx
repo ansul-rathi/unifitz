@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Search, UserCog, ShieldCheck, Ban, GraduationCap, UserPlus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
@@ -7,9 +8,10 @@ import AddStudentModal from '../../components/AddStudentModal';
 
 export default function AdminUsers() {
   const toast = useToast();
+  const [params] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState([]);
-  const [roleFilter, setRoleFilter] = useState('all');
+  const [roleFilter, setRoleFilter] = useState(['client', 'teacher', 'admin'].includes(params.get('role')) ? params.get('role') : 'all');
   const [q, setQ] = useState('');
   const [addOpen, setAddOpen] = useState(false);
 

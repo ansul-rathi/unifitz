@@ -14,6 +14,7 @@ import { Card, Spinner, EmptyState, Avatar, SessionThumb, CategoryIcon, CLASS_TY
 function freshAdd() {
   return {
     challenge_id: '', day_number: '', title: '', description: '', category: 'Zumba',
+    type: 'live', recording_link: '',
     date: new Date().toISOString().slice(0, 10),
     time: '19:00', duration_minutes: 60, poster: null,
   };
@@ -238,6 +239,7 @@ export default function TeacherSchedule() {
     setBusy(true);
     try {
       const challengeId = add.challenge_id || challenges[0]?.id;
+      const isRec = add.type === 'recording';
       const { data: created, error } = await supabase.from('sessions').insert({
         challenge_id: challengeId,
         day_number: +add.day_number,
@@ -246,7 +248,9 @@ export default function TeacherSchedule() {
         category: add.category || null,
         scheduled_at: add.date && add.time ? new Date(`${add.date}T${add.time}`).toISOString() : null,
         duration_minutes: +add.duration_minutes,
-        session_type: 'live',
+        session_type: isRec ? 'recording' : 'live',
+        completed: isRec,
+        recording_link: isRec ? (add.recording_link || null) : null,
       }).select('id').single();
       if (error) throw error;
 
@@ -259,13 +263,16 @@ export default function TeacherSchedule() {
         await supabase.from('sessions').update({ poster_url: pub.publicUrl }).eq('id', created.id);
       }
 
-      // Auto-create the Zoom meeting (cloud-record + registration). Best-effort:
-      // if Zoom isn't configured yet, the session still saves with the manual link.
-      try {
-        await createZoomMeeting(created.id);
-        toast('Session added + Zoom meeting created');
-      } catch {
-        toast('Session added (Zoom meeting not created — check Zoom secrets)', 'error');
+      if (isRec) {
+        toast('Recording added');
+      } else {
+        // Auto-create the Zoom meeting (best-effort).
+        try {
+          await createZoomMeeting(created.id);
+          toast('Session added + Zoom meeting created');
+        } catch {
+          toast('Session added (Zoom meeting not created — check Zoom secrets)', 'error');
+        }
       }
       setShowAdd(false);
       setAdd(freshAdd());
@@ -292,6 +299,13 @@ export default function TeacherSchedule() {
       {showAdd && (
         <Card className="p-5 animate-fade-up">
           <form onSubmit={addSession} className="grid gap-3 sm:grid-cols-2">
+            {/* Live vs Recording */}
+            <div className="sm:col-span-2 inline-flex rounded-lg bg-slate-100 p-0.5 text-sm font-bold">
+              {[['live', 'Live (Zoom)'], ['recording', 'Recording']].map(([v, l]) => (
+                <button type="button" key={v} onClick={() => setAdd(x => ({ ...x, type: v }))}
+                  className={`flex-1 py-2 rounded-md transition-colors duration-150 ${add.type === v ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>{l}</button>
+              ))}
+            </div>
             <select required className="input" value={add.challenge_id} onChange={e => setAdd(x => ({ ...x, challenge_id: e.target.value }))}>
               <option value="">Select challenge…</option>
               {challenges.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -304,18 +318,25 @@ export default function TeacherSchedule() {
             <textarea placeholder="Description (what's the class about?)" rows="2" className="input sm:col-span-2" value={add.description} onChange={e => setAdd(x => ({ ...x, description: e.target.value }))} />
 
             <div>
-              <label className="label" htmlFor="add-date">Date</label>
+              <label className="label" htmlFor="add-date">{add.type === 'recording' ? 'Posted date' : 'Date'}</label>
               <input id="add-date" required type="date" className="input" value={add.date} onChange={e => setAdd(x => ({ ...x, date: e.target.value }))} />
             </div>
             <div>
-              <label className="label" htmlFor="add-time">Start time</label>
+              <label className="label" htmlFor="add-time">{add.type === 'recording' ? 'Time' : 'Start time'}</label>
               <input id="add-time" required type="time" className="input" value={add.time} onChange={e => setAdd(x => ({ ...x, time: e.target.value }))} />
             </div>
 
-            <p className="sm:col-span-2 flex items-center gap-2 text-xs text-slate-500">
-              <Video className="w-4 h-4 text-sky-500 shrink-0" />
-              A Zoom meeting (cloud-recorded, 60 min) is created automatically — no link needed.
-            </p>
+            {add.type === 'recording' ? (
+              <div className="sm:col-span-2">
+                <label className="label" htmlFor="add-rec">Recording link</label>
+                <input id="add-rec" required type="url" placeholder="Zoom / YouTube / Drive link" className="input" value={add.recording_link} onChange={e => setAdd(x => ({ ...x, recording_link: e.target.value }))} />
+              </div>
+            ) : (
+              <p className="sm:col-span-2 flex items-center gap-2 text-xs text-slate-500">
+                <Video className="w-4 h-4 text-sky-500 shrink-0" />
+                A Zoom meeting (cloud-recorded, 60 min) is created automatically — no link needed.
+              </p>
+            )}
 
             <div className="sm:col-span-2">
               <label className="label">Poster image <span className="font-normal text-slate-400">(rectangle 16:9, optional)</span></label>
