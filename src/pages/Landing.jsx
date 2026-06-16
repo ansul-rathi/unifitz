@@ -26,7 +26,7 @@ const PROGRAMS = [
 ];
 
 const STEPS = [
-  { icon: BadgeCheck, title: 'Sign up free', desc: 'One minute, no credit card.' },
+  { icon: BadgeCheck, title: 'Book a free demo', desc: 'One minute on WhatsApp, no card.' },
   { icon: Video, title: 'Join live on Zoom', desc: 'One tap into the live class.' },
   { icon: LineChart, title: 'Track your transformation', desc: 'Weekly reports + badges.' },
 ];
@@ -47,7 +47,7 @@ const WHY = [
 ];
 
 const FAQS = [
-  { q: 'Is it really free?', a: 'Yes — the 21-Day and 30-Day challenges are 100% free right now. No credit card needed.' },
+  { q: 'Is there a free trial?', a: 'Yes — your first demo class is completely free, no credit card needed. After that, affordable monthly and quarterly plans keep you going.' },
   { q: 'Do I need any equipment?', a: 'No. A mat and some floor space is enough. Water bottles double as light weights.' },
   { q: 'What are the timings?', a: 'Morning, evening and night batches across the week — pick what fits. India + USA friendly slots.' },
   { q: 'Do I need to be fit already?', a: 'Not at all. Most members start as complete beginners; trainers scale every move to your level.' },
@@ -68,15 +68,15 @@ function useSEO(reviewAgg) {
       const [a, v] = sel.includes('property') ? ['property', sel.match(/"(.*?)"/)[1]] : ['name', sel.match(/"(.*?)"/)[1]];
       el.setAttribute(a, v); el.setAttribute('content', val);
     };
-    const desc = 'Free live online Zumba, Yoga, Meditation, Strength & Weight Training for women in Jaipur & across India. Join the free 30-day weight-loss challenge — live daily on Zoom, no gym, no credit card.';
+    const desc = 'Live online Zumba, Yoga, Meditation, Strength & Weight Training for women in Jaipur & across India. Book a free demo class — live daily on Zoom, no gym needed.';
     set('meta[name="description"]', 'content', desc);
-    set('meta[property="og:title"]', 'content', 'UniFit — Free Online Fitness Challenge for Women');
+    set('meta[property="og:title"]', 'content', 'UniFit — Online Fitness for Women · Free Demo Class');
     set('meta[property="og:description"]', 'content', desc);
     set('meta[property="og:type"]', 'content', 'website');
     set('meta[property="og:url"]', 'content', BUSINESS.url);
     set('meta[property="og:image"]', 'content', `${BUSINESS.url}/og-image.jpg`);
     set('meta[name="twitter:card"]', 'content', 'summary_large_image');
-    set('meta[name="twitter:title"]', 'content', 'UniFit — Free Online Fitness Challenge for Women');
+    set('meta[name="twitter:title"]', 'content', 'UniFit — Online Fitness for Women · Free Demo Class');
     set('meta[name="twitter:description"]', 'content', desc);
 
     let canonical = document.head.querySelector('link[rel="canonical"]');
@@ -141,7 +141,7 @@ export default function Landing() {
             </ul>
             <div className="flex items-center gap-2">
               <Link to="/auth" className="hidden sm:inline text-sm font-semibold text-slate-600 hover:text-brand-600 px-2">Login</Link>
-              <a href="#join" className="btn-primary !py-2.5 text-sm">Join Free</a>
+              <a href="#join" className="btn-primary !py-2.5 text-sm">Free Demo</a>
               <button className="lg:hidden p-2.5 rounded-lg border border-slate-200" onClick={() => setOpen(!open)} aria-label="Menu" aria-expanded={open}>
                 {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -161,16 +161,16 @@ export default function Landing() {
             <div className="max-w-6xl mx-auto px-4 md:px-6 pt-12 md:pt-20 pb-16 grid lg:grid-cols-2 gap-10 lg:items-center">
               <div>
                 <p className="inline-flex items-center gap-2 bg-brand-100 text-brand-700 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide">
-                  <Flame className="w-3.5 h-3.5" /> Day 12 live — next batch starts Monday
+                  <Flame className="w-3.5 h-3.5" /> New batch starts Monday — book your demo class
                 </p>
                 <h1 className="mt-5 font-display font-extrabold uppercase leading-[0.95] tracking-tight text-[clamp(2.5rem,7vw,4.5rem)]">
-                  Transform Your Body in 30 Days — <span className="text-brand-500">Free.</span>
+                  Transform Your Body in <span className="text-brand-500">30 Days.</span>
                 </h1>
                 <p className="mt-4 text-lg text-slate-600 max-w-lg">
-                  Live online Zumba, Yoga & Strength classes for women. No gym. No credit card. Join from home, guided by certified trainers.
+                  Live online Zumba, Yoga & Strength classes for women. No gym needed — join from home, guided by certified trainers. Start with a <strong className="text-slate-800">free demo class</strong>.
                 </p>
                 <div className="mt-7 flex flex-col sm:flex-row gap-3">
-                  <a href="#join" className="btn-primary text-base">Join the Free Challenge <ArrowRight className="w-4 h-4" /></a>
+                  <a href="#join" className="btn-primary text-base">Book a Free Demo Class <ArrowRight className="w-4 h-4" /></a>
                   <a href="#how" className="btn-secondary text-base">Watch how it works</a>
                 </div>
                 {/* Trust badges */}
@@ -213,7 +213,7 @@ export default function Landing() {
           </section>
 
           {/* ── Programs ── */}
-          <Section id="programs" title={<>Five programs.<br /><span className="text-brand-500">One free membership.</span></>}>
+          <Section id="programs" title={<>Five programs.<br /><span className="text-brand-500">One membership.</span></>}>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {PROGRAMS.map(p => (
                 <div key={p.name} className="group bg-white border border-slate-200 rounded-2xl p-5 hover:border-brand-300 hover:shadow-md transition-all duration-200">
@@ -224,7 +224,7 @@ export default function Landing() {
                 </div>
               ))}
               <a href="#join" className="flex items-center justify-center gap-2 rounded-2xl bg-brand-500 text-white font-bold p-5 hover:bg-brand-600 transition-colors duration-200">
-                Join the Free Challenge <ArrowRight className="w-4 h-4" />
+                Book a Free Demo Class <ArrowRight className="w-4 h-4" />
               </a>
             </div>
           </Section>
@@ -232,21 +232,22 @@ export default function Landing() {
           {/* ── The free offer ── */}
           <section id="offer" className="bg-slate-900 text-white">
             <div className="max-w-6xl mx-auto px-4 md:px-6 py-16 md:py-20 text-center">
-              <p className="inline-flex items-center gap-2 bg-emerald-500/15 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide">100% free right now</p>
+              <p className="inline-flex items-center gap-2 bg-emerald-500/15 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide">Free demo class — no card needed</p>
               <h2 className="mt-5 font-display font-extrabold uppercase tracking-tight leading-none text-[clamp(2rem,6vw,3.5rem)] text-white">
-                The Free 30-Day Challenge
+                Try Before You Join
               </h2>
               <p className="mt-4 text-slate-300 max-w-2xl mx-auto">
-                Live sessions, recordings, progress tracking, a personalized diet plan and a women-only community —
-                all free. <strong className="text-white">Next batch starts Monday.</strong>
+                Book a <strong className="text-white">free demo class</strong>, feel the energy, then pick a plan that fits.
+                Members get live sessions, recordings, progress tracking, a diet plan and a women-only community.
+                <strong className="text-white"> New batch starts Monday.</strong>
               </p>
               <div className="mt-7 flex flex-wrap justify-center gap-3 text-sm">
-                {['Live Zoom sessions', 'Class recordings', 'Progress tracking', 'Free diet plan', 'Supportive community'].map(x => (
+                {['Free demo class', 'Live Zoom sessions', 'Class recordings', 'Progress tracking', 'Diet plan', 'Supportive community'].map(x => (
                   <span key={x} className="inline-flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full font-semibold"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> {x}</span>
                 ))}
               </div>
               <a href="#join" className="mt-8 inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 py-4 rounded-xl text-base shadow-lg shadow-emerald-500/25 transition-colors duration-200">
-                Join the Free Challenge <ArrowRight className="w-5 h-5" />
+                Book a Free Demo Class <ArrowRight className="w-5 h-5" />
               </a>
             </div>
           </section>
@@ -286,7 +287,7 @@ export default function Landing() {
               </div>
               <div className="mt-10 text-center">
                 <a href="#join" className="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 py-4 rounded-xl text-base shadow-lg shadow-emerald-500/25 transition-colors duration-200">
-                  Start Your Transformation — Free <ArrowRight className="w-5 h-5" />
+                  Start With a Free Demo Class <ArrowRight className="w-5 h-5" />
                 </a>
               </div>
             </div>
@@ -323,9 +324,9 @@ export default function Landing() {
           <section id="join" className="bg-gradient-to-b from-white to-orange-50">
             <div className="max-w-xl mx-auto px-4 md:px-6 py-16 md:py-20">
               <h2 className="text-center font-display font-extrabold uppercase tracking-tight leading-none text-[clamp(2rem,6vw,3rem)]">
-                Join the <span className="text-brand-500">free challenge</span>
+                Book your <span className="text-brand-500">free demo class</span>
               </h2>
-              <p className="mt-3 text-center text-slate-600">Drop your details — we'll WhatsApp you the joining link. Free, no card needed.</p>
+              <p className="mt-3 text-center text-slate-600">Drop your details — we'll WhatsApp you the demo class link. No card needed.</p>
               <div className="mt-7"><LeadForm /></div>
             </div>
           </section>
@@ -347,8 +348,8 @@ export default function Landing() {
           <section className="bg-slate-900">
             <div className="max-w-6xl mx-auto px-4 md:px-6 py-16 text-center">
               <h2 className="font-display font-extrabold uppercase tracking-tight leading-none text-[clamp(2rem,5vw,3.5rem)] text-white">Your transformation starts <span className="text-brand-500">today.</span></h2>
-              <a href="#join" className="mt-7 inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 py-4 rounded-xl text-base shadow-lg shadow-emerald-500/25 transition-colors duration-200">Join the Free Challenge <ArrowRight className="w-5 h-5" /></a>
-              <p className="mt-3 text-sm text-slate-400">Free. Cancel anytime. No card needed.</p>
+              <a href="#join" className="mt-7 inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 py-4 rounded-xl text-base shadow-lg shadow-emerald-500/25 transition-colors duration-200">Book a Free Demo Class <ArrowRight className="w-5 h-5" /></a>
+              <p className="mt-3 text-sm text-slate-400">Free demo class · No card needed · Cancel anytime.</p>
             </div>
           </section>
         </main>
@@ -358,7 +359,7 @@ export default function Landing() {
           <div className="max-w-6xl mx-auto px-4 md:px-6 py-12 grid gap-10 md:grid-cols-3">
             <div>
               <span className="flex items-center gap-2 font-display text-2xl font-bold uppercase text-white"><Dumbbell className="w-6 h-6 text-brand-500" /> UniFit</span>
-              <p className="mt-3 text-sm max-w-xs">Free live online fitness classes for women — Zumba, Yoga, Meditation, Strength & Weight Training.</p>
+              <p className="mt-3 text-sm max-w-xs">Live online fitness classes for women — Zumba, Yoga, Meditation, Strength & Weight Training. Free demo class available.</p>
               <div className="mt-4 flex gap-3">
                 <a href={BUSINESS.socials.instagram} aria-label="Instagram" className="p-2.5 rounded-lg bg-slate-800 hover:bg-brand-500 transition-colors duration-200"><Instagram className="w-4 h-4" /></a>
                 <a href={BUSINESS.socials.facebook} aria-label="Facebook" className="p-2.5 rounded-lg bg-slate-800 hover:bg-brand-500 transition-colors duration-200"><Facebook className="w-4 h-4" /></a>
@@ -387,7 +388,7 @@ export default function Landing() {
 
         {/* Sticky mobile CTA + floating WhatsApp */}
         <div className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-slate-200 p-3">
-          <a href="#join" className="btn-primary w-full">Join the Free Challenge <ArrowRight className="w-4 h-4" /></a>
+          <a href="#join" className="btn-primary w-full">Book a Free Demo Class <ArrowRight className="w-4 h-4" /></a>
         </div>
         <FloatingWhatsApp />
       </div>
@@ -429,9 +430,9 @@ function LeadForm({ compact }) {
     return (
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center">
         <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
-        <p className="mt-3 font-bold text-emerald-900">You're in! 🎉</p>
-        <p className="mt-1 text-sm text-emerald-700">We'll WhatsApp you the joining link shortly.</p>
-        <a href={waLink("Hi UniFit! I just signed up for the free challenge.")} target="_blank" rel="noreferrer"
+        <p className="mt-3 font-bold text-emerald-900">You're booked! 🎉</p>
+        <p className="mt-1 text-sm text-emerald-700">We'll WhatsApp you the free demo class link shortly.</p>
+        <a href={waLink("Hi UniFit! I just booked a free demo class.")} target="_blank" rel="noreferrer"
           className="mt-4 inline-flex items-center justify-center gap-2 bg-[#25D366] text-white font-bold px-5 py-3 rounded-xl text-sm">
           Message us now
         </a>
@@ -441,7 +442,7 @@ function LeadForm({ compact }) {
 
   return (
     <form onSubmit={submit} className={`rounded-2xl border border-slate-200 bg-white p-5 ${compact ? 'shadow-lg' : 'shadow-sm'} space-y-3`}>
-      {compact && <p className="font-bold text-center">Start free in 30 seconds</p>}
+      {compact && <p className="font-bold text-center">Book your free demo class</p>}
       <input required placeholder="Your name" className="input" value={f.name} onChange={e => setF(x => ({ ...x, name: e.target.value }))} aria-label="Name" />
       <input required type="tel" placeholder="WhatsApp number" className="input" value={f.whatsapp} onChange={e => setF(x => ({ ...x, whatsapp: e.target.value }))} aria-label="WhatsApp number" />
       <select className="input" value={f.goal} onChange={e => setF(x => ({ ...x, goal: e.target.value }))} aria-label="Goal">
@@ -453,7 +454,7 @@ function LeadForm({ compact }) {
       </label>
       {err && <p className="text-sm text-red-600">{err}</p>}
       <button type="submit" disabled={busy} className="btn-primary w-full">
-        {busy && <Loader2 className="w-4 h-4 animate-spin" />} Join the Free Challenge
+        {busy && <Loader2 className="w-4 h-4 animate-spin" />} Book a Free Demo Class
       </button>
     </form>
   );

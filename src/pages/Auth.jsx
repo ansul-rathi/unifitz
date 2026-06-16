@@ -117,7 +117,7 @@ export default function Auth() {
 
           <button type="submit" disabled={busy} className="btn-primary w-full text-base">
             {busy && <Loader2 className="w-4 h-4 animate-spin" />}
-            {mode === 'login' ? 'Login' : 'Create Free Account'}
+            {mode === 'login' ? 'Login' : 'Create Account'}
           </button>
         </form>
 

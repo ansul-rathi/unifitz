@@ -20,7 +20,7 @@ export const BUSINESS = {
   },
 };
 
-export const WA_PREFILL = "Hi UniFit! I'd like to know more about the free fitness challenge.";
+export const WA_PREFILL = "Hi UniFit! I'd like to book a free demo class.";
 
 export function waLink(text = WA_PREFILL) {
   return `https://wa.me/${BUSINESS.whatsappNumber}?text=${encodeURIComponent(text)}`;

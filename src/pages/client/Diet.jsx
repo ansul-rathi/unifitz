@@ -93,7 +93,7 @@ export default function ClientDiet() {
           <span className="inline-flex w-14 h-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 mx-auto">
             <Lock className="w-7 h-7" />
           </span>
-          <h2 className="mt-4 text-xl font-bold">Complete your profile to unlock your free personalized diet plan</h2>
+          <h2 className="mt-4 text-xl font-bold">Complete your profile to unlock your personalized diet plan</h2>
           <p className="mt-2 text-sm text-slate-600 max-w-md mx-auto">
             We need your age, height, weight, activity level and goal to calculate your numbers.
           </p>
@@ -147,7 +147,7 @@ export default function ClientDiet() {
             <Sparkles className="w-5 h-5 text-violet-600 shrink-0 mt-0.5" />
             <div>
               <p className="font-bold text-violet-900 text-sm">Premium — coming soon</p>
-              <p className="text-sm text-violet-700 mt-0.5">Your free plan stays available below. New plans unlock with Premium.</p>
+              <p className="text-sm text-violet-700 mt-0.5">Your current plan stays available below. New plans unlock with Premium.</p>
             </div>
           </div>
         )}

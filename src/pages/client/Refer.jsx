@@ -28,7 +28,7 @@ export default function ClientRefer() {
 
   const link = `${window.location.origin}/auth?mode=signup&ref=${profile.referral_code}`;
   const waText = encodeURIComponent(
-    `Hey! I've been working out with UniFit — live Zumba, Yoga and Strength classes on Zoom, and the free challenge is genuinely fun. Join with my code ${profile.referral_code} and we both earn rewards: ${link}`
+    `Hey! I've been working out with UniFit — live Zumba, Yoga and Strength classes on Zoom, and it's genuinely fun. Book a free demo class with my code ${profile.referral_code} and we both earn rewards: ${link}`
   );
 
   useEffect(() => {
