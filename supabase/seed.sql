@@ -311,6 +311,18 @@ insert into public.recipes (title, category, ingredients, steps, calories, prote
 ('Quinoa Veg Pulao', 'Low-Cal', '["1 cup quinoa","Mixed veggies","1 tsp oil","Whole spices"]', '["Saute spices+veggies","Add quinoa + 2 cups water","Cook 15 min"]', 290, 11, 46, 7, 'a0000000-0000-0000-0000-000000000001'),
 ('Tofu Stir Fry', 'High Protein', '["200g tofu","Bell peppers, broccoli","Soy sauce, garlic","1 tsp oil"]', '["Pan-fry tofu","Add veggies + sauce","Stir fry 5 min"]', 300, 24, 16, 16, 'b0000000-0000-0000-0000-000000000001');
 
+-- Recipe images (keyword placeholders; swap for hosted images anytime).
+update public.recipes set image_url = 'https://loremflickr.com/800/450/' || x.kw || '?lock=' || x.lk
+from (values
+  ('Masala Oats','oats,breakfast',11),('Paneer Bhurji','paneer,indianfood',12),
+  ('Moong Dal Chilla','indianpancake,food',13),('Grilled Chicken Salad','chicken,salad',14),
+  ('Sprouts Chaat','sprouts,salad',15),('Vegetable Daliya','porridge,vegetables',16),
+  ('Banana Peanut Smoothie','smoothie,banana',17),('Egg White Omelette','omelette,eggs',18),
+  ('Roasted Makhana','snack,seeds',19),('Greek Yogurt Bowl','yogurt,berries',20),
+  ('Quinoa Veg Pulao','quinoa,rice',21),('Tofu Stir Fry','tofu,stirfry',22)
+) as x(title, kw, lk)
+where public.recipes.title = x.title;
+
 -- ───────────────────────────────
 -- 12. DEMO BADGES + POINTS (so the UI looks alive)
 -- ───────────────────────────────

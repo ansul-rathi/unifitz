@@ -25,3 +25,8 @@ export const WA_PREFILL = "Hi UniFit! I'd like to book a free demo class.";
 export function waLink(text = WA_PREFILL) {
   return `https://wa.me/${BUSINESS.whatsappNumber}?text=${encodeURIComponent(text)}`;
 }
+
+// api.whatsapp.com form (used for the custom diet-plan handoff + reusable).
+export function waSendLink(text = WA_PREFILL) {
+  return `https://api.whatsapp.com/send?phone=${BUSINESS.whatsappNumber}&text=${encodeURIComponent(text)}`;
+}

@@ -6,6 +6,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { calcBMI, bmiCategory, calcTDEE, ACTIVITY_LABELS } from '../../lib/calc';
 import { Card, Avatar } from '../../components/ui';
+import Select from '../../components/Select';
+import HeightField from '../../components/HeightField';
 import ClientRefer from './Refer';
 
 const GOAL_LABELS = { lose_weight: 'Lose weight', gain_muscle: 'Gain muscle', stay_fit: 'Stay fit' };
@@ -71,22 +73,19 @@ export default function ClientProfile() {
             <Field label="Phone"><input className="input" value={f.phone} onChange={e => setF(x => ({ ...x, phone: e.target.value }))} /></Field>
             <Field label="Age"><input type="number" className="input" value={f.age} onChange={e => setF(x => ({ ...x, age: e.target.value }))} /></Field>
             <Field label="Gender">
-              <select className="input" value={f.gender} onChange={e => setF(x => ({ ...x, gender: e.target.value }))}>
-                {['female', 'male', 'other'].map(g => <option key={g} value={g}>{g}</option>)}
-              </select>
+              <Select value={f.gender} onChange={v => setF(x => ({ ...x, gender: v }))}
+                options={[{ value: 'female', label: 'Female' }, { value: 'male', label: 'Male' }, { value: 'other', label: 'Other' }]} />
             </Field>
-            <Field label="Height (cm)"><input type="number" className="input" value={f.height_cm} onChange={e => setF(x => ({ ...x, height_cm: e.target.value }))} /></Field>
+            <div><HeightField valueCm={f.height_cm === '' ? '' : Number(f.height_cm)} onChange={v => setF(x => ({ ...x, height_cm: v }))} /></div>
             <Field label="Starting weight (kg)"><input type="number" step="0.1" className="input" value={f.starting_weight_kg} onChange={e => setF(x => ({ ...x, starting_weight_kg: e.target.value }))} /></Field>
             <Field label="Target weight (kg)"><input type="number" step="0.5" className="input" value={f.target_weight_kg} onChange={e => setF(x => ({ ...x, target_weight_kg: e.target.value }))} /></Field>
             <Field label="Activity level">
-              <select className="input" value={f.activity_level} onChange={e => setF(x => ({ ...x, activity_level: e.target.value }))}>
-                {Object.entries(ACTIVITY_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
+              <Select value={f.activity_level} onChange={v => setF(x => ({ ...x, activity_level: v }))}
+                options={Object.entries(ACTIVITY_LABELS).map(([value, label]) => ({ value, label }))} />
             </Field>
             <Field label="Goal" full>
-              <select className="input" value={f.fitness_goal} onChange={e => setF(x => ({ ...x, fitness_goal: e.target.value }))}>
-                {Object.entries(GOAL_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
+              <Select value={f.fitness_goal} onChange={v => setF(x => ({ ...x, fitness_goal: v }))}
+                options={Object.entries(GOAL_LABELS).map(([value, label]) => ({ value, label }))} />
             </Field>
             <div className="sm:col-span-2 flex gap-2">
               <button type="submit" disabled={busy} className="btn-primary flex-1">

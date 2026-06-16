@@ -4,6 +4,8 @@ import { Spinner } from './components/ui';
 import Landing from './pages/Landing';
 import Auth from './pages/Auth';
 import Onboarding from './pages/Onboarding';
+import RecipeDetail from './pages/RecipeDetail';
+import StaffProfile from './pages/StaffProfile';
 import DashboardLayout from './components/DashboardLayout';
 
 import ClientHome from './pages/client/Home';
@@ -53,6 +55,7 @@ export default function App() {
         }
       />
       <Route path="/auth" element={session && profile ? <Navigate to={HOME_BY_ROLE[profile.role]} replace /> : <Auth />} />
+      <Route path="/recipes/:code" element={<RecipeDetail />} />
       <Route
         path="/onboarding"
         element={
@@ -77,6 +80,7 @@ export default function App() {
         <Route index element={<TeacherSchedule />} />
         <Route path="students" element={<TeacherStudents />} />
         <Route path="announcements" element={<TeacherAnnouncements />} />
+        <Route path="profile" element={<StaffProfile />} />
       </Route>
 
       <Route path="/admin" element={<Protected role="admin"><DashboardLayout /></Protected>}>
@@ -87,6 +91,7 @@ export default function App() {
         <Route path="badges" element={<AdminBadges />} />
         <Route path="leads" element={<AdminLeads />} />
         <Route path="revenue" element={<AdminRevenue />} />
+        <Route path="profile" element={<StaffProfile />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

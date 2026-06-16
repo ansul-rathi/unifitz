@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, MessageCircle, TrendingDown, TrendingUp, Minus, Users, Award, X, Loader2 } from 'lucide-react';
+import { AlertTriangle, MessageCircle, TrendingDown, TrendingUp, Minus, Users, Award, X, Loader2, UserPlus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Card, Spinner, EmptyState, Avatar } from '../../components/ui';
+import AddStudentModal from '../../components/AddStudentModal';
 
 export default function TeacherStudents() {
   const { profile } = useAuth();
@@ -15,6 +16,7 @@ export default function TeacherStudents() {
   const [awardCode, setAwardCode] = useState('');
   const [awardNote, setAwardNote] = useState('');
   const [busy, setBusy] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
 
   // Teachers can grant manual + hybrid badges only.
   useEffect(() => {
@@ -90,7 +92,12 @@ export default function TeacherStudents() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl md:text-3xl font-bold">My Students</h1>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h1 className="text-2xl md:text-3xl font-bold">My Students</h1>
+        <button onClick={() => setAddOpen(true)} className="btn-primary !py-2.5 text-sm"><UserPlus className="w-4 h-4" /> Add student</button>
+      </div>
+      <AddStudentModal open={addOpen} onClose={() => setAddOpen(false)} />
+      <p className="text-xs text-slate-500 -mt-2">New students are linked to your referrals. They appear here once enrolled in your series.</p>
 
       {students.length === 0 ? (
         <Card><EmptyState icon={Users} title="No students yet" hint="Students appear here once they enroll in your challenges." /></Card>

@@ -12,7 +12,7 @@ import { Avatar } from './ui';
 const NAV = {
   client: [
     { to: '/app', label: 'Home', icon: Home, end: true },
-    { to: '/app/challenges', label: 'Challenges', icon: Trophy },
+    { to: '/app/challenges', label: 'Series', icon: Trophy },
     { to: '/app/progress', label: 'Progress', icon: TrendingUp },
     { to: '/app/diet', label: 'Diet Plan', icon: Salad },
     { to: '/app/badges', label: 'Badges', icon: Medal },
@@ -23,17 +23,21 @@ const NAV = {
     { to: '/teacher', label: 'Schedule', icon: Calendar, end: true },
     { to: '/teacher/students', label: 'My Students', icon: Users },
     { to: '/teacher/announcements', label: 'Announce', icon: Megaphone },
+    { to: '/teacher/profile', label: 'Profile', icon: User },
   ],
   admin: [
     { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
-    { to: '/admin/challenges', label: 'Challenges', icon: ListChecks },
+    { to: '/admin/challenges', label: 'Series', icon: ListChecks },
     { to: '/admin/users', label: 'Users', icon: UserCog },
     { to: '/admin/referrals', label: 'Referrals', icon: Share2 },
     { to: '/admin/badges', label: 'Badges', icon: Medal },
     { to: '/admin/leads', label: 'Leads', icon: Mailbox },
     { to: '/admin/revenue', label: 'Revenue', icon: IndianRupee },
+    { to: '/admin/profile', label: 'Profile', icon: User },
   ],
 };
+
+const HOME_BASE = { client: '/app', teacher: '/teacher', admin: '/admin' };
 
 export default function DashboardLayout() {
   const { profile, signOut } = useAuth();
@@ -78,9 +82,16 @@ export default function DashboardLayout() {
                 <Avatar name={profile.full_name} url={profile.avatar_url} />
               </Link>
             )}
-            {/* Desktop, and all teacher/admin: avatar + logout in header (unchanged) */}
+            {/* Desktop client + all teacher/admin: avatar links to Profile + logout */}
             <div className={`items-center gap-2 ${profile.role === 'client' ? 'hidden lg:flex' : 'flex'}`}>
-              <Avatar name={profile.full_name} url={profile.avatar_url} />
+              <Link
+                to={`${HOME_BASE[profile.role] ?? '/app'}/profile`}
+                aria-label="Your profile"
+                title="Profile"
+                className="rounded-full ring-2 ring-transparent hover:ring-brand-200 transition-shadow duration-200"
+              >
+                <Avatar name={profile.full_name} url={profile.avatar_url} />
+              </Link>
               <button
                 onClick={signOut}
                 aria-label="Sign out"

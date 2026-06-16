@@ -5,6 +5,8 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { calcBMI, bmiCategory, calcTDEE, ACTIVITY_LABELS } from '../lib/calc';
+import Select from '../components/Select';
+import HeightField from '../components/HeightField';
 
 const GOALS = [
   { value: 'lose_weight', label: 'Lose weight' },
@@ -97,8 +99,7 @@ export default function Onboarding() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="label" htmlFor="height_cm">Height (cm)</label>
-                <input id="height_cm" name="height_cm" type="number" min="100" max="230" value={f.height_cm} onChange={set} className="input" placeholder="162" />
+                <HeightField valueCm={f.height_cm} onChange={v => setF(x => ({ ...x, height_cm: v }))} />
               </div>
               <div>
                 <label className="label" htmlFor="weight_kg">Weight (kg)</label>
@@ -112,12 +113,9 @@ export default function Onboarding() {
           <div className="space-y-4 animate-fade-up">
             <h2 className="text-xl font-bold">Your lifestyle & goal</h2>
             <div>
-              <label className="label" htmlFor="activity_level">Activity level</label>
-              <select id="activity_level" name="activity_level" value={f.activity_level} onChange={set} className="input">
-                {Object.entries(ACTIVITY_LABELS).map(([v, l]) => (
-                  <option key={v} value={v}>{l}</option>
-                ))}
-              </select>
+              <span className="label">Activity level</span>
+              <Select value={f.activity_level} onChange={v => setF(x => ({ ...x, activity_level: v }))}
+                options={Object.entries(ACTIVITY_LABELS).map(([value, label]) => ({ value, label }))} />
             </div>
             <div>
               <span className="label">Goal</span>

@@ -76,16 +76,30 @@ One login screen → auto-routes by role. Highlights: ananya has an 11-day strea
 | `zoom-webhook` | Receives join/leave/ended/recording events → attendance % + recording link. | `supabase functions deploy zoom-webhook --no-verify-jwt` |
 | `generate-diet-plan` | Gemini `gemini-2.0-flash` → 7-day Indian meal plan (JSON). | `supabase functions deploy generate-diet-plan` |
 | `generate-session-image` | Gemini image (`gemini-3-pro-image-preview` → flash fallback) → session poster. | `supabase functions deploy generate-session-image` |
+| `razorpay-create-order` | Create a Razorpay order for a paid series + a `payments` row. | `supabase functions deploy razorpay-create-order` |
+| `razorpay-verify` | Verify checkout signature → mark paid → auto-enroll (DB trigger). | `supabase functions deploy razorpay-verify` |
 
 ### Secrets (Dashboard → Edge Functions → Secrets, or CLI)
 ```bash
 supabase secrets set \
   ZOOM_ACCOUNT_ID=xxx ZOOM_CLIENT_ID=xxx ZOOM_CLIENT_SECRET=xxx \
   ZOOM_WEBHOOK_SECRET_TOKEN=xxx ZOOM_USER_ID=host@yourdomain.com \
-  GEMINI_API_KEY=your-google-ai-studio-key
+  GEMINI_API_KEY=your-google-ai-studio-key \
+  RAZORPAY_KEY_ID=rzp_test_xxx RAZORPAY_KEY_SECRET=xxx
 # SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY are injected automatically.
 # Optional: GEMINI_IMAGE_MODEL to override the image model.
+# Also add VITE_RAZORPAY_KEY_ID (public Key ID) to the frontend env (Vercel).
 ```
+
+## Paid Series + payments
+
+Challenges are now **Series** (UI label) and can be free or paid. Run [`supabase/migration_series.sql`](supabase/migration_series.sql): adds `challenges.price`, a `challenge_teachers` join (multiple teachers/series), a `payments` table, an enroll-on-payment trigger, a `series_earnings` view, and the `teacher_earnings` function.
+
+- **Admin → Series**: create/edit a series — upload an image, assign **multiple teachers**, toggle free/paid and set the **price** (editable anytime).
+- **Client → Series**: free → instant join; paid → modal with **Pay online (Razorpay)** or **Pay by cash** (pick which teacher/admin they handed cash to → status `pending_verification`).
+- **Razorpay**: `razorpay-create-order` makes the order; checkout runs client-side ([lib/razorpay.js](src/lib/razorpay.js)); `razorpay-verify` checks the signature → marks paid → the DB trigger auto-enrolls.
+- **Admin → Revenue**: verify pending cash (verify = enroll), see all payments, gross + **20% UniFitz / 80% teacher-pool split**, and per-teacher payouts (pool ÷ teachers per series, summed).
+- Razorpay webhook signature secret optional; verification uses the checkout HMAC. Add `VITE_RAZORPAY_KEY_ID` to Vercel env.
 Gemini key: [aistudio.google.com/apikey](https://aistudio.google.com/apikey). `zoom-webhook` **must** deploy with `--no-verify-jwt` (Zoom can't send a Supabase JWT).
 
 ---
@@ -120,11 +134,11 @@ Anonymous joiners land in the teacher attendance modal → "Unmatched Zoom parti
 
 **Admin** — Overview (stats + CSV export), Challenges (+ sessions), Users, Referrals, Badges (definitions/leaderboard/award/revoke), Leads (CSV + reviews moderation + testimonials), Revenue (paid-phase placeholder).
 
-### Diet Plan (Gemini)
-Gated behind a complete profile → "Your Numbers" (BMI/TDEE/target/macros) → preferences → AI 7-day plan (one free; regen = "Premium soon" until `app_settings.diet_regeneration_enabled='true'`) → recipe library. Enable paid regen:
-```sql
-update app_settings set value = 'true' where key = 'diet_regeneration_enabled';
-```
+### Diet Plan (fixed dietician engine — NO AI)
+Free for everyone, gated only by a complete profile. Run [`supabase/migration_diet_engine.sql`](supabase/migration_diet_engine.sql): seeds `diet_plan_template` (fixed dietician plan, base 1650 kcal), `diet_rules`, `workout_plan`, and recipe rows (with `code`).
+- Flow: profile gate → **Veg/Non-Veg** toggle (saved to `profiles.diet_type`) → "Your Daily Targets" (BMR/TDEE/goal math in [lib/dietEngine.js](src/lib/dietEngine.js)) → day's meals with **per-person scaled quantities** (`scale_factor = target/1650`), each dish links to its recipe → rules + weekly workout → **Download PDF** ([lib/dietPdf.js](src/lib/dietPdf.js), text-only, clickable recipe links via jsPDF).
+- **Custom plan → WhatsApp** handoff (no in-app AI generation), `api.whatsapp.com` link from `src/config.js`.
+- Public recipe pages at `/recipes/:code` (open from app + PDF, no login). Recipes seeded with placeholder images — replace with real/Gemini images anytime.
 
 ### Badges
 54 badges, 10 categories × 5 tiers (bronze 10 → diamond 200 pts). Postgres rules engine: `user_metrics` → `evaluate_badges` (awards + bumps points + returns new codes for confetti); `nearest_badges` powers the "You're close!" nudge; `award_manual_badge` / `revoke_badge` for staff. Premium medallion UI w/ tier gradients + glow.

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Search, UserCog, ShieldCheck, Ban, GraduationCap } from 'lucide-react';
+import { Search, UserCog, ShieldCheck, Ban, GraduationCap, UserPlus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
 import { Card, Spinner, Avatar } from '../../components/ui';
+import AddStudentModal from '../../components/AddStudentModal';
 
 export default function AdminUsers() {
   const toast = useToast();
@@ -10,6 +11,7 @@ export default function AdminUsers() {
   const [rows, setRows] = useState([]);
   const [roleFilter, setRoleFilter] = useState('all');
   const [q, setQ] = useState('');
+  const [addOpen, setAddOpen] = useState(false);
 
   async function load() {
     const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
@@ -34,7 +36,11 @@ export default function AdminUsers() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl md:text-3xl font-bold">Users</h1>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h1 className="text-2xl md:text-3xl font-bold">Users</h1>
+        <button onClick={() => setAddOpen(true)} className="btn-primary !py-2.5 text-sm"><UserPlus className="w-4 h-4" /> Add student</button>
+      </div>
+      <AddStudentModal open={addOpen} onClose={() => setAddOpen(false)} onCreated={load} />
 
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
