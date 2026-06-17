@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Plus, Pencil, Loader2, X, Video, ImagePlus, Users, IndianRupee, CalendarDays, Layers, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
@@ -233,8 +234,7 @@ export default function AdminChallenges() {
                       <button onClick={() => togglePublish(c)} title={c.is_published ? 'Hide from students & teachers' : 'Publish'} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500">
                         {c.is_published ? <Eye className="w-4 h-4 text-emerald-500" /> : <EyeOff className="w-4 h-4 text-slate-400" />}
                       </button>
-                      <button onClick={() => openEdit(c)} title="Edit" className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"><Pencil className="w-4 h-4" /></button>
-                      <button onClick={() => openSessions(c)} title="Sessions" className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"><Video className="w-4 h-4" /></button>
+                      <Link to={`/admin/series/${c.id}`} title="Open" className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"><Pencil className="w-4 h-4" /></Link>
                     </div>
                   </div>
 
@@ -263,10 +263,7 @@ export default function AdminChallenges() {
                     ) : <span className="text-xs text-slate-400">None assigned</span>}
                   </div>
 
-                  <div className="mt-4 flex gap-2">
-                    <button onClick={() => openEdit(c)} className="btn-secondary flex-1 !py-2 text-xs"><Pencil className="w-4 h-4" /> Edit series</button>
-                    <button onClick={() => openSessions(c)} className="btn-primary flex-1 !py-2 text-xs"><Video className="w-4 h-4" /> Sessions ({st.sessions})</button>
-                  </div>
+                  <Link to={`/admin/series/${c.id}`} className="btn-primary mt-4 !py-2 text-xs"><Layers className="w-4 h-4" /> Open series ({st.sessions} sessions)</Link>
                 </div>
               </Card>
             );
