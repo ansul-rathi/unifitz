@@ -12,7 +12,7 @@ export const BUSINESS = {
   region: 'Rajasthan',
   country: 'India',
   addressLine: 'Jaipur, Rajasthan, India',
-  url: 'https://unifit.in',
+  url: 'https://www.unifitz.in',
   socials: {
     instagram: 'https://instagram.com/unifit',
     facebook: 'https://facebook.com/unifit',

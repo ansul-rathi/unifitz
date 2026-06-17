@@ -4,4 +4,4 @@ Disallow: /app
 Disallow: /teacher
 Disallow: /admin
 
-Sitemap: https://unifit.in/sitemap.xml
+Sitemap: https://www.unifitz.in/sitemap.xml

@@ -49,16 +49,10 @@ export default function ClientChallenges() {
 
   async function openPay(c) {
     setPayFor(c); setMode(null); setCollector('');
-    // Collector list = this series' teachers + all admins.
-    const [{ data: cts }, { data: admins }] = await Promise.all([
-      supabase.from('challenge_teachers').select('teacher_id, profiles(full_name, avatar_url)').eq('challenge_id', c.id),
-      supabase.from('profiles').select('id, full_name, avatar_url').eq('role', 'admin'),
-    ]);
-    const list = [
-      ...(cts ?? []).map(x => ({ id: x.teacher_id, name: x.profiles?.full_name, avatar: x.profiles?.avatar_url, role: 'Teacher' })),
-      ...(admins ?? []).map(a => ({ id: a.id, name: a.full_name, avatar: a.avatar_url, role: 'Admin' })),
-    ];
-    setCollectors(list);
+    // Collector list (teachers of this series + admins) via SECURITY DEFINER rpc,
+    // since RLS otherwise hides other people's profiles from clients.
+    const { data } = await supabase.rpc('series_collectors', { p_challenge: c.id });
+    setCollectors((data ?? []).map(p => ({ id: p.id, name: p.full_name, avatar: p.avatar_url, role: p.role === 'admin' ? 'Admin' : 'Teacher' })));
   }
 
   async function payOnline() {
@@ -116,7 +110,7 @@ export default function ClientChallenges() {
                     : c.status === 'upcoming' ? 'bg-sky-100 text-sky-700'
                     : 'bg-slate-100 text-slate-600'
                   }`}>
-                    {c.status === 'active' ? `Active · Day ${day}` : c.status}
+                    {c.status === 'active' ? (sc.total ? `Active · ${sc.done}/${sc.total} done` : 'Active') : c.status}
                   </span>
                   <span className={`text-xs font-bold px-3 py-1 rounded-full ${c.is_free ? 'bg-brand-100 text-brand-700' : 'bg-amber-100 text-amber-700'}`}>
                     {c.is_free ? 'FREE' : `₹${c.price}`}

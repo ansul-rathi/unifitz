@@ -2,12 +2,12 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, Loader2, Pencil, Check, X, Plus, Trash2, Video, PlayCircle, Radio,
-  CheckCircle2, Copy, Eye, EyeOff, Users, IndianRupee, ImagePlus, CalendarDays, Layers,
+  CheckCircle2, Copy, Eye, EyeOff, Users, IndianRupee, ImagePlus, CalendarDays, Layers, Sparkles, Upload,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
 import { compressImage } from '../../lib/compressImage';
-import { createZoomMeeting } from '../../lib/zoom';
+import { createZoomMeeting, generateSessionImage, generateSeriesImage } from '../../lib/zoom';
 import { Card, Spinner, EmptyState, Avatar, StatCard, SessionThumb, CLASS_TYPES } from '../../components/ui';
 import Select from '../../components/Select';
 
@@ -132,6 +132,41 @@ export default function AdminSeriesDetail() {
     catch (err) { toast(err.message || 'Zoom failed', 'error'); } finally { setBusy(false); }
   }
 
+  // ── Image management ──
+  async function uploadSessionImage(s, file) {
+    if (!file) return;
+    setBusy(true);
+    try {
+      const small = await compressImage(file);
+      const path = `${id}/${s.id}.jpg`;
+      await supabase.storage.from('posters').upload(path, small, { upsert: true });
+      const { data: pub } = supabase.storage.from('posters').getPublicUrl(path);
+      await patchSession(s.id, { poster_url: `${pub.publicUrl}?t=${Date.now()}` }, 'Image uploaded');
+    } catch (err) { toast(err.message, 'error'); } finally { setBusy(false); }
+  }
+  async function aiSessionImage(s) {
+    setBusy(true);
+    try { await generateSessionImage(s.id); toast('AI image generated'); load(); }
+    catch (err) { toast(err.message || 'AI image failed', 'error'); } finally { setBusy(false); }
+  }
+  async function aiSeriesImage() {
+    setBusy(true);
+    try { await generateSeriesImage(id); toast('AI banner generated'); load(); }
+    catch (err) { toast(err.message || 'AI image failed', 'error'); } finally { setBusy(false); }
+  }
+  async function uploadSeriesImage(file) {
+    if (!file) return;
+    setBusy(true);
+    try {
+      const small = await compressImage(file);
+      const path = `challenge/${id}.jpg`;
+      await supabase.storage.from('posters').upload(path, small, { upsert: true });
+      const { data: pub } = supabase.storage.from('posters').getPublicUrl(path);
+      await supabase.from('challenges').update({ poster_url: `${pub.publicUrl}?t=${Date.now()}` }).eq('id', id);
+      toast('Series image updated'); load();
+    } catch (err) { toast(err.message, 'error'); } finally { setBusy(false); }
+  }
+
   if (loading) return <Spinner />;
   if (!c) return <EmptyState title="Series not found" />;
 
@@ -145,9 +180,20 @@ export default function AdminSeriesDetail() {
 
       {/* Header */}
       <Card className="overflow-hidden">
-        {c.poster_url
-          ? <img src={c.poster_url} alt={c.name} className="w-full aspect-[16/6] object-cover" />
-          : <div className="w-full aspect-[16/6] bg-gradient-to-br from-brand-400 to-orange-600 flex items-center justify-center"><Layers className="w-10 h-10 text-white/80" /></div>}
+        <div className="relative group">
+          {c.poster_url
+            ? <img src={c.poster_url} alt={c.name} className="w-full aspect-[16/6] object-cover" />
+            : <div className="w-full aspect-[16/6] bg-gradient-to-br from-brand-400 to-orange-600 flex items-center justify-center"><Layers className="w-10 h-10 text-white/80" /></div>}
+          <div className="absolute top-3 right-3 flex gap-2">
+            <label className="inline-flex items-center gap-1.5 bg-white/90 hover:bg-white text-slate-800 text-xs font-bold px-3 py-2 rounded-lg cursor-pointer shadow">
+              <Upload className="w-4 h-4" /> Upload
+              <input type="file" accept="image/*" className="hidden" onChange={e => uploadSeriesImage(e.target.files?.[0])} />
+            </label>
+            <button onClick={aiSeriesImage} disabled={busy} className="inline-flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow disabled:opacity-50">
+              {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} AI image
+            </button>
+          </div>
+        </div>
         <div className="p-5 md:p-6">
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div>
@@ -290,6 +336,12 @@ export default function AdminSeriesDetail() {
                     <button onClick={async () => { await supabase.from('sessions').update({ is_live_next: false }).eq('challenge_id', id); patchSession(s.id, { is_live_next: true }, 'Pinned live'); }}
                       className="btn-secondary !py-1.5 !px-2.5 text-xs"><Radio className="w-4 h-4 text-red-500" /></button>
                   )}
+                  {/* Image controls */}
+                  <label title="Upload image" className="btn-secondary !py-1.5 !px-2.5 text-xs cursor-pointer">
+                    <Upload className="w-4 h-4 text-slate-500" />
+                    <input type="file" accept="image/*" className="hidden" onChange={e => uploadSessionImage(s, e.target.files?.[0])} />
+                  </label>
+                  <button onClick={() => aiSessionImage(s)} disabled={busy} title="Generate AI image" className="btn-secondary !py-1.5 !px-2.5 text-xs"><Sparkles className="w-4 h-4 text-violet-500" /></button>
                 </div>
               </li>
             ))}

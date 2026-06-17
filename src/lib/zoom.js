@@ -30,3 +30,13 @@ export async function generateSessionImage(sessionId, prompt) {
   if (data?.error) throw new Error(data.error);
   return data?.poster_url;
 }
+
+// Admin: AI-generate a banner for a whole series.
+export async function generateSeriesImage(challengeId, prompt) {
+  const { data, error } = await supabase.functions.invoke('generate-series-image', {
+    body: { challenge_id: challengeId, prompt },
+  });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data?.poster_url;
+}
