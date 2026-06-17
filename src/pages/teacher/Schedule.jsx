@@ -432,6 +432,17 @@ export default function TeacherSchedule() {
                   ) : (
                     <IconBtn icon={Video} label="Create Zoom link" onClick={() => createMeetingFor(s)} disabled={busy} spinning={busy} tone="text-sky-500" />
                   )}
+                  {/* Manual join link — fallback if Zoom auto-create fails */}
+                  {!s.zoom_meeting_id && (
+                    <input
+                      type="url"
+                      defaultValue={s.zoom_link ?? ''}
+                      placeholder="Manual link"
+                      onBlur={e => e.target.value !== (s.zoom_link ?? '') && patchSession(s.id, { zoom_link: e.target.value || null }, 'Manual link saved')}
+                      className="input !py-1.5 !px-2.5 text-xs w-36"
+                      aria-label="Manual join link"
+                    />
+                  )}
                   <IconBtn icon={Sparkles} label="Generate AI poster" onClick={() => { setAiFor(s); setAiPrompt(''); }} tone="text-violet-500" />
                   <IconBtn icon={ImagePlus} label="View / edit image" onClick={() => openPoster(s)} tone="text-slate-500" />
                   <IconBtn icon={Share2} label="Share on WhatsApp" onClick={() => shareWhatsApp(s)} tone="text-emerald-500" />

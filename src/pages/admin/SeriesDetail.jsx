@@ -328,6 +328,14 @@ export default function AdminSeriesDetail() {
                   {s.zoom_meeting_id
                     ? <button onClick={() => { navigator.clipboard.writeText(s.zoom_join_url || ''); toast('Join link copied'); }} className="btn-secondary !py-1.5 !px-2.5 text-xs"><Copy className="w-4 h-4 text-sky-500" /></button>
                     : <button onClick={() => createZoom(s.id)} disabled={busy} className="btn-secondary !py-1.5 !px-2.5 text-xs"><Video className="w-4 h-4 text-sky-500" /> Zoom</button>}
+                  {/* Manual join link fallback (used if Zoom auto-create fails) */}
+                  <input
+                    type="url"
+                    defaultValue={s.zoom_link ?? ''}
+                    placeholder="Manual join link"
+                    onBlur={e => e.target.value !== (s.zoom_link ?? '') && patchSession(s.id, { zoom_link: e.target.value || null }, 'Manual link saved')}
+                    className="input !py-1.5 !px-2.5 text-xs flex-1 min-w-[160px]"
+                  />
                   <button onClick={() => patchSession(s.id, { completed: !s.completed }, s.completed ? 'Marked incomplete' : 'Marked completed')}
                     className={`btn-secondary !py-1.5 !px-2.5 text-xs ${s.completed ? 'text-emerald-600' : ''}`}>
                     <CheckCircle2 className="w-4 h-4" /> {s.completed ? 'Done' : 'Mark done'}

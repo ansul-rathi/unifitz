@@ -62,7 +62,7 @@ export default function DashboardLayout() {
         <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold text-slate-900">
             <Dumbbell className="w-6 h-6 text-brand-500" />
-            Uni<span className="text-brand-500">Fit</span>
+            Uni<span className="text-brand-500">Fitz</span>
           </Link>
 
           <div className="flex items-center gap-3">

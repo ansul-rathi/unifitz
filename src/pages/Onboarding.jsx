@@ -65,7 +65,7 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-slate-50 flex flex-col items-center px-4 py-10">
       <div className="flex items-center gap-2 font-display text-2xl font-bold text-slate-900 mb-2">
-        <Dumbbell className="w-7 h-7 text-brand-500" /> Uni<span className="text-brand-500">Fit</span>
+        <Dumbbell className="w-7 h-7 text-brand-500" /> Uni<span className="text-brand-500">Fitz</span>
       </div>
       <p className="text-sm text-slate-500 mb-6">Let's set your starting point — takes 1 minute</p>
 

@@ -1,13 +1,28 @@
 import { useEffect, useMemo, useState } from 'react';
-import * as Icons from 'lucide-react';
-import { Award, Lock, Zap, Trophy, Sparkles } from 'lucide-react';
+import {
+  Award, Lock, Zap, Trophy, Sparkles, Hand, BadgeCheck, Footprints, Flame, CalendarDays,
+  Gem, Undo2, CalendarCheck, Sunrise, Medal, Crown, TrendingDown, Ruler, Target, Images,
+  Activity, ClipboardList, ClipboardCheck, MessageSquare, MessagesSquare, GlassWater, Moon,
+  Share2, Megaphone, Star, GraduationCap, Flag, Layers, Shield, Swords, Salad, PartyPopper,
+  CheckCircle2, Cake, Heart,
+} from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { TIERS, TIER_ORDER } from '../../lib/badges';
 import { Card, Spinner, Confetti } from '../../components/ui';
 
+// Explicit map (only the icons badges actually use) — avoids bundling all of
+// lucide via `import * as Icons`, which ballooned this chunk to 700KB+.
+const ICONS = {
+  Award, Hand, BadgeCheck, Footprints, Flame, CalendarDays, Gem, Undo2, CalendarCheck,
+  Sunrise, Medal, Trophy, Crown, TrendingDown, Ruler, Target, Images, Activity, ClipboardList,
+  ClipboardCheck, MessageSquare, MessagesSquare, GlassWater, Moon, Share2, Megaphone, Star,
+  GraduationCap, Sparkles, Flag, Layers, Shield, Swords, Salad, PartyPopper, CheckCircle2,
+  Zap, Cake, Heart,
+};
+
 function Glyph({ name, className }) {
-  const Cmp = Icons[name] ?? Award;
+  const Cmp = ICONS[name] ?? Award;
   return <Cmp className={className} />;
 }
 
@@ -155,7 +170,7 @@ export default function ClientBadges() {
               <p className="mt-1 text-xs text-slate-500 leading-snug">{d.description}</p>
               {got ? (
                 <p className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600">
-                  <Icons.CheckCircle2 className="w-3.5 h-3.5" />
+                  <CheckCircle2 className="w-3.5 h-3.5" />
                   {new Date(earned.get(d.code)).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                   <span className="text-slate-300">·</span><span className={t.text}>+{d.points}</span>
                 </p>

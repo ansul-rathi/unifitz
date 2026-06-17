@@ -1,36 +1,40 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { Spinner } from './components/ui';
-import Landing from './pages/Landing';
-import Auth from './pages/Auth';
-import Onboarding from './pages/Onboarding';
-import RecipeDetail from './pages/RecipeDetail';
-import StaffProfile from './pages/StaffProfile';
-import NotFound from './pages/NotFound';
 import DashboardLayout from './components/DashboardLayout';
 
-import ClientHome from './pages/client/Home';
-import ClientChallenges from './pages/client/Challenges';
-import ChallengeDetail from './pages/client/ChallengeDetail';
-import ClientProgress from './pages/client/Progress';
-import ClientDiet from './pages/client/Diet';
-import ClientBadges from './pages/client/Badges';
-import ClientRefer from './pages/client/Refer';
-import ClientProfile from './pages/client/Profile';
+// Route-level code splitting — each page ships as its own chunk, so the first
+// load (landing/auth) no longer downloads the entire app + recharts + jspdf.
+const Landing = lazy(() => import('./pages/Landing'));
+const Auth = lazy(() => import('./pages/Auth'));
+const Onboarding = lazy(() => import('./pages/Onboarding'));
+const RecipeDetail = lazy(() => import('./pages/RecipeDetail'));
+const StaffProfile = lazy(() => import('./pages/StaffProfile'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
-import TeacherSchedule from './pages/teacher/Schedule';
-import TeacherStudents from './pages/teacher/Students';
-import TeacherAnnouncements from './pages/teacher/Announcements';
+const ClientHome = lazy(() => import('./pages/client/Home'));
+const ClientChallenges = lazy(() => import('./pages/client/Challenges'));
+const ChallengeDetail = lazy(() => import('./pages/client/ChallengeDetail'));
+const ClientProgress = lazy(() => import('./pages/client/Progress'));
+const ClientDiet = lazy(() => import('./pages/client/Diet'));
+const ClientBadges = lazy(() => import('./pages/client/Badges'));
+const ClientRefer = lazy(() => import('./pages/client/Refer'));
+const ClientProfile = lazy(() => import('./pages/client/Profile'));
 
-import AdminOverview from './pages/admin/Overview';
-import AdminChallenges from './pages/admin/Challenges';
-import AdminUsers from './pages/admin/Users';
-import AdminReferrals from './pages/admin/Referrals';
-import AdminRevenue from './pages/admin/Revenue';
-import AdminBadges from './pages/admin/Badges';
-import AdminLeads from './pages/admin/Leads';
-import AdminReports from './pages/admin/Reports';
-import AdminSeriesDetail from './pages/admin/SeriesDetail';
+const TeacherSchedule = lazy(() => import('./pages/teacher/Schedule'));
+const TeacherStudents = lazy(() => import('./pages/teacher/Students'));
+const TeacherAnnouncements = lazy(() => import('./pages/teacher/Announcements'));
+
+const AdminOverview = lazy(() => import('./pages/admin/Overview'));
+const AdminChallenges = lazy(() => import('./pages/admin/Challenges'));
+const AdminUsers = lazy(() => import('./pages/admin/Users'));
+const AdminReferrals = lazy(() => import('./pages/admin/Referrals'));
+const AdminRevenue = lazy(() => import('./pages/admin/Revenue'));
+const AdminBadges = lazy(() => import('./pages/admin/Badges'));
+const AdminLeads = lazy(() => import('./pages/admin/Leads'));
+const AdminReports = lazy(() => import('./pages/admin/Reports'));
+const AdminSeriesDetail = lazy(() => import('./pages/admin/SeriesDetail'));
 
 const HOME_BY_ROLE = { admin: '/admin', teacher: '/teacher', client: '/app' };
 
@@ -48,58 +52,62 @@ export default function App() {
   const { session, profile, loading } = useAuth();
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          !loading && session && profile
-            ? <Navigate to={HOME_BY_ROLE[profile.role] ?? '/app'} replace />
-            : <Landing />
-        }
-      />
-      <Route path="/auth" element={session && profile ? <Navigate to={HOME_BY_ROLE[profile.role]} replace /> : <Auth />} />
-      <Route path="/recipes/:code" element={<RecipeDetail />} />
-      <Route
-        path="/onboarding"
-        element={
-          !session ? <Navigate to="/auth" replace />
-          : profile?.onboarding_complete ? <Navigate to="/app" replace />
-          : <Onboarding />
-        }
-      />
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Spinner /></div>}>
+      <Routes>
+        {/* Temporary: landing hidden — send everyone to login/signup.
+            Restore <Landing /> here to bring the marketing page back. */}
+        <Route
+          path="/"
+          element={
+            !loading && session && profile
+              ? <Navigate to={HOME_BY_ROLE[profile.role] ?? '/app'} replace />
+              : <Navigate to="/auth" replace />
+          }
+        />
+        <Route path="/auth" element={session && profile ? <Navigate to={HOME_BY_ROLE[profile.role]} replace /> : <Auth />} />
+        <Route path="/recipes/:code" element={<RecipeDetail />} />
+        <Route
+          path="/onboarding"
+          element={
+            !session ? <Navigate to="/auth" replace />
+            : profile?.onboarding_complete ? <Navigate to="/app" replace />
+            : <Onboarding />
+          }
+        />
 
-      <Route path="/app" element={<Protected role="client"><DashboardLayout /></Protected>}>
-        <Route index element={<ClientHome />} />
-        <Route path="challenges" element={<ClientChallenges />} />
-        <Route path="challenges/:id" element={<ChallengeDetail />} />
-        <Route path="progress" element={<ClientProgress />} />
-        <Route path="diet" element={<ClientDiet />} />
-        <Route path="badges" element={<ClientBadges />} />
-        <Route path="refer" element={<ClientRefer />} />
-        <Route path="profile" element={<ClientProfile />} />
-      </Route>
+        <Route path="/app" element={<Protected role="client"><DashboardLayout /></Protected>}>
+          <Route index element={<ClientHome />} />
+          <Route path="challenges" element={<ClientChallenges />} />
+          <Route path="challenges/:id" element={<ChallengeDetail />} />
+          <Route path="progress" element={<ClientProgress />} />
+          <Route path="diet" element={<ClientDiet />} />
+          <Route path="badges" element={<ClientBadges />} />
+          <Route path="refer" element={<ClientRefer />} />
+          <Route path="profile" element={<ClientProfile />} />
+        </Route>
 
-      <Route path="/teacher" element={<Protected role="teacher"><DashboardLayout /></Protected>}>
-        <Route index element={<TeacherSchedule />} />
-        <Route path="students" element={<TeacherStudents />} />
-        <Route path="announcements" element={<TeacherAnnouncements />} />
-        <Route path="profile" element={<StaffProfile />} />
-      </Route>
+        <Route path="/teacher" element={<Protected role="teacher"><DashboardLayout /></Protected>}>
+          <Route index element={<TeacherSchedule />} />
+          <Route path="students" element={<TeacherStudents />} />
+          <Route path="announcements" element={<TeacherAnnouncements />} />
+          <Route path="profile" element={<StaffProfile />} />
+        </Route>
 
-      <Route path="/admin" element={<Protected role="admin"><DashboardLayout /></Protected>}>
-        <Route index element={<AdminOverview />} />
-        <Route path="reports" element={<AdminReports />} />
-        <Route path="challenges" element={<AdminChallenges />} />
-        <Route path="series/:id" element={<AdminSeriesDetail />} />
-        <Route path="users" element={<AdminUsers />} />
-        <Route path="referrals" element={<AdminReferrals />} />
-        <Route path="badges" element={<AdminBadges />} />
-        <Route path="leads" element={<AdminLeads />} />
-        <Route path="revenue" element={<AdminRevenue />} />
-        <Route path="profile" element={<StaffProfile />} />
-      </Route>
+        <Route path="/admin" element={<Protected role="admin"><DashboardLayout /></Protected>}>
+          <Route index element={<AdminOverview />} />
+          <Route path="reports" element={<AdminReports />} />
+          <Route path="challenges" element={<AdminChallenges />} />
+          <Route path="series/:id" element={<AdminSeriesDetail />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="referrals" element={<AdminReferrals />} />
+          <Route path="badges" element={<AdminBadges />} />
+          <Route path="leads" element={<AdminLeads />} />
+          <Route path="revenue" element={<AdminRevenue />} />
+          <Route path="profile" element={<StaffProfile />} />
+        </Route>
 
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
   );
 }

@@ -277,12 +277,11 @@ end; $$;
 grant execute on function public.revoke_badge(uuid, text) to authenticated;
 
 -- ── Backstop triggers (drop-if-exists then create) ──
+-- Attached only to tables with user_id; must not reference referrer_id.
 create or replace function public.trg_eval_badges()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  perform public.evaluate_badges(
-    coalesce(new.user_id, case when tg_table_name = 'referrals' then new.referrer_id end)
-  );
+  perform public.evaluate_badges(new.user_id);
   return new;
 end; $$;
 

@@ -5,8 +5,8 @@
 export const BUSINESS = {
   name: 'UniFit',
   // wa.me needs digits only, country code first, no + or spaces.
-  whatsappNumber: '919810000000',
-  phoneDisplay: '+91 98100 00000',
+  whatsappNumber: '917387846841',
+  phoneDisplay: '+91 73878 46841',
   email: 'hello@unifit.in',
   area: 'Jaipur',
   region: 'Rajasthan',

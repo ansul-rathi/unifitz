@@ -22,7 +22,7 @@ export default function RecipeDetail() {
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold uppercase text-slate-900">
-            <Dumbbell className="w-6 h-6 text-brand-500" /> Uni<span className="text-brand-500">Fit</span>
+            <Dumbbell className="w-6 h-6 text-brand-500" /> Uni<span className="text-brand-500">Fitz</span>
           </Link>
           <Link to="/app/diet" className="text-sm font-semibold text-slate-500 hover:text-brand-600 inline-flex items-center gap-1">
             <ArrowLeft className="w-4 h-4" /> Diet plan

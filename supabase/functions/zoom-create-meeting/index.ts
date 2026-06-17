@@ -18,10 +18,11 @@ Deno.serve(async req => {
     const db = svc();
     const { data: session, error } = await db
       .from('sessions')
-      .select('id, title, scheduled_at, duration_minutes, zoom_meeting_id, zoom_join_url')
+      .select('*')
       .eq('id', session_id)
-      .single();
-    if (error || !session) throw new Error('session not found');
+      .maybeSingle();
+    if (error) throw new Error(`DB error: ${error.message}`);
+    if (!session) throw new Error(`session not found for id ${session_id}`);
 
     // Slot lock: never create a second meeting. Return the existing one.
     if (session.zoom_meeting_id) {
@@ -35,8 +36,8 @@ Deno.serve(async req => {
     // field is ignored. We instead send the naive local wall-clock (no Z) and
     // set timezone explicitly, so Zoom shows the exact IST time the teacher picked.
     // scheduled_at is stored as UTC; shift +5:30 (IST, no DST) to get IST wall time.
-    const utc = new Date(session.scheduled_at);
-    const istLocal = new Date(utc.getTime() + 5.5 * 3600 * 1000).toISOString().slice(0, 19);
+    const baseUtc = session.scheduled_at ? new Date(session.scheduled_at) : new Date(Date.now() + 3600 * 1000);
+    const istLocal = new Date(baseUtc.getTime() + 5.5 * 3600 * 1000).toISOString().slice(0, 19);
 
     const userId = Deno.env.get('ZOOM_USER_ID')!;
     const meeting = await zoomFetch(`/users/${userId}/meetings`, {

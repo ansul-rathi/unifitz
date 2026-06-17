@@ -152,10 +152,14 @@ export default function ClientDiet() {
       <Card className="p-5 md:p-6 bg-gradient-to-r from-slate-900 to-slate-800 !border-0 text-white flex flex-wrap items-center gap-4">
         <div className="flex-1 min-w-[220px]">
           <h3 className="font-bold text-white">Want a customized diet plan for your specific goal?</h3>
-          <p className="text-sm text-slate-300 mt-0.5">Our dietician will build one just for you.</p>
+          <p className="text-sm text-slate-300 mt-0.5">A dietician builds one just for you — tailored to your goal, food preferences and routine.</p>
+          <p className="mt-2 inline-flex items-baseline gap-1.5">
+            <span className="text-xs font-semibold text-slate-400">Starting from just</span>
+            <span className="font-display text-2xl font-extrabold text-emerald-400">₹499</span>
+          </p>
         </div>
-        <a href={waSendLink('Hi UniFit! I want a customized diet plan for my goal.')} target="_blank" rel="noreferrer"
-          className="inline-flex items-center gap-2 bg-[#25D366] text-white font-bold px-5 py-3 rounded-xl text-sm">
+        <a href={waSendLink('Hi UniFit! I want a customized diet plan for my goal (starting ₹499).')} target="_blank" rel="noreferrer"
+          className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1fb855] text-white font-bold px-5 py-3 rounded-xl text-sm transition-colors duration-200">
           <MessageCircle className="w-4 h-4" /> Get my custom plan on WhatsApp
         </a>
       </Card>

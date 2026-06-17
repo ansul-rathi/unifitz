@@ -134,7 +134,7 @@ export default function Landing() {
         <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-100">
           <nav className="max-w-6xl mx-auto flex items-center justify-between px-4 md:px-6 h-16">
             <a href="#top" className="flex items-center gap-2 font-display text-2xl font-bold uppercase tracking-wide text-slate-900">
-              <Dumbbell className="w-6 h-6 text-brand-500" /> Uni<span className="text-brand-500">Fit</span>
+              <Dumbbell className="w-6 h-6 text-brand-500" /> Uni<span className="text-brand-500">Fitz</span>
             </a>
             <ul className="hidden lg:flex items-center gap-7">
               {NAV.map(l => <li key={l.href}><a href={l.href} className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors duration-200">{l.label}</a></li>)}

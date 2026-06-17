@@ -5,7 +5,7 @@ export default function NotFound() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-slate-50 flex flex-col items-center justify-center px-4 text-center">
       <Link to="/" className="flex items-center gap-2 font-display text-2xl font-bold uppercase text-slate-900 mb-8">
-        <Dumbbell className="w-7 h-7 text-brand-500" /> Uni<span className="text-brand-500">Fit</span>
+        <Dumbbell className="w-7 h-7 text-brand-500" /> Uni<span className="text-brand-500">Fitz</span>
       </Link>
       <p className="font-display text-[clamp(4rem,18vw,9rem)] font-extrabold leading-none text-brand-500">404</p>
       <h1 className="mt-2 text-2xl font-bold text-slate-900">Page not found</h1>
