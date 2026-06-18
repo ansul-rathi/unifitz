@@ -8,7 +8,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { registerForSession } from '../../lib/zoom';
-import { Card, Spinner, EmptyState, CountdownTimer, SessionThumb } from '../../components/ui';
+import { Card, Spinner, CountdownTimer, SessionThumb } from '../../components/ui';
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
@@ -40,7 +40,9 @@ export default function ClientHome() {
       supabase.from('weekly_checkins').select('created_at').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(1),
     ]);
 
-    const live = (sessions ?? []).find(s => s.is_live_next);
+    // A pinned session that's already done (completed or has a recording) is no
+    // longer "next" — drop it from the top highlight.
+    const live = (sessions ?? []).find(s => s.is_live_next && !s.completed && !s.recording_link);
     setLiveSession(live ?? null);
     if (live?.scheduled_at) setIsLiveNow(new Date(live.scheduled_at) <= new Date());
     setRecordings((sessions ?? []).filter(s => s.session_type === 'recording' || s.completed));
@@ -137,8 +139,8 @@ export default function ClientHome() {
         </Link>
       )}
 
-      {/* Pinned live session */}
-      {liveSession ? (
+      {/* Pinned live session — hidden entirely when nothing is pinned */}
+      {liveSession && (
         <Card className="overflow-hidden">
           {liveSession.poster_url && (
             <img src={liveSession.poster_url} alt={liveSession.title} className="w-full aspect-video object-cover" />
@@ -190,11 +192,6 @@ export default function ClientHome() {
               })()}
             </div>
           </div>
-        </Card>
-      ) : (
-        <Card>
-          <EmptyState icon={CalendarClock} title="No live session pinned yet"
-            hint="Your trainer will pin the next live class here. Browse challenges to get enrolled." />
         </Card>
       )}
 
@@ -282,12 +279,10 @@ export default function ClientHome() {
         </div>
       </Card>
 
-      {/* Session queue */}
+      {/* Recordings — hidden entirely when there are none */}
+      {recordings.length > 0 && (
       <Card className="p-5 md:p-6">
         <h3 className="font-bold text-lg">Recordings</h3>
-        {recordings.length === 0 ? (
-          <EmptyState icon={PlayCircle} title="No recordings yet" hint="Past class recordings appear here once your challenge starts." />
-        ) : (
           <ul className="mt-3 divide-y divide-slate-100">
             {recordings.map(s => (
               <li key={s.id} className="flex items-center gap-3 py-3">
@@ -315,8 +310,8 @@ export default function ClientHome() {
               </li>
             ))}
           </ul>
-        )}
       </Card>
+      )}
     </div>
   );
 }

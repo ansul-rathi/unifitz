@@ -15,7 +15,7 @@ const GOALS = [
 ];
 
 export default function Onboarding() {
-  const { session, refreshProfile } = useAuth();
+  const { session, refreshProfile, signOut } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -23,7 +23,7 @@ export default function Onboarding() {
   const [f, setF] = useState({
     age: '', gender: 'female', height_cm: '', weight_kg: '',
     activity_level: 'light', fitness_goal: 'lose_weight',
-    waist_in: '', hips_in: '', chest_in: '', target_weight_kg: '',
+    target_weight_kg: '',
   });
 
   const set = e => setF(x => ({ ...x, [e.target.name]: e.target.value }));
@@ -46,14 +46,6 @@ export default function Onboarding() {
     setBusy(false);
     if (error) return toast(error.message, 'error');
 
-    // Save optional measurements as the Week-0 baseline check-in.
-    if (f.waist_in || f.hips_in || f.chest_in) {
-      await supabase.from('weekly_checkins').insert({
-        user_id: session.user.id, week_number: 0, weight_kg: num(f.weight_kg),
-        waist_in: num(f.waist_in), hips_in: num(f.hips_in), chest_in: num(f.chest_in),
-        notes: 'Starting measurements',
-      });
-    }
     await refreshProfile();
     navigate('/app', { replace: true });
   }
@@ -67,11 +59,17 @@ export default function Onboarding() {
       <div className="flex items-center gap-2 font-display text-2xl font-bold text-slate-900 mb-2">
         <Dumbbell className="w-7 h-7 text-brand-500" /> Uni<span className="text-brand-500">Fitz</span>
       </div>
-      <p className="text-sm text-slate-500 mb-6">Let's set your starting point — takes 1 minute</p>
+      <p className="text-sm text-slate-500 mb-1">Let's set your starting point — takes 1 minute</p>
+      {/* Wrong account? switch the email/id you signed in with */}
+      <p className="text-xs text-slate-400 mb-6">
+        Signed in as <span className="font-semibold text-slate-600">{session?.user?.email}</span>
+        {' · '}
+        <button onClick={signOut} className="font-semibold text-brand-600 hover:underline">Use a different account</button>
+      </p>
 
       {/* Step dots */}
-      <div className="flex gap-2 mb-8" aria-label={`Step ${step} of 4`}>
-        {[1, 2, 3, 4].map(s => (
+      <div className="flex gap-2 mb-8" aria-label={`Step ${step} of 3`}>
+        {[1, 2, 3].map(s => (
           <span key={s} className={`h-2 rounded-full transition-all duration-300 ${s === step ? 'w-8 bg-brand-500' : 'w-2 bg-slate-300'}`} />
         ))}
       </div>
@@ -134,24 +132,6 @@ export default function Onboarding() {
         )}
 
         {step === 3 && (
-          <div className="space-y-4 animate-fade-up">
-            <h2 className="text-xl font-bold">Measurements <span className="text-sm font-normal text-slate-400">(optional)</span></h2>
-            <div className="grid grid-cols-3 gap-3">
-              {[['waist_in', 'Waist (in)'], ['hips_in', 'Hips (in)'], ['chest_in', 'Chest (in)']].map(([name, label]) => (
-                <div key={name}>
-                  <label className="label" htmlFor={name}>{label}</label>
-                  <input id={name} name={name} type="number" step="0.5" min="15" max="80" value={f[name]} onChange={set} className="input" />
-                </div>
-              ))}
-            </div>
-            <div>
-              <label className="label" htmlFor="target_weight_kg">Target weight (kg)</label>
-              <input id="target_weight_kg" name="target_weight_kg" type="number" step="0.5" min="30" max="200" value={f.target_weight_kg} onChange={set} className="input" placeholder="60" />
-            </div>
-          </div>
-        )}
-
-        {step === 4 && (
           <div className="animate-fade-up text-center">
             <h2 className="text-xl font-bold">Your Starting Point</h2>
             <div className="mt-5 grid grid-cols-2 gap-4">
@@ -181,7 +161,7 @@ export default function Onboarding() {
               <ArrowLeft className="w-4 h-4" /> Back
             </button>
           )}
-          {step < 4 ? (
+          {step < 3 ? (
             <button onClick={() => stepValid && setStep(s => s + 1)} disabled={!stepValid} className="btn-primary flex-1">
               Next <ArrowRight className="w-4 h-4" />
             </button>

@@ -2,6 +2,10 @@
 // Update these once and the landing page, WhatsApp button, footer and
 // SEO/JSON-LD all pick them up.
 
+// Auth: allow brand-new accounts to be created on first email OTP.
+// Flip to false for invite-only / login-only mode.
+export const ALLOW_SIGNUP_VIA_OTP = true;
+
 export const BUSINESS = {
   name: 'UniFit',
   // wa.me needs digits only, country code first, no + or spaces.

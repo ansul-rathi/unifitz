@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, MessageCircle, TrendingDown, TrendingUp, Minus, Users, Award, X, Loader2, UserPlus } from 'lucide-react';
+import { AlertTriangle, TrendingDown, TrendingUp, Minus, Users, Award, X, Loader2, UserPlus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -40,12 +40,13 @@ export default function TeacherStudents() {
 
   useEffect(() => {
     (async () => {
-      const { data: ch } = await supabase.from('challenges').select('id, name').eq('teacher_id', profile.id);
-      const ids = (ch ?? []).map(c => c.id);
-      if (!ids.length) { setLoading(false); return; }
+      // Names + avatars only — no phone/email. Personal contact details are not
+      // exposed to teachers (served via the my_students SECURITY DEFINER RPC).
+      const { data: rows } = await supabase.rpc('my_students');
+      if (!rows?.length) { setStudents([]); setLoading(false); return; }
 
-      const [{ data: enr }, { data: weekly }, { data: sessions }] = await Promise.all([
-        supabase.from('enrollments').select('user_id, challenge_id, profiles(id, full_name, phone, avatar_url)').in('challenge_id', ids),
+      const ids = [...new Set(rows.map(r => r.challenge_id))];
+      const [{ data: weekly }, { data: sessions }] = await Promise.all([
         supabase.from('weekly_checkins').select('user_id, week_number, weight_kg, created_at').order('week_number'),
         supabase.from('sessions').select('id, challenge_id').in('challenge_id', ids).eq('completed', true),
       ]);
@@ -59,10 +60,10 @@ export default function TeacherStudents() {
       const totalSessions = sessionIds.length;
 
       const byUser = new Map();
-      for (const e of enr ?? []) {
-        if (!e.profiles || byUser.has(e.user_id)) continue;
-        const checks = (weekly ?? []).filter(w => w.user_id === e.user_id);
-        const mine = attendance.filter(a => a.user_id === e.user_id);
+      for (const r of rows) {
+        if (byUser.has(r.user_id)) continue;
+        const checks = (weekly ?? []).filter(w => w.user_id === r.user_id);
+        const mine = attendance.filter(a => a.user_id === r.user_id);
         const attended = mine.filter(a => a.attended).length;
         const missed = totalSessions - attended;
         const pctRows = mine.filter(a => a.attendance_pct != null);
@@ -76,9 +77,9 @@ export default function TeacherStudents() {
 
         const trend = last && prev ? Math.sign(last.weight_kg - prev.weight_kg) : null;
 
-        byUser.set(e.user_id, {
-          ...e.profiles,
-          challenge: (ch ?? []).find(c => c.id === e.challenge_id)?.name,
+        byUser.set(r.user_id, {
+          id: r.user_id, full_name: r.full_name, avatar_url: r.avatar_url,
+          challenge: r.challenge_name,
           attended, totalSessions, checks: checks.length, avgPct,
           lastWeight: last?.weight_kg, trend, flagged,
         });
@@ -122,16 +123,6 @@ export default function TeacherStudents() {
                   >
                     <Award className="w-4 h-4 text-amber-500" /> Award
                   </button>
-                  {s.phone && (
-                    <a
-                      href={`https://wa.me/${s.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${s.full_name.split(' ')[0]}! Missed you in class — everything okay? Let's get you back on track this week 💪`)}`}
-                      target="_blank" rel="noreferrer"
-                      onClick={() => toast(`Nudge opened for ${s.full_name.split(' ')[0]}`)}
-                      className="btn-secondary !py-2 !px-3 text-xs"
-                    >
-                      <MessageCircle className="w-4 h-4 text-emerald-500" /> Nudge
-                    </a>
-                  )}
                 </div>
               </div>
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">

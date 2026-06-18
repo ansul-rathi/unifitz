@@ -51,13 +51,31 @@ export default function TeacherSchedule() {
   const [aiBusy, setAiBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const { data: ch } = await supabase.from('challenges').select('*').eq('teacher_id', profile.id);
-    setChallenges(ch ?? []);
-    const ids = (ch ?? []).map(c => c.id);
+    // Series this teacher runs — lead teacher_id OR co-teacher (challenge_teachers).
+    const [{ data: own }, { data: ct }] = await Promise.all([
+      supabase.from('challenges').select('*').eq('teacher_id', profile.id),
+      supabase.from('challenge_teachers').select('challenge_id, challenges(*)').eq('teacher_id', profile.id),
+    ]);
+    const map = new Map();
+    for (const c of own ?? []) map.set(c.id, c);
+    for (const r of ct ?? []) if (r.challenges) map.set(r.challenges.id, r.challenges);
+    const ch = [...map.values()];
+    setChallenges(ch);
+
+    const ids = ch.map(c => c.id);
     if (ids.length) {
+      // Only the upcoming LIVE classes the teacher still has to take —
+      // not completed, not recordings, soonest first.
+      const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
       const { data: ses } = await supabase.from('sessions').select('*, challenges(name, batch_name)')
-        .in('challenge_id', ids).order('day_number', { ascending: false });
+        .in('challenge_id', ids)
+        .eq('completed', false)
+        .eq('session_type', 'live')
+        .gte('scheduled_at', startToday.toISOString())
+        .order('scheduled_at', { ascending: true });
       setSessions(ses ?? []);
+    } else {
+      setSessions([]);
     }
     setLoading(false);
   }, [profile.id]);
@@ -200,7 +218,8 @@ export default function TeacherSchedule() {
   async function openAttendance(session) {
     setAttendanceFor(session);
     const [{ data: enr }, { data: existing }, { data: parts }] = await Promise.all([
-      supabase.from('enrollments').select('user_id, profiles(full_name, avatar_url)').eq('challenge_id', session.challenge_id),
+      // Names + avatars only — no student contact details exposed to teachers.
+      supabase.rpc('series_roster', { p_challenge: session.challenge_id }),
       supabase.from('attendance').select('user_id').eq('session_id', session.id).eq('attended', true),
       supabase.from('session_participants').select('*').eq('session_id', session.id).is('user_id', null),
     ]);
@@ -490,8 +509,8 @@ export default function TeacherSchedule() {
                       })}
                       className="w-5 h-5 accent-brand-500"
                     />
-                    <Avatar name={r.profiles?.full_name} url={r.profiles?.avatar_url} size="w-8 h-8" />
-                    <span className="text-sm font-semibold">{r.profiles?.full_name}</span>
+                    <Avatar name={r.full_name} url={r.avatar_url} size="w-8 h-8" />
+                    <span className="text-sm font-semibold">{r.full_name}</span>
                   </label>
                 </li>
               ))}
@@ -519,7 +538,7 @@ export default function TeacherSchedule() {
                       >
                         <option value="">Assign to…</option>
                         {roster.map(r => (
-                          <option key={r.user_id} value={r.user_id}>{r.profiles?.full_name}</option>
+                          <option key={r.user_id} value={r.user_id}>{r.full_name}</option>
                         ))}
                       </select>
                     </li>

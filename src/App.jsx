@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import { useViewMode } from './context/ViewModeContext';
 import { Spinner } from './components/ui';
 import DashboardLayout from './components/DashboardLayout';
 
@@ -8,6 +9,7 @@ import DashboardLayout from './components/DashboardLayout';
 // load (landing/auth) no longer downloads the entire app + recharts + jspdf.
 const Landing = lazy(() => import('./pages/Landing'));
 const Auth = lazy(() => import('./pages/Auth'));
+const AuthConfirm = lazy(() => import('./pages/AuthConfirm'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const RecipeDetail = lazy(() => import('./pages/RecipeDetail'));
 const StaffProfile = lazy(() => import('./pages/StaffProfile'));
@@ -20,11 +22,15 @@ const ClientProgress = lazy(() => import('./pages/client/Progress'));
 const ClientDiet = lazy(() => import('./pages/client/Diet'));
 const ClientBadges = lazy(() => import('./pages/client/Badges'));
 const ClientRefer = lazy(() => import('./pages/client/Refer'));
+const ClientRecipes = lazy(() => import('./pages/client/Recipes'));
 const ClientProfile = lazy(() => import('./pages/client/Profile'));
+
+const StaffRecipes = lazy(() => import('./pages/staff/Recipes'));
 
 const TeacherSchedule = lazy(() => import('./pages/teacher/Schedule'));
 const TeacherStudents = lazy(() => import('./pages/teacher/Students'));
 const TeacherAnnouncements = lazy(() => import('./pages/teacher/Announcements'));
+const TeacherSeries = lazy(() => import('./pages/teacher/Series'));
 
 const AdminOverview = lazy(() => import('./pages/admin/Overview'));
 const AdminChallenges = lazy(() => import('./pages/admin/Challenges'));
@@ -40,11 +46,16 @@ const HOME_BY_ROLE = { admin: '/admin', teacher: '/teacher', client: '/app' };
 
 function Protected({ role, children }) {
   const { session, profile, loading } = useAuth();
+  const { preview } = useViewMode();
   if (loading) return <Spinner label="Checking your session…" />;
   if (!session) return <Navigate to="/auth" replace />;
   if (!profile) return <Spinner label="Loading profile…" />;
   if (profile.role === 'client' && !profile.onboarding_complete) return <Navigate to="/onboarding" replace />;
-  if (role && profile.role !== role) return <Navigate to={HOME_BY_ROLE[profile.role]} replace />;
+  if (role && profile.role !== role) {
+    // Teacher/admin previewing the student experience may enter the client app.
+    if (preview && role === 'client' && profile.role !== 'client') return children;
+    return <Navigate to={HOME_BY_ROLE[profile.role]} replace />;
+  }
   return children;
 }
 
@@ -65,6 +76,7 @@ export default function App() {
           }
         />
         <Route path="/auth" element={session && profile ? <Navigate to={HOME_BY_ROLE[profile.role]} replace /> : <Auth />} />
+        <Route path="/auth/confirm" element={<AuthConfirm />} />
         <Route path="/recipes/:code" element={<RecipeDetail />} />
         <Route
           path="/onboarding"
@@ -81,6 +93,7 @@ export default function App() {
           <Route path="challenges/:id" element={<ChallengeDetail />} />
           <Route path="progress" element={<ClientProgress />} />
           <Route path="diet" element={<ClientDiet />} />
+          <Route path="recipes" element={<ClientRecipes />} />
           <Route path="badges" element={<ClientBadges />} />
           <Route path="refer" element={<ClientRefer />} />
           <Route path="profile" element={<ClientProfile />} />
@@ -90,6 +103,9 @@ export default function App() {
           <Route index element={<TeacherSchedule />} />
           <Route path="students" element={<TeacherStudents />} />
           <Route path="announcements" element={<TeacherAnnouncements />} />
+          <Route path="series" element={<TeacherSeries />} />
+          <Route path="series/:id" element={<AdminSeriesDetail />} />
+          <Route path="recipes" element={<StaffRecipes />} />
           <Route path="profile" element={<StaffProfile />} />
         </Route>
 
@@ -101,6 +117,7 @@ export default function App() {
           <Route path="users" element={<AdminUsers />} />
           <Route path="referrals" element={<AdminReferrals />} />
           <Route path="badges" element={<AdminBadges />} />
+          <Route path="recipes" element={<StaffRecipes />} />
           <Route path="leads" element={<AdminLeads />} />
           <Route path="revenue" element={<AdminRevenue />} />
           <Route path="profile" element={<StaffProfile />} />

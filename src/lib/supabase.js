@@ -8,4 +8,10 @@ if (!url || !anonKey) {
   console.error('Missing VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY — copy .env.example to .env');
 }
 
-export const supabase = createClient(url, anonKey);
+export const supabase = createClient(url, anonKey, {
+  auth: {
+    detectSessionInUrl: true,  // complete email-link sign-ins arriving with tokens in the URL
+    persistSession: true,
+    autoRefreshToken: true,
+  },
+});

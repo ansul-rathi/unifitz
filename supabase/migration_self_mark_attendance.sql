@@ -6,6 +6,14 @@
 --
 -- Idempotent + non-destructive. Run in the Supabase SQL editor.
 
+-- ── 0) Ensure the Zoom/attendance columns exist ─────────────────────────────
+-- (some environments predate these; the zoom-webhook + this RPC both need them.)
+alter table public.attendance
+  add column if not exists attended_minutes int,
+  add column if not exists session_minutes  int,
+  add column if not exists attendance_pct    numeric,
+  add column if not exists source            text not null default 'manual';  -- 'zoom' | 'manual' | 'recording'
+
 create or replace function public.self_mark_attendance(p_session uuid)
 returns void
 language plpgsql

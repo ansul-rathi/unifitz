@@ -44,6 +44,16 @@ npm run dev
 ### 5. (Optional) Edge Functions — Zoom + AI
 Needed only for live-Zoom automation and AI generation. See [Edge Functions](#edge-functions) below. The app runs fully without them (manual Zoom links, no AI).
 
+### 6. Passwordless auth — Supabase Dashboard settings (NOT code)
+Login is passwordless: a 6-digit **email OTP code** plus a **magic login link** that lands on `/auth/confirm`. Configure these once in the dashboard:
+
+- **Authentication → URL Configuration**
+  - **Site URL** = production domain (e.g. `https://www.unifitz.in`).
+  - **Redirect URLs** allowlist must include both **`https://www.unifitz.in/auth/confirm`** and **`http://localhost:5173/auth/confirm`** (the app sends `emailRedirectTo = ${window.location.origin}/auth/confirm`).
+- **Authentication → Providers → Email**: Email enabled. The OTP code is the `{{ .Token }}` template variable — make sure the **Magic Link** email template includes `{{ .Token }}` so users get a code as well as the link.
+- **Authentication → SMTP**: set a custom SMTP provider (e.g. Resend, with its domain verified via DNS). Supabase's built-in email is heavily rate-limited and not for production.
+- New users created via OTP land in the onboarding wizard automatically (`onboarding_complete=false`); signup passes `full_name`/`phone`/`referral_code` as metadata for the profile trigger.
+
 ---
 
 ## Demo logins (after `seed.sql`, password `password123`)

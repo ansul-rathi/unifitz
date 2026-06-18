@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Outlet, NavLink, Link } from 'react-router-dom';
+import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   Home, Trophy, TrendingUp, Gift, User, Calendar, Users, Megaphone,
   LayoutDashboard, ListChecks, UserCog, Share2, IndianRupee, Flame, LogOut, Dumbbell,
-  Salad, Medal, Mailbox, BarChart3, X, CalendarCheck, Sparkles,
+  Salad, Medal, Mailbox, BarChart3, X, CalendarCheck, Sparkles, ChefHat, Eye,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useViewMode } from '../context/ViewModeContext';
 import { supabase } from '../lib/supabase';
 import { Avatar } from './ui';
 
@@ -15,14 +16,17 @@ const NAV = {
     { to: '/app/challenges', label: 'Series', icon: Trophy },
     { to: '/app/progress', label: 'Progress', icon: TrendingUp },
     { to: '/app/diet', label: 'Diet Plan', icon: Salad },
+    { to: '/app/recipes', label: 'Recipes', icon: ChefHat },
     { to: '/app/badges', label: 'Badges', icon: Medal },
     { to: '/app/refer', label: 'Refer & Earn', icon: Gift },
     { to: '/app/profile', label: 'Profile', icon: User },
   ],
   teacher: [
     { to: '/teacher', label: 'Schedule', icon: Calendar, end: true },
+    { to: '/teacher/series', label: 'Series', icon: ListChecks },
     { to: '/teacher/students', label: 'My Students', icon: Users },
     { to: '/teacher/announcements', label: 'Announce', icon: Megaphone },
+    { to: '/teacher/recipes', label: 'Recipes', icon: ChefHat },
     { to: '/teacher/profile', label: 'Profile', icon: User },
   ],
   admin: [
@@ -32,6 +36,7 @@ const NAV = {
     { to: '/admin/users', label: 'Users', icon: UserCog },
     { to: '/admin/referrals', label: 'Referrals', icon: Share2 },
     { to: '/admin/badges', label: 'Badges', icon: Medal },
+    { to: '/admin/recipes', label: 'Recipes', icon: ChefHat },
     { to: '/admin/leads', label: 'Leads', icon: Mailbox },
     { to: '/admin/revenue', label: 'Revenue', icon: IndianRupee },
     { to: '/admin/profile', label: 'Profile', icon: User },
@@ -42,19 +47,28 @@ const HOME_BASE = { client: '/app', teacher: '/teacher', admin: '/admin' };
 
 export default function DashboardLayout() {
   const { profile, signOut } = useAuth();
+  const { preview, setPreview } = useViewMode();
+  const navigate = useNavigate();
   const [streak, setStreak] = useState(null);
   const [showStreak, setShowStreak] = useState(false);
-  const items = NAV[profile.role] ?? NAV.client;
+
+  const isStaff = profile.role === 'teacher' || profile.role === 'admin';
+  // While a staff member previews the student app, render the client nav/shell.
+  const effectiveRole = preview && isStaff ? 'client' : profile.role;
+  const items = NAV[effectiveRole] ?? NAV.client;
   // Mobile/tablet bottom tabs drop Profile + Refer for clients (reached via the
   // header avatar instead). Desktop sidebar keeps the full list unchanged.
-  const bottomItems = profile.role === 'client'
+  const bottomItems = effectiveRole === 'client'
     ? items.filter(i => !['/app/refer', '/app/profile'].includes(i.to))
     : items;
 
+  function enterPreview() { setPreview(true); navigate('/app'); }
+  function exitPreview() { setPreview(false); navigate(HOME_BASE[profile.role] ?? '/'); }
+
   useEffect(() => {
-    if (profile.role !== 'client') return;
+    if (effectiveRole !== 'client' || profile.role !== 'client') return;
     supabase.rpc('current_streak', { p_user: profile.id }).then(({ data }) => setStreak(data ?? 0));
-  }, [profile.id, profile.role]);
+  }, [profile.id, profile.role, effectiveRole]);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -67,6 +81,15 @@ export default function DashboardLayout() {
           </Link>
 
           <div className="flex items-center gap-3">
+            {isStaff && !preview && (
+              <button
+                onClick={enterPreview}
+                title="Preview the student experience"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 border border-slate-200 hover:bg-slate-50 px-2.5 sm:px-3 py-2 rounded-lg transition-colors duration-150"
+              >
+                <Eye className="w-4 h-4" /> <span className="hidden sm:inline">View as student</span>
+              </button>
+            )}
             {profile.role === 'client' && streak !== null && (
               <button
                 onClick={() => setShowStreak(true)}
@@ -90,9 +113,9 @@ export default function DashboardLayout() {
               </Link>
             )}
             {/* Desktop client + all teacher/admin: avatar links to Profile + logout */}
-            <div className={`items-center gap-2 ${profile.role === 'client' ? 'hidden lg:flex' : 'flex'}`}>
+            <div className={`items-center gap-2 ${effectiveRole === 'client' ? 'hidden lg:flex' : 'flex'}`}>
               <Link
-                to={`${HOME_BASE[profile.role] ?? '/app'}/profile`}
+                to={`${HOME_BASE[effectiveRole] ?? '/app'}/profile`}
                 aria-label="Your profile"
                 title="Profile"
                 className="rounded-full ring-2 ring-transparent hover:ring-brand-200 transition-shadow duration-200"
@@ -111,6 +134,18 @@ export default function DashboardLayout() {
           </div>
         </div>
       </header>
+
+      {/* Student-preview banner (staff only) */}
+      {preview && isStaff && (
+        <div className="sticky top-14 md:top-16 z-30 bg-brand-500 text-white text-sm font-semibold">
+          <div className="max-w-6xl mx-auto px-4 md:px-6 py-2 flex items-center justify-between gap-3">
+            <span className="inline-flex items-center gap-2"><Eye className="w-4 h-4" /> Student preview — how students see the app</span>
+            <button onClick={exitPreview} className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg transition-colors duration-150">
+              <X className="w-4 h-4" /> Exit
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Streak detail popup */}
       {showStreak && streak !== null && (() => {

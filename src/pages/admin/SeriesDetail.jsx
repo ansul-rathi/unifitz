@@ -5,6 +5,7 @@ import {
   CheckCircle2, Copy, Eye, EyeOff, Users, IndianRupee, ImagePlus, CalendarDays, Layers, Sparkles, Upload,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { compressImage } from '../../lib/compressImage';
 import { createZoomMeeting, generateSessionImage, generateSeriesImage } from '../../lib/zoom';
@@ -18,6 +19,9 @@ const blankSession = () => ({
 
 export default function AdminSeriesDetail() {
   const { id } = useParams();
+  const { profile } = useAuth();
+  const isAdmin = profile.role === 'admin';
+  const backTo = isAdmin ? '/admin/challenges' : '/teacher/series';
   const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [c, setC] = useState(null);
@@ -66,12 +70,20 @@ export default function AdminSeriesDetail() {
     e.preventDefault();
     setBusy(true);
     try {
-      await supabase.from('challenges').update({
-        name: f.name, description: f.description, duration_days: +f.duration_days,
-        batch_name: f.batch_name, start_date: f.start_date || null, status: f.status,
-        is_free: f.is_free, price: f.is_free ? 0 : (f.price === '' ? 0 : +f.price),
-        is_published: f.is_published, teacher_id: f.teacherIds[0] || null,
-      }).eq('id', id);
+      // Teachers may edit content (name/description/schedule/sessions) but not
+      // pricing, visibility or the teacher roster — those stay admin-only.
+      const update = isAdmin
+        ? {
+            name: f.name, description: f.description, duration_days: +f.duration_days,
+            batch_name: f.batch_name, start_date: f.start_date || null, status: f.status,
+            is_free: f.is_free, price: f.is_free ? 0 : (f.price === '' ? 0 : +f.price),
+            is_published: f.is_published, teacher_id: f.teacherIds[0] || null,
+          }
+        : {
+            name: f.name, description: f.description, duration_days: +f.duration_days,
+            batch_name: f.batch_name, start_date: f.start_date || null, status: f.status,
+          };
+      await supabase.from('challenges').update(update).eq('id', id);
       if (f.poster) {
         const small = await compressImage(f.poster);
         const path = `challenge/${id}.jpg`;
@@ -79,8 +91,10 @@ export default function AdminSeriesDetail() {
         const { data: pub } = supabase.storage.from('posters').getPublicUrl(path);
         await supabase.from('challenges').update({ poster_url: `${pub.publicUrl}?t=${Date.now()}` }).eq('id', id);
       }
-      await supabase.from('challenge_teachers').delete().eq('challenge_id', id);
-      if (f.teacherIds.length) await supabase.from('challenge_teachers').insert(f.teacherIds.map(tid => ({ challenge_id: id, teacher_id: tid })));
+      if (isAdmin) {
+        await supabase.from('challenge_teachers').delete().eq('challenge_id', id);
+        if (f.teacherIds.length) await supabase.from('challenge_teachers').insert(f.teacherIds.map(tid => ({ challenge_id: id, teacher_id: tid })));
+      }
       toast('Series updated');
       setEditing(false);
       load();
@@ -176,7 +190,7 @@ export default function AdminSeriesDetail() {
 
   return (
     <div className="space-y-5">
-      <Link to="/admin/challenges" className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800"><ArrowLeft className="w-4 h-4" /> All series</Link>
+      <Link to={backTo} className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800"><ArrowLeft className="w-4 h-4" /> All series</Link>
 
       {/* Header */}
       <Card className="overflow-hidden">
@@ -207,7 +221,7 @@ export default function AdminSeriesDetail() {
               <p className="mt-1 text-xs text-slate-500 flex items-center gap-1"><CalendarDays className="w-3.5 h-3.5" /> {c.batch_name || 'No batch'} · {c.duration_days} days · starts {c.start_date ?? 'TBD'}</p>
             </div>
             <div className="flex gap-2 shrink-0">
-              <button onClick={togglePublish} className="btn-secondary !py-2 !px-3 text-sm">{c.is_published ? <><EyeOff className="w-4 h-4" /> Hide</> : <><Eye className="w-4 h-4" /> Publish</>}</button>
+              {isAdmin && <button onClick={togglePublish} className="btn-secondary !py-2 !px-3 text-sm">{c.is_published ? <><EyeOff className="w-4 h-4" /> Hide</> : <><Eye className="w-4 h-4" /> Publish</>}</button>}
               <button onClick={startEdit} className="btn-primary !py-2 !px-3 text-sm"><Pencil className="w-4 h-4" /> Edit details</button>
             </div>
           </div>
@@ -220,10 +234,10 @@ export default function AdminSeriesDetail() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={Users} label="Enrolled" value={stats.enrolled} to={`/admin/users?role=client`} />
+        <StatCard icon={Users} label="Enrolled" value={stats.enrolled} to={isAdmin ? '/admin/users?role=client' : undefined} />
         <StatCard icon={Video} label="Sessions" value={sessions.length} accent="text-violet-500" />
         <StatCard icon={CheckCircle2} label="Completed" value={`${completed} (${pct}%)`} accent="text-emerald-500" />
-        <StatCard icon={IndianRupee} label="Revenue" value={c.is_free ? '—' : `₹${stats.gross.toLocaleString('en-IN')}`} accent="text-emerald-500" to="/admin/revenue" />
+        <StatCard icon={IndianRupee} label="Revenue" value={c.is_free ? '—' : `₹${stats.gross.toLocaleString('en-IN')}`} accent="text-emerald-500" to={isAdmin ? '/admin/revenue' : undefined} />
       </div>
 
       {/* Edit details modal */}
@@ -241,24 +255,30 @@ export default function AdminSeriesDetail() {
             <input placeholder="Batch name" className="input" value={f.batch_name} onChange={e => setF(x => ({ ...x, batch_name: e.target.value }))} />
             <input type="date" className="input" value={f.start_date} onChange={e => setF(x => ({ ...x, start_date: e.target.value }))} />
             <Select value={f.status} onChange={v => setF(x => ({ ...x, status: v }))} options={['upcoming', 'active', 'completed']} />
-            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 sm:col-span-2">
-              <input type="checkbox" checked={f.is_published} onChange={e => setF(x => ({ ...x, is_published: e.target.checked }))} className="w-5 h-5 accent-brand-500" /> Visible to students &amp; teachers
-            </label>
-            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-              <input type="checkbox" checked={f.is_free} onChange={e => setF(x => ({ ...x, is_free: e.target.checked }))} className="w-5 h-5 accent-brand-500" /> Free series
-            </label>
-            {!f.is_free && <div className="flex items-center gap-2"><span className="text-slate-400">₹</span><input type="number" min="0" placeholder="Price" className="input" value={f.price} onChange={e => setF(x => ({ ...x, price: e.target.value }))} /></div>}
-            <div className="sm:col-span-2">
-              <span className="label">Teachers</span>
-              <div className="grid grid-cols-2 gap-2">
-                {teachers.map(t => {
-                  const on = f.teacherIds.includes(t.id);
-                  return <label key={t.id} className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer ${on ? 'border-brand-400 bg-brand-50 text-brand-700 font-semibold' : 'border-slate-200 text-slate-600'}`}>
-                    <input type="checkbox" checked={on} className="w-4 h-4 accent-brand-500" onChange={() => setF(x => { const s = new Set(x.teacherIds); s.has(t.id) ? s.delete(t.id) : s.add(t.id); return { ...x, teacherIds: [...s] }; })} />{t.full_name}
-                  </label>;
-                })}
+            {isAdmin && (
+              <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 sm:col-span-2">
+                <input type="checkbox" checked={f.is_published} onChange={e => setF(x => ({ ...x, is_published: e.target.checked }))} className="w-5 h-5 accent-brand-500" /> Visible to students &amp; teachers
+              </label>
+            )}
+            {isAdmin && (
+              <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                <input type="checkbox" checked={f.is_free} onChange={e => setF(x => ({ ...x, is_free: e.target.checked }))} className="w-5 h-5 accent-brand-500" /> Free series
+              </label>
+            )}
+            {isAdmin && !f.is_free && <div className="flex items-center gap-2"><span className="text-slate-400">₹</span><input type="number" min="0" placeholder="Price" className="input" value={f.price} onChange={e => setF(x => ({ ...x, price: e.target.value }))} /></div>}
+            {isAdmin && (
+              <div className="sm:col-span-2">
+                <span className="label">Teachers</span>
+                <div className="grid grid-cols-2 gap-2">
+                  {teachers.map(t => {
+                    const on = f.teacherIds.includes(t.id);
+                    return <label key={t.id} className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer ${on ? 'border-brand-400 bg-brand-50 text-brand-700 font-semibold' : 'border-slate-200 text-slate-600'}`}>
+                      <input type="checkbox" checked={on} className="w-4 h-4 accent-brand-500" onChange={() => setF(x => { const s = new Set(x.teacherIds); s.has(t.id) ? s.delete(t.id) : s.add(t.id); return { ...x, teacherIds: [...s] }; })} />{t.full_name}
+                    </label>;
+                  })}
+                </div>
               </div>
-            </div>
+            )}
             <div className="sm:col-span-2">
               <label className="label">Series image</label>
               <input type="file" accept="image/*" onChange={e => setF(x => ({ ...x, poster: e.target.files?.[0] ?? null }))} className="block text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:text-xs file:border-0 file:bg-slate-100 file:rounded-lg file:font-semibold file:cursor-pointer" />
@@ -318,7 +338,7 @@ export default function AdminSeriesDetail() {
                       {s.scheduled_at && <> · {new Date(s.scheduled_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</>}
                     </p>
                   </div>
-                  <button onClick={() => deleteSession(s.id)} title="Delete" className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 shrink-0"><Trash2 className="w-4 h-4" /></button>
+                  {isAdmin && <button onClick={() => deleteSession(s.id)} title="Delete" className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 shrink-0"><Trash2 className="w-4 h-4" /></button>}
                 </div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-2">
