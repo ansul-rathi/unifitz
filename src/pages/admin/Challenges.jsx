@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Pencil, Loader2, X, Video, ImagePlus, Users, IndianRupee, CalendarDays, Layers, Eye, EyeOff } from 'lucide-react';
+import { Plus, Pencil, Loader2, X, Video, ImagePlus, Users, IndianRupee, CalendarDays, Layers, Eye, EyeOff, LayoutGrid, List } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
 import { compressImage } from '../../lib/compressImage';
@@ -32,6 +32,8 @@ export default function AdminChallenges() {
   const [sessDragging, setSessDragging] = useState(false);
 
   const [stats, setStats] = useState({}); // challenge_id → { enrolled, sessions, gross, teachers[] }
+  const [view, setView] = useState(() => localStorage.getItem('admin_series_view') || 'grid');
+  const setViewMode = v => { setView(v); localStorage.setItem('admin_series_view', v); };
 
   async function load() {
     const [{ data: ch }, { data: t }, { data: enr }, { data: ses }, { data: pays }, { data: cts }, { data: profs }] = await Promise.all([
@@ -43,7 +45,16 @@ export default function AdminChallenges() {
       supabase.from('challenge_teachers').select('challenge_id, teacher_id'),
       supabase.from('profiles').select('id, full_name, avatar_url'),
     ]);
-    setRows(ch ?? []);
+    // Sort: visible (published) first, hidden last. Within each, active → upcoming → completed.
+    const statusRank = { active: 0, upcoming: 1, completed: 2 };
+    const sorted = [...(ch ?? [])].sort((a, b) => {
+      const av = a.is_published !== false, bv = b.is_published !== false;
+      if (av !== bv) return av ? -1 : 1;                              // published before hidden
+      const sr = (statusRank[a.status] ?? 3) - (statusRank[b.status] ?? 3);
+      if (sr) return sr;                                              // active first
+      return new Date(a.created_at) - new Date(b.created_at);         // stable by creation
+    });
+    setRows(sorted);
     setTeachers(t ?? []);
 
     const nameMap = Object.fromEntries((profs ?? []).map(p => [p.id, p]));
@@ -188,9 +199,22 @@ export default function AdminChallenges() {
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-2xl md:text-3xl font-bold">Series</h1>
-        <button onClick={() => setEditing({ ...EMPTY })} className="btn-primary !py-2.5 text-sm">
-          <Plus className="w-4 h-4" /> New series
-        </button>
+        <div className="flex items-center gap-2">
+          {/* View toggle */}
+          <div className="inline-flex rounded-lg bg-slate-100 p-0.5">
+            <button onClick={() => setViewMode('grid')} aria-label="Grid view" title="Grid view"
+              className={`p-2 rounded-md transition-colors duration-150 ${view === 'grid' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button onClick={() => setViewMode('list')} aria-label="List view" title="List view"
+              className={`p-2 rounded-md transition-colors duration-150 ${view === 'list' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+          <button onClick={() => setEditing({ ...EMPTY })} className="btn-primary !py-2.5 text-sm">
+            <Plus className="w-4 h-4" /> New series
+          </button>
+        </div>
       </div>
 
       {/* Portfolio summary */}
@@ -205,7 +229,7 @@ export default function AdminChallenges() {
 
       {rows.length === 0 ? (
         <Card><EmptyState title="No series yet" hint="Create your first series to get started." /></Card>
-      ) : (
+      ) : view === 'grid' ? (
         <div className="grid gap-4 md:grid-cols-2">
           {rows.map(c => {
             const st = stats[c.id] ?? { enrolled: 0, sessions: 0, completed: 0, gross: 0, teachers: [] };
@@ -269,6 +293,57 @@ export default function AdminChallenges() {
             );
           })}
         </div>
+      ) : (
+        /* List view */
+        <Card className="overflow-hidden p-0">
+          {/* header row — desktop only */}
+          <div className="hidden md:grid grid-cols-[minmax(0,2.2fr)_1fr_1fr_1fr_1.2fr_auto] gap-3 px-4 py-2.5 bg-slate-50 text-[11px] font-bold uppercase tracking-wide text-slate-400">
+            <span>Series</span><span>Progress</span><span>Enrolled</span><span>Sessions</span><span>Revenue</span><span className="text-right">Actions</span>
+          </div>
+          <ul className="divide-y divide-slate-100">
+            {rows.map(c => {
+              const st = stats[c.id] ?? { enrolled: 0, sessions: 0, completed: 0, gross: 0, teachers: [] };
+              const pct = st.sessions ? Math.round((st.completed / st.sessions) * 100) : 0;
+              return (
+                <li key={c.id} className={`grid grid-cols-2 md:grid-cols-[minmax(0,2.2fr)_1fr_1fr_1fr_1.2fr_auto] gap-3 px-4 py-3 items-center ${c.is_published ? '' : 'opacity-70'}`}>
+                  {/* Series identity */}
+                  <div className="flex items-center gap-3 min-w-0 col-span-2 md:col-span-1">
+                    {c.poster_url
+                      ? <img src={c.poster_url} alt="" className="w-14 h-9 rounded-lg object-cover shrink-0" />
+                      : <div className="w-14 h-9 rounded-lg bg-gradient-to-br from-brand-400 to-orange-600 flex items-center justify-center shrink-0"><Layers className="w-4 h-4 text-white/80" /></div>}
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <Link to={`/admin/series/${c.id}`} className="font-bold text-sm truncate hover:text-brand-600">{c.name}</Link>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${c.status === 'active' ? 'bg-emerald-100 text-emerald-700' : c.status === 'upcoming' ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600'}`}>{c.status}</span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${c.is_free ? 'bg-brand-100 text-brand-700' : 'bg-amber-100 text-amber-700'}`}>{c.is_free ? 'FREE' : `₹${c.price}`}</span>
+                        {!c.is_published && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-900 text-white">Hidden</span>}
+                      </div>
+                      <p className="text-[11px] text-slate-400 truncate">{c.batch_name || 'No batch'} · {c.duration_days} days</p>
+                    </div>
+                  </div>
+                  {/* Progress */}
+                  <div className="hidden md:block">
+                    <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden"><div className="h-full bg-emerald-500 rounded-full" style={{ width: `${pct}%` }} /></div>
+                    <p className="mt-1 text-[11px] text-slate-400">{st.completed}/{st.sessions} ({pct}%)</p>
+                  </div>
+                  {/* Enrolled */}
+                  <div><span className="md:hidden text-[11px] text-slate-400 font-semibold">Enrolled: </span><span className="text-sm font-bold">{st.enrolled}</span></div>
+                  {/* Sessions */}
+                  <div><span className="md:hidden text-[11px] text-slate-400 font-semibold">Sessions: </span><span className="text-sm font-bold">{st.sessions}</span></div>
+                  {/* Revenue */}
+                  <div className="text-sm font-bold">{c.is_free ? '—' : `₹${st.gross.toLocaleString('en-IN')}`}</div>
+                  {/* Actions */}
+                  <div className="flex items-center justify-end gap-1.5 col-span-2 md:col-span-1">
+                    <button onClick={() => togglePublish(c)} title={c.is_published ? 'Hide' : 'Publish'} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500">
+                      {c.is_published ? <Eye className="w-4 h-4 text-emerald-500" /> : <EyeOff className="w-4 h-4 text-slate-400" />}
+                    </button>
+                    <Link to={`/admin/series/${c.id}`} title="Open series" className="btn-secondary !py-1.5 !px-3 text-xs"><Layers className="w-4 h-4" /> Open</Link>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
       )}
 
       {/* Edit / create modal */}

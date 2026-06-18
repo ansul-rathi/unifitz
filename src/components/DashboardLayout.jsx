@@ -3,7 +3,7 @@ import { Outlet, NavLink, Link } from 'react-router-dom';
 import {
   Home, Trophy, TrendingUp, Gift, User, Calendar, Users, Megaphone,
   LayoutDashboard, ListChecks, UserCog, Share2, IndianRupee, Flame, LogOut, Dumbbell,
-  Salad, Medal, Mailbox, BarChart3,
+  Salad, Medal, Mailbox, BarChart3, X, CalendarCheck, Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -43,6 +43,7 @@ const HOME_BASE = { client: '/app', teacher: '/teacher', admin: '/admin' };
 export default function DashboardLayout() {
   const { profile, signOut } = useAuth();
   const [streak, setStreak] = useState(null);
+  const [showStreak, setShowStreak] = useState(false);
   const items = NAV[profile.role] ?? NAV.client;
   // Mobile/tablet bottom tabs drop Profile + Refer for clients (reached via the
   // header avatar instead). Desktop sidebar keeps the full list unchanged.
@@ -67,10 +68,15 @@ export default function DashboardLayout() {
 
           <div className="flex items-center gap-3">
             {profile.role === 'client' && streak !== null && (
-              <span className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 text-sm font-bold px-3 py-1.5 rounded-full">
+              <button
+                onClick={() => setShowStreak(true)}
+                aria-label={`Day ${streak} streak — view details`}
+                title="Your streak"
+                className="inline-flex items-center gap-1 bg-orange-50 border border-orange-200 text-orange-700 text-sm font-bold pl-2 pr-2.5 py-1.5 rounded-full active:scale-95 hover:bg-orange-100 transition duration-150"
+              >
                 <Flame className="w-4 h-4 text-orange-500" />
-                Day {streak} streak
-              </span>
+                {streak}
+              </button>
             )}
             {/* Mobile/tablet (client): avatar links to Profile, no header logout */}
             {profile.role === 'client' && (
@@ -106,6 +112,54 @@ export default function DashboardLayout() {
         </div>
       </header>
 
+      {/* Streak detail popup */}
+      {showStreak && streak !== null && (() => {
+        const MILES = [3, 7, 14, 21, 30, 60, 100];
+        const next = MILES.find(m => m > streak) ?? null;
+        const pct = next ? Math.min(100, Math.round((streak / next) * 100)) : 100;
+        return (
+          <div className="fixed inset-0 z-[60] bg-slate-900/50 flex items-end sm:items-center justify-center p-0 sm:p-6" role="dialog" aria-modal="true" onClick={() => setShowStreak(false)}>
+            <div className="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-6 animate-fade-up" onClick={e => e.stopPropagation()}>
+              <div className="flex items-start justify-between">
+                <h3 className="font-bold text-lg">Your streak</h3>
+                <button onClick={() => setShowStreak(false)} aria-label="Close" className="p-1.5 rounded-lg hover:bg-slate-100"><X className="w-5 h-5" /></button>
+              </div>
+
+              <div className="mt-4 flex flex-col items-center text-center">
+                <span className="inline-flex w-20 h-20 items-center justify-center rounded-full bg-orange-100">
+                  <Flame className="w-10 h-10 text-orange-500" />
+                </span>
+                <p className="mt-3 font-display text-4xl font-extrabold text-slate-900">{streak} {streak === 1 ? 'day' : 'days'}</p>
+                <p className="mt-1 text-sm text-slate-500">
+                  {streak > 0 ? "You're on fire — don't break the chain!" : 'Check in today to start your streak.'}
+                </p>
+              </div>
+
+              {next && (
+                <div className="mt-5">
+                  <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+                    <span>Next milestone</span>
+                    <span>{streak}/{next} days</span>
+                  </div>
+                  <div className="mt-1.5 h-2 rounded-full bg-slate-100 overflow-hidden">
+                    <div className="h-full bg-orange-500 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                  </div>
+                  <p className="mt-1.5 text-xs text-slate-400">{next - streak} more {next - streak === 1 ? 'day' : 'days'} to reach {next} 🔥</p>
+                </div>
+              )}
+
+              <div className="mt-5 rounded-2xl bg-slate-50 p-4 space-y-2.5">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">How streaks work</p>
+                <p className="flex items-start gap-2 text-sm text-slate-600"><CalendarCheck className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> Check in or join a class each day to keep it going.</p>
+                <p className="flex items-start gap-2 text-sm text-slate-600"><Sparkles className="w-4 h-4 text-violet-500 shrink-0 mt-0.5" /> Miss a day and the streak resets to zero.</p>
+              </div>
+
+              <button onClick={() => setShowStreak(false)} className="btn-primary w-full mt-5">Got it</button>
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="max-w-6xl mx-auto lg:flex">
         {/* Sidebar — desktop (lg+) */}
         <aside className="hidden lg:block w-56 shrink-0 px-3 py-6">
@@ -135,7 +189,10 @@ export default function DashboardLayout() {
       </div>
 
       {/* Bottom tabs — mobile + tablet (below lg) */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid grid-flow-col">
+      <nav
+        className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid grid-flow-col shadow-[0_-1px_8px_rgba(0,0,0,0.04)]"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         {bottomItems.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}

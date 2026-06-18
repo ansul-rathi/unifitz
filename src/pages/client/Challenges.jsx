@@ -24,17 +24,30 @@ export default function ClientChallenges() {
   const [busy, setBusy] = useState(false);
 
   async function load() {
-    const [{ data: ch }, { data: enr }, { data: pays }, { data: ses }] = await Promise.all([
+    const [{ data: ch }, { data: enr }, { data: pays }, { data: ses }, { data: att }] = await Promise.all([
       supabase.from('challenges').select('*').order('start_date'),
       supabase.from('enrollments').select('challenge_id').eq('user_id', profile.id),
       supabase.from('payments').select('challenge_id, status').eq('user_id', profile.id).eq('status', 'pending_verification'),
-      supabase.from('sessions').select('challenge_id, completed'),
+      supabase.from('sessions').select('id, challenge_id, completed'),
+      supabase.from('attendance').select('session_id, attended').eq('user_id', profile.id),
     ]);
     setChallenges(ch ?? []);
     setEnrolled(new Set((enr ?? []).map(e => e.challenge_id)));
     setPending(new Set((pays ?? []).map(p => p.challenge_id)));
+    // Per-series counts. total = all sessions, held = already completed (happened),
+    // attended = THIS student's attended sessions (from attendance, ≥75%).
     const counts = {};
-    for (const s of ses ?? []) { (counts[s.challenge_id] ??= { total: 0, done: 0 }); counts[s.challenge_id].total++; if (s.completed) counts[s.challenge_id].done++; }
+    const sToCh = {};
+    for (const s of ses ?? []) {
+      sToCh[s.id] = s.challenge_id;
+      (counts[s.challenge_id] ??= { total: 0, held: 0, attended: 0 });
+      counts[s.challenge_id].total++;
+      if (s.completed) counts[s.challenge_id].held++;
+    }
+    for (const a of att ?? []) {
+      const cid = sToCh[a.session_id];
+      if (a.attended && cid && counts[cid]) counts[cid].attended++;
+    }
     setSessionCounts(counts);
     setLoading(false);
   }
@@ -96,10 +109,11 @@ export default function ClientChallenges() {
 
       <div className="grid gap-5 md:grid-cols-2">
         {challenges.map(c => {
-          const sc = sessionCounts[c.id] ?? { total: 0, done: 0 };
-          const pct = sc.total ? Math.round((sc.done / sc.total) * 100) : 0;
+          const sc = sessionCounts[c.id] ?? { total: 0, held: 0, attended: 0 };
           const isIn = enrolled.has(c.id);
           const isPending = pending.has(c.id);
+          const remaining = Math.max(0, sc.total - sc.attended); // sessions left for this student
+          const missed = Math.max(0, sc.held - sc.attended);     // happened but not attended
           return (
             <Card key={c.id} className="overflow-hidden flex flex-col">
               {c.poster_url && <img src={c.poster_url} alt={c.name} className="w-full aspect-[16/7] object-cover" />}
@@ -110,7 +124,9 @@ export default function ClientChallenges() {
                     : c.status === 'upcoming' ? 'bg-sky-100 text-sky-700'
                     : 'bg-slate-100 text-slate-600'
                   }`}>
-                    {c.status === 'active' ? (sc.total ? `Active · ${sc.done}/${sc.total} done` : 'Active') : c.status}
+                    {c.status === 'active'
+                      ? (sc.total ? `Active · ${isIn ? sc.attended : sc.held}/${sc.total}` : 'Active')
+                      : c.status}
                   </span>
                   <span className={`text-xs font-bold px-3 py-1 rounded-full ${c.is_free ? 'bg-brand-100 text-brand-700' : 'bg-amber-100 text-amber-700'}`}>
                     {c.is_free ? 'FREE' : `₹${c.price}`}
@@ -123,8 +139,21 @@ export default function ClientChallenges() {
                 </p>
                 {sc.total > 0 && (
                   <div className="mt-3">
-                    <ProgressBar value={sc.done} max={sc.total} />
-                    <p className="mt-1 text-xs text-slate-500">{sc.done} / {sc.total} sessions done ({pct}%)</p>
+                    {isIn ? (
+                      <>
+                        <ProgressBar value={sc.attended} max={sc.total} />
+                        <p className="mt-1 text-xs text-slate-500">
+                          You've attended <span className="font-bold text-slate-700">{sc.attended}</span> of {sc.total} sessions
+                          {remaining > 0 && <> · {remaining} remaining</>}
+                        </p>
+                        {missed > 0 && <p className="text-[11px] font-semibold text-amber-600">{missed} missed so far</p>}
+                      </>
+                    ) : (
+                      <>
+                        <ProgressBar value={sc.held} max={sc.total} />
+                        <p className="mt-1 text-xs text-slate-500">{sc.held} / {sc.total} sessions done</p>
+                      </>
+                    )}
                   </div>
                 )}
                 <div className="mt-5">

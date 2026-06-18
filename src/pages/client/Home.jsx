@@ -4,13 +4,11 @@ import {
   Video, PlayCircle, CheckCircle2, Megaphone, GlassWater, Moon,
   CalendarClock, ClipboardList, Radio,
 } from 'lucide-react';
-import { Trophy } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { registerForSession } from '../../lib/zoom';
-import { nearestBadges } from '../../lib/badges';
-import { Card, Spinner, EmptyState, CountdownTimer, SessionThumb, ProgressBar } from '../../components/ui';
+import { Card, Spinner, EmptyState, CountdownTimer, SessionThumb } from '../../components/ui';
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
@@ -25,7 +23,6 @@ export default function ClientHome() {
   const [checkin, setCheckin] = useState(null);
   const [weeklyDue, setWeeklyDue] = useState(false);
   const [isLiveNow, setIsLiveNow] = useState(false);
-  const [nudges, setNudges] = useState([]);
   const [watched, setWatched] = useState(() => new Set(JSON.parse(localStorage.getItem('uf_watched') || '[]')));
 
   const load = useCallback(async () => {
@@ -55,11 +52,6 @@ export default function ClientHome() {
   }, [profile.id]);
 
   useEffect(() => { load(); }, [load]);
-
-  // "You're close!" badge nudges.
-  useEffect(() => {
-    nearestBadges(profile.id).then(setNudges);
-  }, [profile.id]);
 
   // Realtime: new announcements + live-session flips arrive without refresh.
   useEffect(() => {
@@ -145,28 +137,6 @@ export default function ClientHome() {
         </Link>
       )}
 
-      {/* "You're close!" badge nudges */}
-      {nudges.length > 0 && (
-        <Card className="p-5">
-          <h3 className="font-bold text-sm flex items-center gap-2"><Trophy className="w-4 h-4 text-amber-500" /> You're close!</h3>
-          <div className="mt-3 space-y-3">
-            {nudges.map(n => {
-              const remaining = Math.max(0, Math.ceil(n.remaining));
-              const cur = Number(n.current), thr = Number(n.threshold);
-              return (
-                <div key={n.code}>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-semibold text-slate-700">{remaining} more → {n.name}</span>
-                    <span className="text-xs text-slate-400">{Math.round(cur)}/{Math.round(thr)}</span>
-                  </div>
-                  <ProgressBar value={cur} max={thr} className="mt-1.5" />
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-      )}
-
       {/* Pinned live session */}
       {liveSession ? (
         <Card className="overflow-hidden">
@@ -228,47 +198,87 @@ export default function ClientHome() {
         </Card>
       )}
 
-      {/* Daily check-in widget */}
-      <Card className="p-5 md:p-6">
+      {/* Daily check-in widget — mobile-first, big tap targets */}
+      <Card className="p-4 sm:p-5">
         <h3 className="font-bold text-lg">Today's check-in</h3>
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
-          <button
-            onClick={() => saveCheckin({ attended_session: !checkin?.attended_session })}
-            className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-3.5 font-bold text-sm transition-colors duration-200 ${
-              checkin?.attended_session
-                ? 'bg-emerald-500 border-emerald-500 text-white'
-                : 'border-slate-300 text-slate-600 hover:border-emerald-400'
-            }`}
-          >
-            <CheckCircle2 className="w-5 h-5" />
-            {checkin?.attended_session ? 'Attended today' : 'I attended today'}
-          </button>
+        <p className="text-xs text-slate-400 mt-0.5">Saves automatically</p>
 
-          <div className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3 py-3">
-            {Array.from({ length: 8 }, (_, i) => (
+        <div className="mt-4 space-y-3">
+          {/* Attended toggle */}
+          {(() => {
+            const on = !!checkin?.attended_session;
+            return (
               <button
-                key={i}
-                onClick={() => saveCheckin({ water_glasses: i + 1 === checkin?.water_glasses ? i : i + 1 })}
-                aria-label={`${i + 1} glasses of water`}
-                className="transition-transform duration-150 hover:scale-110"
+                onClick={() => saveCheckin({ attended_session: !on })}
+                aria-pressed={on}
+                className={`w-full flex items-center justify-between rounded-2xl border px-4 py-4 transition-colors duration-200 ${
+                  on ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200 text-slate-700 active:bg-slate-50'
+                }`}
               >
-                <GlassWater className={`w-5 h-5 ${i < (checkin?.water_glasses ?? 0) ? 'text-sky-500 fill-sky-100' : 'text-slate-300'}`} />
+                <span className="flex items-center gap-2.5 font-bold text-sm">
+                  <CheckCircle2 className={`w-5 h-5 ${on ? 'text-white' : 'text-emerald-500'}`} />
+                  {on ? "Attended today's class" : "I attended today's class"}
+                </span>
+                <span className={`relative h-6 w-11 rounded-full transition-colors duration-200 shrink-0 ${on ? 'bg-white/30' : 'bg-slate-200'}`}>
+                  <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all duration-200 ${on ? 'left-[22px]' : 'left-0.5'}`} />
+                </span>
               </button>
-            ))}
-          </div>
+            );
+          })()}
 
-          <div className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5">
-            <Moon className="w-5 h-5 text-violet-500 shrink-0" />
-            <label htmlFor="sleep" className="text-sm font-semibold text-slate-600 shrink-0">Sleep</label>
-            <input
-              id="sleep" type="number" min="0" max="14" step="0.5"
-              value={checkin?.sleep_hours ?? ''}
-              onChange={e => saveCheckin({ sleep_hours: e.target.value === '' ? null : Number(e.target.value) })}
-              className="w-full text-right font-bold text-slate-900 outline-none"
-              placeholder="7"
-            />
-            <span className="text-sm text-slate-400">hrs</span>
-          </div>
+          {/* Water */}
+          {(() => {
+            const water = checkin?.water_glasses ?? 0;
+            const setWater = v => saveCheckin({ water_glasses: Math.max(0, Math.min(8, v)) });
+            return (
+              <div className="rounded-2xl border border-slate-200 px-4 py-3.5">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2.5 font-bold text-sm text-slate-700">
+                    <GlassWater className="w-5 h-5 text-sky-500" /> Water
+                  </span>
+                  <span className="text-sm font-bold text-slate-900">{water}<span className="text-slate-400 font-semibold"> / 8 glasses</span></span>
+                </div>
+                <div className="mt-3 flex items-center gap-3">
+                  <button onClick={() => setWater(water - 1)} aria-label="Less water"
+                    className="w-10 h-10 shrink-0 rounded-xl border border-slate-200 text-xl font-bold text-slate-500 active:bg-slate-100 disabled:opacity-40" disabled={water === 0}>−</button>
+                  <div className="flex-1 flex gap-1">
+                    {Array.from({ length: 8 }, (_, i) => (
+                      <button key={i} onClick={() => setWater(i + 1 === water ? i : i + 1)} aria-label={`${i + 1} glasses`}
+                        className={`h-7 flex-1 rounded-md transition-colors duration-150 ${i < water ? 'bg-sky-400' : 'bg-slate-100'}`} />
+                    ))}
+                  </div>
+                  <button onClick={() => setWater(water + 1)} aria-label="More water"
+                    className="w-10 h-10 shrink-0 rounded-xl border border-slate-200 text-xl font-bold text-slate-500 active:bg-slate-100 disabled:opacity-40" disabled={water === 8}>+</button>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Sleep */}
+          {(() => {
+            const sleep = checkin?.sleep_hours ?? null;
+            return (
+              <div className="rounded-2xl border border-slate-200 px-4 py-3.5">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2.5 font-bold text-sm text-slate-700">
+                    <Moon className="w-5 h-5 text-violet-500" /> Sleep
+                  </span>
+                  <span className="text-sm font-bold text-slate-900">{sleep != null ? sleep : '—'}<span className="text-slate-400 font-semibold"> hrs</span></span>
+                </div>
+                <div className="mt-3 grid grid-cols-6 gap-2">
+                  {[5, 6, 7, 8, 9, 10].map(h => {
+                    const on = sleep === h;
+                    return (
+                      <button key={h} onClick={() => saveCheckin({ sleep_hours: on ? null : h })}
+                        className={`h-10 rounded-xl text-sm font-bold transition-colors duration-150 ${
+                          on ? 'bg-violet-500 text-white' : 'bg-slate-100 text-slate-600 active:bg-slate-200'
+                        }`}>{h}</button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </Card>
 
@@ -287,15 +297,21 @@ export default function ClientHome() {
                   <p className="text-xs text-slate-500">{s.challenges?.name} · {s.duration_minutes} min</p>
                 </div>
                 {watched.has(s.id) && <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />}
-                <a
-                  href={s.recording_link || s.zoom_link || '#'}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => markWatched(s.id)}
-                  className="btn-secondary !py-2 !px-3.5 text-xs shrink-0"
-                >
-                  <PlayCircle className="w-4 h-4" /> Watch
-                </a>
+                {s.recording_link ? (
+                  <a
+                    href={s.recording_link}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => markWatched(s.id)}
+                    className="btn-secondary !py-2 !px-3.5 text-xs shrink-0"
+                  >
+                    <PlayCircle className="w-4 h-4" /> Watch
+                  </a>
+                ) : (
+                  <span className="text-[11px] font-semibold text-slate-400 shrink-0">
+                    {s.recording_status === 'processing' ? 'Recording soon' : 'No recording'}
+                  </span>
+                )}
               </li>
             ))}
           </ul>

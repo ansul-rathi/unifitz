@@ -133,6 +133,13 @@ Deno.serve(async req => {
             attended_minutes: mins, session_minutes: sessionMinutes,
             attendance_pct: pct, source: 'zoom', marked_by: null,
           }, { onConflict: 'session_id,user_id' });
+
+          // Self-heal: a matched participant who joined the live class is a real
+          // participant — make sure they're enrolled so series counts stay correct.
+          if (session.challenge_id) {
+            await db.from('enrollments')
+              .upsert({ user_id, challenge_id: session.challenge_id }, { onConflict: 'user_id,challenge_id' });
+          }
         }
         // attendance trigger on_attendance_marked handles Day-7 referral check.
         await db.from('sessions').update({

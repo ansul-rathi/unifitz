@@ -63,6 +63,9 @@ Deno.serve(async req => {
       zoom_meeting_id: String(meeting.id),
       zoom_join_url: meeting.join_url,
       zoom_start_url: meeting.start_url, // host only
+      // Also seed the editable "manual join link" field so the auto-created link
+      // shows in the UI immediately and can be overridden later if needed.
+      zoom_link: meeting.join_url,
     }).eq('id', session_id);
 
     return new Response(

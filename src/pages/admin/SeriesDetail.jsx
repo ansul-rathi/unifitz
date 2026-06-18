@@ -32,7 +32,7 @@ export default function AdminSeriesDetail() {
   const [showAdd, setShowAdd] = useState(false);
 
   const load = useCallback(async () => {
-    const [{ data: ch }, { data: ses }, { data: t }, { data: cts }, { data: enr }, { data: pays }] = await Promise.all([
+    const [{ data: ch }, { data: ses }, { data: t }, { data: cts }, { count: enrCount }, { data: pays }] = await Promise.all([
       supabase.from('challenges').select('*').eq('id', id).single(),
       supabase.from('sessions').select('*').eq('challenge_id', id).order('day_number'),
       supabase.from('profiles').select('id, full_name, avatar_url').eq('role', 'teacher'),
@@ -45,7 +45,7 @@ export default function AdminSeriesDetail() {
     setTeachers(t ?? []);
     setTeacherIds((cts ?? []).map(x => x.teacher_id));
     setStats({
-      enrolled: enr?.length ?? 0,
+      enrolled: enrCount ?? 0,
       gross: (pays ?? []).filter(p => ['paid', 'verified'].includes(p.status)).reduce((s, p) => s + Number(p.amount), 0),
     });
     setLoading(false);
@@ -226,9 +226,14 @@ export default function AdminSeriesDetail() {
         <StatCard icon={IndianRupee} label="Revenue" value={c.is_free ? '—' : `₹${stats.gross.toLocaleString('en-IN')}`} accent="text-emerald-500" to="/admin/revenue" />
       </div>
 
-      {/* Edit details panel */}
+      {/* Edit details modal */}
       {editing && (
-        <Card className="p-5 md:p-6">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-end md:items-center justify-center p-0 md:p-6" role="dialog" aria-modal="true" onClick={() => !busy && setEditing(false)}>
+          <div className="bg-white w-full max-w-lg rounded-t-2xl md:rounded-2xl p-5 md:p-6 max-h-[90vh] overflow-y-auto animate-fade-up" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg">Edit series</h3>
+              <button type="button" onClick={() => setEditing(false)} aria-label="Close" className="p-1.5 rounded-lg hover:bg-slate-100"><X className="w-5 h-5" /></button>
+            </div>
           <form onSubmit={saveDetails} className="grid gap-3 sm:grid-cols-2">
             <input required placeholder="Series name" className="input sm:col-span-2" value={f.name} onChange={e => setF(x => ({ ...x, name: e.target.value }))} />
             <textarea rows="2" placeholder="Description" className="input sm:col-span-2" value={f.description} onChange={e => setF(x => ({ ...x, description: e.target.value }))} />
@@ -263,7 +268,8 @@ export default function AdminSeriesDetail() {
               <button type="button" onClick={() => setEditing(false)} className="btn-secondary"><X className="w-4 h-4" /> Cancel</button>
             </div>
           </form>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Sessions */}
@@ -316,8 +322,10 @@ export default function AdminSeriesDetail() {
                 </div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                  {/* recording link inline */}
+                  {/* recording link inline — keyed on value so the webhook-set
+                      link shows after reload (uncontrolled input otherwise sticks). */}
                   <input
+                    key={`rec-${s.id}-${s.recording_link ?? ''}`}
                     type="url"
                     defaultValue={s.recording_link ?? ''}
                     placeholder="Recording link"
@@ -328,11 +336,13 @@ export default function AdminSeriesDetail() {
                   {s.zoom_meeting_id
                     ? <button onClick={() => { navigator.clipboard.writeText(s.zoom_join_url || ''); toast('Join link copied'); }} className="btn-secondary !py-1.5 !px-2.5 text-xs"><Copy className="w-4 h-4 text-sky-500" /></button>
                     : <button onClick={() => createZoom(s.id)} disabled={busy} className="btn-secondary !py-1.5 !px-2.5 text-xs"><Video className="w-4 h-4 text-sky-500" /> Zoom</button>}
-                  {/* Manual join link fallback (used if Zoom auto-create fails) */}
+                  {/* Join link — auto-filled when Zoom meeting is created; editable.
+                      Keyed on value so the auto-created link appears after reload. */}
                   <input
+                    key={`zl-${s.id}-${s.zoom_link ?? ''}`}
                     type="url"
                     defaultValue={s.zoom_link ?? ''}
-                    placeholder="Manual join link"
+                    placeholder="Join link (auto-filled from Zoom)"
                     onBlur={e => e.target.value !== (s.zoom_link ?? '') && patchSession(s.id, { zoom_link: e.target.value || null }, 'Manual link saved')}
                     className="input !py-1.5 !px-2.5 text-xs flex-1 min-w-[160px]"
                   />
