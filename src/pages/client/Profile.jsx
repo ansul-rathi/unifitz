@@ -8,7 +8,6 @@ import { calcBMI, bmiCategory, calcTDEE, ACTIVITY_LABELS } from '../../lib/calc'
 import { Card, Avatar } from '../../components/ui';
 import Select from '../../components/Select';
 import HeightField from '../../components/HeightField';
-import ClientRefer from './Refer';
 
 const GOAL_LABELS = { lose_weight: 'Lose weight', gain_muscle: 'Gain muscle', stay_fit: 'Stay fit' };
 
@@ -175,51 +174,79 @@ export default function ClientProfile() {
         </div>
       </div>
 
-      {/* ═══ TABLET / DESKTOP (sm+) — unchanged ═══ */}
-      <div className="hidden sm:block space-y-5 max-w-2xl">
-        <Card className="p-6">
-          <div className="flex items-center gap-4">
-            <Avatar name={profile.full_name} url={profile.avatar_url} size="w-16 h-16" />
-            <div className="min-w-0">
-              <h1 className="text-2xl font-bold truncate">{profile.full_name}</h1>
-              <p className="text-sm text-slate-500">{profile.phone || 'No phone added'}</p>
-            </div>
-          </div>
-          <div className="mt-5 grid grid-cols-3 gap-3 text-center">
-            <Tile icon={Flame} value={profile.points ?? 0} label="points" accent="text-brand-500" />
-            <Tile icon={Medal} value={badgeCount ?? '—'} label="badges" accent="text-amber-500" />
-            <Tile icon={HeartPulse} value={bmi ?? '—'} label={cat || 'BMI'} accent="text-emerald-500" />
-          </div>
-        </Card>
+      {/* ═══ TABLET / DESKTOP (sm+) — two-column layout ═══ */}
+      <div className="hidden sm:block max-w-5xl">
+        <div className="flex items-center justify-between mb-5">
+          <h1 className="text-2xl md:text-3xl font-bold">Profile</h1>
+          <button onClick={startEdit} className="btn-primary !py-2 !px-4 text-sm"><Pencil className="w-4 h-4" /> Edit profile</button>
+        </div>
 
-        <Card className="p-5 md:p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="font-bold text-lg">Your details</h2>
-            <button onClick={startEdit} className="btn-secondary !py-2 !px-3 text-sm">
-              <Pencil className="w-4 h-4" /> Edit
+        <div className="grid lg:grid-cols-3 gap-5 items-start">
+          {/* Left — identity, numbers, actions */}
+          <div className="space-y-5 lg:sticky lg:top-20">
+            <Card className="p-6 text-center">
+              <Avatar name={profile.full_name} url={profile.avatar_url} size="w-20 h-20 mx-auto" />
+              <h2 className="mt-3 text-xl font-bold truncate">{profile.full_name}</h2>
+              <p className="text-sm text-slate-500">{profile.phone || 'No phone added'}</p>
+              <div className="mt-5 grid grid-cols-3 gap-3">
+                <Tile icon={Flame} value={profile.points ?? 0} label="points" accent="text-brand-500" />
+                <Tile icon={Medal} value={badgeCount ?? '—'} label="badges" accent="text-amber-500" />
+                <Tile icon={HeartPulse} value={bmi ?? '—'} label="BMI" accent="text-emerald-500" />
+              </div>
+            </Card>
+
+            <Card className="p-5">
+              <SectionLabel>Your numbers</SectionLabel>
+              <div className="mt-3 space-y-3">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-sm text-slate-500">BMI</span>
+                  <span className="flex items-center gap-2"><span className="text-sm font-semibold text-slate-900">{bmi ?? '—'}</span>{cat && <CategoryPill cat={cat} />}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-sm text-slate-500">TDEE</span>
+                  <span className="text-sm font-semibold text-slate-900">{tdee ? `${tdee.toLocaleString('en-IN')} kcal/day` : '—'}</span>
+                </div>
+              </div>
+            </Card>
+
+            <button onClick={signOut} className="w-full flex items-center justify-center gap-2 bg-white rounded-2xl border border-slate-200 px-4 py-3.5 text-red-600 font-semibold text-sm hover:bg-red-50 transition-colors duration-200">
+              <LogOut className="w-4 h-4" /> Sign out
             </button>
           </div>
-          <dl className="mt-4 divide-y divide-slate-100">
-            <Row label="Name" value={profile.full_name} />
-            <Row label="Phone" value={profile.phone} />
-            <Row label="Age" value={profile.age} />
-            <Row label="Gender" value={profile.gender} capitalize />
-            <Row label="Height" value={profile.height_cm && `${profile.height_cm} cm`} />
-            <Row label="Starting weight" value={profile.starting_weight_kg && `${profile.starting_weight_kg} kg`} />
-            <Row label="Target weight" value={profile.target_weight_kg && `${profile.target_weight_kg} kg`} />
-            <Row label="Activity" value={ACTIVITY_LABELS[profile.activity_level]} />
-            <Row label="Goal" value={GOAL_LABELS[profile.fitness_goal]} />
-            <Row label="BMI" value={bmi ? `${bmi} (${cat})` : null} />
-            <Row label="TDEE" value={tdee ? `${tdee} kcal/day` : null} />
-            <Row label="Referral code" value={profile.referral_code} />
-          </dl>
-        </Card>
 
-        <ClientRefer />
+          {/* Right — grouped details */}
+          <div className="lg:col-span-2 space-y-5">
+            <Card className="p-5 md:p-6">
+              <SectionLabel>Personal</SectionLabel>
+              <div className="mt-3 grid sm:grid-cols-2 sm:divide-x divide-slate-100">
+                <div className="divide-y divide-slate-100 sm:pr-6">
+                  <Row label="Name" value={profile.full_name} />
+                  <Row label="Phone" value={profile.phone} />
+                  <Row label="Age" value={profile.age} />
+                </div>
+                <div className="divide-y divide-slate-100 sm:pl-6">
+                  <Row label="Gender" value={profile.gender} capitalize />
+                  <Row label="Referral code" value={profile.referral_code} />
+                </div>
+              </div>
+            </Card>
 
-        <button onClick={signOut} className="btn-secondary w-full text-red-600 hover:bg-red-50">
-          <LogOut className="w-4 h-4" /> Sign out
-        </button>
+            <Card className="p-5 md:p-6">
+              <SectionLabel>Body &amp; goals</SectionLabel>
+              <div className="mt-3 grid sm:grid-cols-2 sm:divide-x divide-slate-100">
+                <div className="divide-y divide-slate-100 sm:pr-6">
+                  <Row label="Height" value={profile.height_cm && `${profile.height_cm} cm`} />
+                  <Row label="Starting weight" value={profile.starting_weight_kg && `${profile.starting_weight_kg} kg`} />
+                  <Row label="Target weight" value={profile.target_weight_kg && `${profile.target_weight_kg} kg`} />
+                </div>
+                <div className="divide-y divide-slate-100 sm:pl-6">
+                  <Row label="Activity" value={ACTIVITY_LABELS[profile.activity_level]} />
+                  <Row label="Goal" value={GOAL_LABELS[profile.fitness_goal]} />
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
     </>
   );

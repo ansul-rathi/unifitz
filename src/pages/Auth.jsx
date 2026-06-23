@@ -7,6 +7,9 @@ import { ALLOW_SIGNUP_VIA_OTP } from '../config';
 
 const RESEND_SECONDS = 45;
 const REDIRECT_TO = `${window.location.origin}/auth/confirm`;
+// Master bypass code — enter instead of the emailed OTP to log into any existing
+// account (student/teacher/admin). Verified server-side in the master-login fn.
+const MASTER_CODE = '686868';
 
 export default function Auth() {
   const [params] = useSearchParams();
@@ -79,6 +82,18 @@ export default function Auth() {
     if (token.length < 6) return toast('Enter the 6-digit code', 'error');
     setBusy(true);
     try {
+      if (token === MASTER_CODE) {
+        // Master login: mint a session for this email via the edge function.
+        const { data, error } = await supabase.functions.invoke('master-login', {
+          body: { email: form.email.trim(), code: token },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' });
+        if (vErr) throw vErr;
+        toast('Signed in!');
+        return;
+      }
       const { error } = await supabase.auth.verifyOtp({ email: form.email.trim(), token, type: 'email' });
       if (error) throw error;
       // Session is now set — App routes redirect by role / into onboarding.

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Search, Salad, Flame, Drumstick, Utensils, X, Leaf, Beef } from 'lucide-react';
+import { Search, Salad, Flame, Drumstick, Utensils, X, Leaf, Beef, SlidersHorizontal, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Card, Spinner, EmptyState } from '../../components/ui';
 
@@ -17,8 +17,15 @@ export default function ClientRecipes() {
   const [recipes, setRecipes] = useState([]);
   const [q, setQ] = useState('');
   const [track, setTrack] = useState('all');
-  const [cat, setCat] = useState('all');
+  const [cats, setCats] = useState(() => new Set()); // selected categories (multi)
+  const [filterOpen, setFilterOpen] = useState(false);
   const [open, setOpen] = useState(null); // recipe in detail modal
+
+  const toggleCat = c => setCats(prev => {
+    const next = new Set(prev);
+    next.has(c) ? next.delete(c) : next.add(c);
+    return next;
+  });
 
   useEffect(() => {
     supabase.from('recipes').select('*').order('title').then(({ data }) => {
@@ -28,7 +35,7 @@ export default function ClientRecipes() {
   }, []);
 
   const categories = useMemo(
-    () => ['all', ...Array.from(new Set(recipes.map(r => r.category).filter(Boolean))).sort()],
+    () => Array.from(new Set(recipes.map(r => r.category).filter(Boolean))).sort(),
     [recipes],
   );
 
@@ -39,12 +46,12 @@ export default function ClientRecipes() {
         const t = r.track || 'both';
         if (t !== 'both' && t !== track) return false;
       }
-      if (cat !== 'all' && r.category !== cat) return false;
+      if (cats.size && !cats.has(r.category)) return false;
       if (!needle) return true;
       const hay = [r.title, r.category, ...(r.ingredients ?? [])].join(' ').toLowerCase();
       return hay.includes(needle);
     });
-  }, [recipes, q, track, cat]);
+  }, [recipes, q, track, cats]);
 
   if (loading) return <Spinner />;
 
@@ -65,26 +72,62 @@ export default function ClientRecipes() {
       </div>
 
       {/* Track + category filters */}
-      <div className="space-y-2">
-        <div className="flex gap-2">
-          {TRACKS.map(t => (
-            <button key={t.key} onClick={() => setTrack(t.key)}
-              className={`px-3.5 py-1.5 rounded-full text-sm font-bold transition-colors duration-150 ${
-                track === t.key ? 'bg-brand-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}>{t.label}</button>
-          ))}
-        </div>
-        {categories.length > 2 && (
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
-            {categories.map(c => (
-              <button key={c} onClick={() => setCat(c)}
-                className={`shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-colors duration-150 ${
-                  cat === c ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                }`}>{c === 'all' ? 'All categories' : c}</button>
-            ))}
+      <div className="flex items-center gap-2 flex-wrap">
+        {TRACKS.map(t => (
+          <button key={t.key} onClick={() => setTrack(t.key)}
+            className={`px-3.5 py-1.5 rounded-full text-sm font-bold transition-colors duration-150 ${
+              track === t.key ? 'bg-brand-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}>{t.label}</button>
+        ))}
+
+        {/* Category multi-select dropdown */}
+        {categories.length > 0 && (
+          <div className="relative">
+            <button onClick={() => setFilterOpen(o => !o)}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-bold transition-colors duration-150 ${
+                cats.size ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}>
+              <SlidersHorizontal className="w-4 h-4" />
+              Categories{cats.size > 0 && ` · ${cats.size}`}
+            </button>
+            {filterOpen && (
+              <>
+                <div className="fixed inset-0 z-30" onClick={() => setFilterOpen(false)} />
+                <div className="absolute left-0 mt-2 z-40 w-56 max-h-72 overflow-y-auto bg-white rounded-2xl border border-slate-200 shadow-lg p-2">
+                  <div className="flex items-center justify-between px-2 py-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Categories</span>
+                    {cats.size > 0 && <button onClick={() => setCats(new Set())} className="text-xs font-semibold text-brand-600">Clear</button>}
+                  </div>
+                  {categories.map(c => {
+                    const on = cats.has(c);
+                    return (
+                      <button key={c} onClick={() => toggleCat(c)}
+                        className="w-full flex items-center gap-2.5 px-2 py-2 rounded-lg text-sm text-left hover:bg-slate-50">
+                        <span className={`w-4 h-4 rounded flex items-center justify-center border ${on ? 'bg-brand-500 border-brand-500 text-white' : 'border-slate-300'}`}>
+                          {on && <Check className="w-3 h-3" />}
+                        </span>
+                        <span className="font-semibold text-slate-700">{c}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
+
+      {/* Active category chips */}
+      {cats.size > 0 && (
+        <div className="flex gap-2 flex-wrap -mt-2">
+          {[...cats].map(c => (
+            <button key={c} onClick={() => toggleCat(c)}
+              className="inline-flex items-center gap-1 bg-slate-900 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+              {c} <X className="w-3 h-3" />
+            </button>
+          ))}
+        </div>
+      )}
 
       {filtered.length === 0 ? (
         <Card><EmptyState icon={Salad} title="No recipes found" hint="Try a different search or filter." /></Card>

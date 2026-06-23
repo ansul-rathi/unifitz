@@ -15,12 +15,16 @@ const GOALS = [
 ];
 
 export default function Onboarding() {
-  const { session, refreshProfile, signOut } = useAuth();
+  const { session, profile, refreshProfile, signOut } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [busy, setBusy] = useState(false);
+  // Users who came straight through login (no signup) have no name/phone yet —
+  // collect them here. Prefill for anyone who already has them.
+  const needsContact = !profile?.full_name?.trim() || !profile?.phone?.trim();
   const [f, setF] = useState({
+    full_name: profile?.full_name ?? '', phone: profile?.phone ?? '',
     age: '', gender: 'female', height_cm: '', weight_kg: '',
     activity_level: 'light', fitness_goal: 'lose_weight',
     target_weight_kg: '',
@@ -38,6 +42,7 @@ export default function Onboarding() {
   async function finish() {
     setBusy(true);
     const { error } = await supabase.from('profiles').update({
+      full_name: f.full_name.trim(), phone: f.phone.trim() || null,
       age: num(f.age), gender: f.gender, height_cm: num(f.height_cm),
       starting_weight_kg: num(f.weight_kg), target_weight_kg: num(f.target_weight_kg),
       activity_level: f.activity_level, fitness_goal: f.fitness_goal,
@@ -51,7 +56,7 @@ export default function Onboarding() {
   }
 
   const stepValid =
-    step === 1 ? f.age && f.height_cm && f.weight_kg
+    step === 1 ? f.full_name.trim() && f.phone.trim() && f.age && f.height_cm && f.weight_kg
     : true;
 
   return (
@@ -78,6 +83,18 @@ export default function Onboarding() {
         {step === 1 && (
           <div className="space-y-4 animate-fade-up">
             <h2 className="text-xl font-bold">About you</h2>
+            {needsContact && (
+              <div className="grid gap-4">
+                <div>
+                  <label className="label" htmlFor="full_name">Full name</label>
+                  <input id="full_name" name="full_name" required value={f.full_name} onChange={set} className="input" placeholder="Priya Sharma" />
+                </div>
+                <div>
+                  <label className="label" htmlFor="phone">Phone</label>
+                  <input id="phone" name="phone" type="tel" required value={f.phone} onChange={set} className="input" placeholder="+91 98xxx xxxxx" />
+                </div>
+              </div>
+            )}
             <div>
               <label className="label" htmlFor="age">Age</label>
               <input id="age" name="age" type="number" min="14" max="90" required value={f.age} onChange={set} className="input" placeholder="34" />

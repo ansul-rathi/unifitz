@@ -61,6 +61,7 @@ export default function AdminSeriesDetail() {
       name: c.name, description: c.description ?? '', duration_days: c.duration_days,
       batch_name: c.batch_name ?? '', start_date: c.start_date ?? '', status: c.status,
       is_free: c.is_free, price: c.price ?? '', is_published: c.is_published !== false,
+      free_session_count: c.free_session_count ?? 0,
       teacherIds: [...teacherIds], poster: null,
     });
     setEditing(true);
@@ -72,16 +73,19 @@ export default function AdminSeriesDetail() {
     try {
       // Teachers may edit content (name/description/schedule/sessions) but not
       // pricing, visibility or the teacher roster — those stay admin-only.
+      const freePreview = Math.max(0, parseInt(f.free_session_count, 10) || 0);
       const update = isAdmin
         ? {
             name: f.name, description: f.description, duration_days: +f.duration_days,
             batch_name: f.batch_name, start_date: f.start_date || null, status: f.status,
             is_free: f.is_free, price: f.is_free ? 0 : (f.price === '' ? 0 : +f.price),
             is_published: f.is_published, teacher_id: f.teacherIds[0] || null,
+            free_session_count: freePreview,
           }
         : {
             name: f.name, description: f.description, duration_days: +f.duration_days,
             batch_name: f.batch_name, start_date: f.start_date || null, status: f.status,
+            free_session_count: freePreview,
           };
       await supabase.from('challenges').update(update).eq('id', id);
       if (f.poster) {
@@ -255,6 +259,12 @@ export default function AdminSeriesDetail() {
             <input placeholder="Batch name" className="input" value={f.batch_name} onChange={e => setF(x => ({ ...x, batch_name: e.target.value }))} />
             <input type="date" className="input" value={f.start_date} onChange={e => setF(x => ({ ...x, start_date: e.target.value }))} />
             <Select value={f.status} onChange={v => setF(x => ({ ...x, status: v }))} options={['upcoming', 'active', 'completed']} />
+            <div className="sm:col-span-2">
+              <label className="label" htmlFor="free_session_count">Free preview sessions <span className="font-normal text-slate-400">(first N unlocked for everyone)</span></label>
+              <input id="free_session_count" type="number" min="0" className="input" value={f.free_session_count}
+                onChange={e => setF(x => ({ ...x, free_session_count: e.target.value }))} placeholder="e.g. 3" />
+              <p className="mt-1 text-xs text-slate-400">Students can watch the first {f.free_session_count || 0} session{(+f.free_session_count === 1) ? '' : 's'} free; the rest stay locked until they enroll.</p>
+            </div>
             {isAdmin && (
               <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 sm:col-span-2">
                 <input type="checkbox" checked={f.is_published} onChange={e => setF(x => ({ ...x, is_published: e.target.checked }))} className="w-5 h-5 accent-brand-500" /> Visible to students &amp; teachers

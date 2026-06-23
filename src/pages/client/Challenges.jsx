@@ -170,9 +170,16 @@ export default function ClientChallenges() {
                       Join Series <ArrowRight className="w-4 h-4" />
                     </button>
                   ) : (
-                    <button onClick={() => openPay(c)} className="btn-primary w-full text-sm">
-                      Enroll · ₹{c.price} <ArrowRight className="w-4 h-4" />
-                    </button>
+                    <div className="space-y-2">
+                      <button onClick={() => openPay(c)} className="btn-primary w-full text-sm">
+                        Enroll · ₹{c.price} <ArrowRight className="w-4 h-4" />
+                      </button>
+                      {c.free_session_count > 0 && (
+                        <Link to={`/app/challenges/${c.id}`} className="btn-secondary w-full text-sm">
+                          Watch {c.free_session_count} free session{c.free_session_count === 1 ? '' : 's'}
+                        </Link>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>

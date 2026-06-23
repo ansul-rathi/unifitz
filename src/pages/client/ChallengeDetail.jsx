@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Video, PlayCircle, Medal, Users, CheckCircle2, XCircle, CalendarClock, X } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Video, PlayCircle, Medal, Users, CheckCircle2, XCircle, CalendarClock, X, Lock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -8,10 +8,14 @@ import { Card, Spinner, Avatar, EmptyState, SessionThumb, ProgressBar } from '..
 
 const MEDAL_COLORS = ['text-amber-500', 'text-slate-400', 'text-amber-700'];
 
+// Temp: hide session poster images from students (show the Day badge instead).
+const HIDE_SESSION_IMAGES = true;
+
 export default function ChallengeDetail() {
   const { id } = useParams();
   const { profile } = useAuth();
   const toast = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [challenge, setChallenge] = useState(null);
   const [teacher, setTeacher] = useState(null);
@@ -19,6 +23,7 @@ export default function ChallengeDetail() {
   const [board, setBoard] = useState([]);
   const [attMap, setAttMap] = useState({}); // session_id → { attended, attendance_pct }
   const [lightbox, setLightbox] = useState(null); // poster url for image popup
+  const [enrolled, setEnrolled] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -29,13 +34,15 @@ export default function ChallengeDetail() {
         const { data: t } = await supabase.from('profiles').select('full_name, avatar_url').eq('id', ch.teacher_id).maybeSingle();
         setTeacher(t ?? null);
       }
-      const [{ data: ses }, { data: lb }, { data: att }] = await Promise.all([
+      const [{ data: ses }, { data: lb }, { data: att }, { data: enr }] = await Promise.all([
         supabase.from('sessions').select('*').eq('challenge_id', id).order('day_number'),
         supabase.from('leaderboard').select('*').eq('challenge_id', id).order('attendance_count', { ascending: false }),
         supabase.from('attendance').select('session_id, attended, attendance_pct').eq('user_id', profile.id),
+        supabase.from('enrollments').select('id').eq('user_id', profile.id).eq('challenge_id', id).maybeSingle(),
       ]);
       setSessions(ses ?? []);
       setBoard(lb ?? []);
+      setEnrolled(!!enr);
       const m = {};
       for (const a of att ?? []) m[a.session_id] = a;
       setAttMap(m);
@@ -50,6 +57,13 @@ export default function ChallengeDetail() {
   const total = sessions.length;
   const attended = sessions.filter(s => attMap[s.id]?.attended).length;
 
+  // Free-preview gating: on a paid series, only the first N sessions are open to
+  // non-enrolled students; the rest are locked until they enroll.
+  const freeCount = challenge.free_session_count ?? 0;
+  const hasAccess = enrolled || challenge.is_free;
+  const isLocked = idx => !hasAccess && idx >= freeCount;
+  const lockedSessions = hasAccess ? 0 : Math.max(0, total - freeCount);
+
   // Status of a single session for THIS student.
   const sessionStatus = s => {
     if (!s.completed) return 'upcoming';
@@ -60,6 +74,7 @@ export default function ChallengeDetail() {
   // RPC is SECURITY DEFINER so it can insert OR flip a prior "missed" row
   // (clients can't UPDATE attendance directly under RLS).
   async function markAttended(s) {
+    if (!enrolled) return; // attendance only counts for enrolled students
     if (attMap[s.id]?.attended) return; // already credited
     setAttMap(m => ({ ...m, [s.id]: { ...(m[s.id] ?? {}), attended: true } })); // optimistic
     const { error } = await supabase.rpc('self_mark_attendance', { p_session: s.id });
@@ -67,7 +82,12 @@ export default function ChallengeDetail() {
   }
 
   // Open a session: recording when completed (also credits attendance), else the live link.
-  function openSession(s) {
+  function openSession(s, idx) {
+    if (isLocked(idx)) {
+      toast('Enroll to unlock this session');
+      navigate('/app/challenges');
+      return;
+    }
     const link = s.completed ? s.recording_link : (s.zoom_link || s.zoom_join_url);
     if (!link) {
       toast(s.completed ? 'Recording not ready yet' : 'Link will be available soon');
@@ -91,8 +111,8 @@ export default function ChallengeDetail() {
         </p>
       </div>
 
-      {/* Your progress — per-student, attendance driven */}
-      {total > 0 && (
+      {/* Your progress — per-student, attendance driven (enrolled only) */}
+      {enrolled && total > 0 && (
         <Card className="p-5 md:p-6">
           <h2 className="font-bold text-lg">Your progress</h2>
           <div className="mt-3 flex items-center gap-3">
@@ -102,35 +122,49 @@ export default function ChallengeDetail() {
         </Card>
       )}
 
+      {/* Free-preview banner for non-enrolled students */}
+      {!hasAccess && lockedSessions > 0 && (
+        <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3.5">
+          <Lock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-amber-900">{freeCount > 0 ? `First ${freeCount} session${freeCount === 1 ? '' : 's'} free` : 'Preview'}</p>
+            <p className="text-xs text-amber-800">{lockedSessions} more {lockedSessions === 1 ? 'session is' : 'sessions are'} locked — enroll to unlock the full series.</p>
+          </div>
+          <button onClick={() => navigate('/app/challenges')} className="btn-primary !py-2 !px-3 text-xs shrink-0">Enroll</button>
+        </div>
+      )}
+
       <div className="grid gap-5 lg:grid-cols-3">
         {/* Sessions */}
-        <Card className="p-5 md:p-6 lg:col-span-2">
+        <Card className="p-5 md:p-6 lg:col-span-2 min-w-0">
           <h2 className="font-bold text-lg">Sessions</h2>
           {sessions.length === 0 ? (
             <EmptyState icon={Video} title="Sessions coming soon" />
           ) : (
             <ul className="mt-3 divide-y divide-slate-100">
-              {sessions.map(s => {
+              {sessions.map((s, idx) => {
                 const st = sessionStatus(s);
+                const locked = isLocked(idx);
+                const isFreePreview = !hasAccess && !locked;
                 const hasLink = s.completed ? !!s.recording_link : !!(s.zoom_link || s.zoom_join_url);
                 return (
                 <li
                   key={s.id}
-                  onClick={() => openSession(s)}
+                  onClick={() => openSession(s, idx)}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSession(s); } }}
-                  className="flex items-start gap-3 py-3 -mx-2 px-2 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors duration-150 group"
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSession(s, idx); } }}
+                  className={`flex items-start gap-3 py-3 -mx-2 px-2 rounded-xl cursor-pointer transition-colors duration-150 group ${locked ? 'opacity-60 hover:bg-amber-50' : 'hover:bg-slate-50'}`}
                 >
-                  {/* Thumb → tap to enlarge (only when there's a real poster) */}
+                  {/* Thumb → tap to enlarge (only when there's a real poster + not locked) */}
                   <button
                     type="button"
-                    onClick={e => { if (s.poster_url) { e.stopPropagation(); setLightbox(s.poster_url); } }}
+                    onClick={e => { if (!HIDE_SESSION_IMAGES && s.poster_url && !locked) { e.stopPropagation(); setLightbox(s.poster_url); } }}
                     className="shrink-0"
-                    aria-label={s.poster_url ? 'View image' : undefined}
-                    tabIndex={s.poster_url ? 0 : -1}
+                    aria-label={!HIDE_SESSION_IMAGES && s.poster_url && !locked ? 'View image' : undefined}
+                    tabIndex={!HIDE_SESSION_IMAGES && s.poster_url && !locked ? 0 : -1}
                   >
-                    <SessionThumb poster={s.poster_url} day={s.day_number} live={s.is_live_next} size="w-16 h-10" />
+                    <SessionThumb poster={HIDE_SESSION_IMAGES ? null : s.poster_url} day={s.day_number} live={s.is_live_next} size="w-16 h-10" />
                   </button>
 
                   <div className="flex-1 min-w-0">
@@ -143,18 +177,23 @@ export default function ChallengeDetail() {
                           {s.is_live_next && <span className="ml-2 font-bold text-red-600">NEXT LIVE</span>}
                         </p>
                       </div>
-                      {/* Affordance only — whole row is clickable */}
+                      {/* Affordance — whole row is clickable. Play icon hidden on
+                          mobile (tap the card to play); lock/soon stay visible. */}
                       <span className="shrink-0 text-slate-300 group-hover:text-brand-500">
-                        {hasLink
-                          ? (s.completed ? <PlayCircle className="w-5 h-5" /> : <Video className="w-5 h-5" />)
-                          : <span className="text-[11px] text-slate-400">{s.completed ? (s.recording_status === 'processing' ? 'Soon' : '—') : 'Soon'}</span>}
+                        {locked
+                          ? <Lock className="w-5 h-5 text-amber-400" />
+                          : hasLink
+                            ? (s.completed ? <PlayCircle className="w-5 h-5 hidden sm:block" /> : <Video className="w-5 h-5 hidden sm:block" />)
+                            : <span className="text-[11px] text-slate-400">{s.completed ? (s.recording_status === 'processing' ? 'Soon' : '—') : 'Soon'}</span>}
                       </span>
                     </div>
-                    {/* Per-student status */}
+                    {/* Per-student status / preview tags */}
                     <div className="mt-1.5">
-                      {st === 'attended' && <StatusPill icon={CheckCircle2} tone="bg-emerald-100 text-emerald-700">Attended{attMap[s.id]?.attendance_pct != null && ` · ${attMap[s.id].attendance_pct}%`}</StatusPill>}
-                      {st === 'missed' && <StatusPill icon={XCircle} tone="bg-amber-100 text-amber-700">Missed</StatusPill>}
-                      {st === 'upcoming' && <StatusPill icon={CalendarClock} tone="bg-sky-100 text-sky-700">Upcoming</StatusPill>}
+                      {locked && <StatusPill icon={Lock} tone="bg-amber-100 text-amber-700">Locked · enroll to unlock</StatusPill>}
+                      {isFreePreview && <StatusPill icon={PlayCircle} tone="bg-emerald-100 text-emerald-700">Free preview</StatusPill>}
+                      {!locked && st === 'attended' && <StatusPill icon={CheckCircle2} tone="bg-emerald-100 text-emerald-700">Attended{attMap[s.id]?.attendance_pct != null && ` · ${attMap[s.id].attendance_pct}%`}</StatusPill>}
+                      {!locked && st === 'missed' && <StatusPill icon={XCircle} tone="bg-amber-100 text-amber-700">Missed</StatusPill>}
+                      {!locked && st === 'upcoming' && <StatusPill icon={CalendarClock} tone="bg-sky-100 text-sky-700">Upcoming</StatusPill>}
                     </div>
                   </div>
                 </li>
@@ -165,7 +204,7 @@ export default function ChallengeDetail() {
         </Card>
 
         {/* Leaderboard */}
-        <Card className="p-5 md:p-6">
+        <Card className="p-5 md:p-6 min-w-0">
           <h2 className="font-bold text-lg">Consistency Leaderboard</h2>
           <p className="text-xs text-slate-500 mt-1">Ranked by sessions attended — showing up is the win.</p>
           {board.length === 0 ? (

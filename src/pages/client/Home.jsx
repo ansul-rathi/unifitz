@@ -1,8 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import {
-  Video, PlayCircle, CheckCircle2, Megaphone, GlassWater, Moon,
-  CalendarClock, ClipboardList, Radio,
+  Video, PlayCircle, CheckCircle2, Megaphone,
+  CalendarClock, Radio,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
@@ -11,6 +10,9 @@ import { registerForSession } from '../../lib/zoom';
 import { Card, Spinner, CountdownTimer, SessionThumb } from '../../components/ui';
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
+
+// Temp: hide session poster images from students.
+const HIDE_SESSION_IMAGES = true;
 
 export default function ClientHome() {
   const { profile, session: authSession } = useAuth();
@@ -130,19 +132,12 @@ export default function ClientHome() {
         </div>
       )}
 
-      {/* Weekly form due */}
-      {weeklyDue && (
-        <Link to="/app/progress" className="flex items-center gap-3 bg-violet-50 border border-violet-200 rounded-2xl px-4 py-3 hover:bg-violet-100 transition-colors duration-200">
-          <ClipboardList className="w-5 h-5 text-violet-600 shrink-0" />
-          <p className="text-sm font-semibold text-violet-900 flex-1">Your weekly check-in is due — it takes 2 minutes</p>
-          <span className="text-xs font-bold text-violet-600">Fill now →</span>
-        </Link>
-      )}
+      {/* Weekly check-in reminder — temporarily hidden for students. */}
 
       {/* Pinned live session — hidden entirely when nothing is pinned */}
       {liveSession && (
         <Card className="overflow-hidden">
-          {liveSession.poster_url && (
+          {!HIDE_SESSION_IMAGES && liveSession.poster_url && (
             <img src={liveSession.poster_url} alt={liveSession.title} className="w-full aspect-video object-cover" />
           )}
           <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 md:p-6">
@@ -195,89 +190,7 @@ export default function ClientHome() {
         </Card>
       )}
 
-      {/* Daily check-in widget — mobile-first, big tap targets */}
-      <Card className="p-4 sm:p-5">
-        <h3 className="font-bold text-lg">Today's check-in</h3>
-        <p className="text-xs text-slate-400 mt-0.5">Saves automatically</p>
-
-        <div className="mt-4 space-y-3">
-          {/* Attended toggle */}
-          {(() => {
-            const on = !!checkin?.attended_session;
-            return (
-              <button
-                onClick={() => saveCheckin({ attended_session: !on })}
-                aria-pressed={on}
-                className={`w-full flex items-center justify-between rounded-2xl border px-4 py-4 transition-colors duration-200 ${
-                  on ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200 text-slate-700 active:bg-slate-50'
-                }`}
-              >
-                <span className="flex items-center gap-2.5 font-bold text-sm">
-                  <CheckCircle2 className={`w-5 h-5 ${on ? 'text-white' : 'text-emerald-500'}`} />
-                  {on ? "Attended today's class" : "I attended today's class"}
-                </span>
-                <span className={`relative h-6 w-11 rounded-full transition-colors duration-200 shrink-0 ${on ? 'bg-white/30' : 'bg-slate-200'}`}>
-                  <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all duration-200 ${on ? 'left-[22px]' : 'left-0.5'}`} />
-                </span>
-              </button>
-            );
-          })()}
-
-          {/* Water */}
-          {(() => {
-            const water = checkin?.water_glasses ?? 0;
-            const setWater = v => saveCheckin({ water_glasses: Math.max(0, Math.min(8, v)) });
-            return (
-              <div className="rounded-2xl border border-slate-200 px-4 py-3.5">
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2.5 font-bold text-sm text-slate-700">
-                    <GlassWater className="w-5 h-5 text-sky-500" /> Water
-                  </span>
-                  <span className="text-sm font-bold text-slate-900">{water}<span className="text-slate-400 font-semibold"> / 8 glasses</span></span>
-                </div>
-                <div className="mt-3 flex items-center gap-3">
-                  <button onClick={() => setWater(water - 1)} aria-label="Less water"
-                    className="w-10 h-10 shrink-0 rounded-xl border border-slate-200 text-xl font-bold text-slate-500 active:bg-slate-100 disabled:opacity-40" disabled={water === 0}>−</button>
-                  <div className="flex-1 flex gap-1">
-                    {Array.from({ length: 8 }, (_, i) => (
-                      <button key={i} onClick={() => setWater(i + 1 === water ? i : i + 1)} aria-label={`${i + 1} glasses`}
-                        className={`h-7 flex-1 rounded-md transition-colors duration-150 ${i < water ? 'bg-sky-400' : 'bg-slate-100'}`} />
-                    ))}
-                  </div>
-                  <button onClick={() => setWater(water + 1)} aria-label="More water"
-                    className="w-10 h-10 shrink-0 rounded-xl border border-slate-200 text-xl font-bold text-slate-500 active:bg-slate-100 disabled:opacity-40" disabled={water === 8}>+</button>
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Sleep */}
-          {(() => {
-            const sleep = checkin?.sleep_hours ?? null;
-            return (
-              <div className="rounded-2xl border border-slate-200 px-4 py-3.5">
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2.5 font-bold text-sm text-slate-700">
-                    <Moon className="w-5 h-5 text-violet-500" /> Sleep
-                  </span>
-                  <span className="text-sm font-bold text-slate-900">{sleep != null ? sleep : '—'}<span className="text-slate-400 font-semibold"> hrs</span></span>
-                </div>
-                <div className="mt-3 grid grid-cols-6 gap-2">
-                  {[5, 6, 7, 8, 9, 10].map(h => {
-                    const on = sleep === h;
-                    return (
-                      <button key={h} onClick={() => saveCheckin({ sleep_hours: on ? null : h })}
-                        className={`h-10 rounded-xl text-sm font-bold transition-colors duration-150 ${
-                          on ? 'bg-violet-500 text-white' : 'bg-slate-100 text-slate-600 active:bg-slate-200'
-                        }`}>{h}</button>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })()}
-        </div>
-      </Card>
+      {/* Today's check-in — temporarily hidden for students (moved to EOD flow). */}
 
       {/* Recordings — hidden entirely when there are none */}
       {recordings.length > 0 && (
@@ -286,7 +199,7 @@ export default function ClientHome() {
           <ul className="mt-3 divide-y divide-slate-100">
             {recordings.map(s => (
               <li key={s.id} className="flex items-center gap-3 py-3">
-                <SessionThumb poster={s.poster_url} day={s.day_number} />
+                <SessionThumb poster={HIDE_SESSION_IMAGES ? null : s.poster_url} day={s.day_number} />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-slate-900 truncate">{s.title}</p>
                   <p className="text-xs text-slate-500">{s.challenges?.name} · {s.duration_minutes} min</p>
