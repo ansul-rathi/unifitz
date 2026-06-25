@@ -41,15 +41,22 @@ export default function Onboarding() {
 
   async function finish() {
     setBusy(true);
-    const { error } = await supabase.from('profiles').update({
+    // Upsert keyed on id (self-heals a missing row) and read the flag back, so a
+    // 0-row / RLS-filtered write can't silently succeed and bounce the user back
+    // to this form. Only navigate once onboarding_complete is truly persisted.
+    const { data, error } = await supabase.from('profiles').upsert({
+      id: session.user.id,
       full_name: f.full_name.trim(), phone: f.phone.trim() || null,
       age: num(f.age), gender: f.gender, height_cm: num(f.height_cm),
       starting_weight_kg: num(f.weight_kg), target_weight_kg: num(f.target_weight_kg),
       activity_level: f.activity_level, fitness_goal: f.fitness_goal,
       onboarding_complete: true,
-    }).eq('id', session.user.id);
+    }, { onConflict: 'id' }).select('onboarding_complete').single();
     setBusy(false);
-    if (error) return toast(error.message, 'error');
+
+    if (error || data?.onboarding_complete !== true) {
+      return toast(error?.message || 'Could not save your profile — please try again', 'error');
+    }
 
     await refreshProfile();
     navigate('/app', { replace: true });
