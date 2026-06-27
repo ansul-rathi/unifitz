@@ -4,6 +4,7 @@ import { ArrowLeft, Video, PlayCircle, Medal, Users, CheckCircle2, XCircle, Cale
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { registerForSession } from '../../lib/zoom';
 import { Card, Spinner, Avatar, EmptyState, SessionThumb, ProgressBar } from '../../components/ui';
 
 const MEDAL_COLORS = ['text-amber-500', 'text-slate-400', 'text-amber-700'];
@@ -13,7 +14,7 @@ const HIDE_SESSION_IMAGES = true;
 
 export default function ChallengeDetail() {
   const { id } = useParams();
-  const { profile } = useAuth();
+  const { profile, session: authSession } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -82,7 +83,7 @@ export default function ChallengeDetail() {
   }
 
   // Open a session: completed recordings play in-app; live classes open Zoom.
-  function openSession(s, idx) {
+  async function openSession(s, idx) {
     if (isLocked(idx)) {
       toast('Enroll to unlock this session');
       navigate('/app/challenges');
@@ -94,10 +95,17 @@ export default function ChallengeDetail() {
       navigate(`/app/session/${s.id}`);
       return;
     }
-    // Live class → join in Zoom.
-    const link = s.zoom_link || s.zoom_join_url;
-    if (!link) { toast('Link will be available soon'); return; }
-    window.open(link, '_blank', 'noopener');
+    // Live class → join Zoom with the student's identity (name + email), not "guest".
+    const fallback = s.zoom_link || s.zoom_join_url;
+    if (s.zoom_meeting_id) {
+      try {
+        const url = await registerForSession(s, profile, authSession?.user?.email);
+        window.open(url, '_blank', 'noopener');
+        return;
+      } catch { /* fall through to the generic link */ }
+    }
+    if (!fallback) { toast('Link will be available soon'); return; }
+    window.open(fallback, '_blank', 'noopener');
   }
 
   return (
