@@ -9,6 +9,7 @@ import { useToast } from '../../context/ToastContext';
 import { compressImage } from '../../lib/compressImage';
 import { createZoomMeeting, generateSessionImage } from '../../lib/zoom';
 import { Card, Spinner, EmptyState, Avatar, SessionThumb, CategoryIcon, CLASS_TYPES } from '../../components/ui';
+import { SessionStatusPill } from '../../components/SessionStatus';
 
 // Fresh Add-session defaults — today's date, 7:00 PM start.
 function freshAdd() {
@@ -81,6 +82,15 @@ export default function TeacherSchedule() {
   }, [profile.id]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Realtime: reflect Zoom-webhook session updates (started/ended/recording) live.
+  useEffect(() => {
+    const channel = supabase
+      .channel('teacher-schedule-sessions')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, () => load())
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, [load]);
 
   async function patchSession(id, patch, msg) {
     const { error } = await supabase.from('sessions').update(patch).eq('id', id);
@@ -430,9 +440,9 @@ export default function TeacherSchedule() {
                     {s.challenges?.name} · {s.challenges?.batch_name}
                     {s.scheduled_at && <> · {new Date(s.scheduled_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}</>}
                   </p>
-                  <div className="mt-1 flex gap-2">
+                  <div className="mt-1.5 flex items-center gap-2 flex-wrap">
+                    <SessionStatusPill session={s} />
                     {s.is_live_next && <span className="text-[11px] font-bold text-red-600">PINNED LIVE NEXT</span>}
-                    {s.completed && <span className="text-[11px] font-bold text-emerald-600">COMPLETED</span>}
                   </div>
                 </div>
 

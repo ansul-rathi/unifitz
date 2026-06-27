@@ -81,19 +81,22 @@ export default function ChallengeDetail() {
     if (error) toast(error.message, 'error');
   }
 
-  // Open a session: recording when completed (also credits attendance), else the live link.
+  // Open a session: completed recordings play in-app; live classes open Zoom.
   function openSession(s, idx) {
     if (isLocked(idx)) {
       toast('Enroll to unlock this session');
       navigate('/app/challenges');
       return;
     }
-    const link = s.completed ? s.recording_link : (s.zoom_link || s.zoom_join_url);
-    if (!link) {
-      toast(s.completed ? 'Recording not ready yet' : 'Link will be available soon');
+    // Recording → in-app player page (also credits attendance there).
+    if (s.completed) {
+      if (!s.recording_link) { toast('Recording not ready yet'); return; }
+      navigate(`/app/session/${s.id}`);
       return;
     }
-    if (s.completed) markAttended(s); // watching the recording = attended
+    // Live class → join in Zoom.
+    const link = s.zoom_link || s.zoom_join_url;
+    if (!link) { toast('Link will be available soon'); return; }
     window.open(link, '_blank', 'noopener');
   }
 

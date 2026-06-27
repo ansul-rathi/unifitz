@@ -18,6 +18,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const ClientHome = lazy(() => import('./pages/client/Home'));
 const ClientChallenges = lazy(() => import('./pages/client/Challenges'));
 const ChallengeDetail = lazy(() => import('./pages/client/ChallengeDetail'));
+const SessionPlayer = lazy(() => import('./pages/client/SessionPlayer'));
 const ClientProgress = lazy(() => import('./pages/client/Progress'));
 const ClientDiet = lazy(() => import('./pages/client/Diet'));
 const ClientBadges = lazy(() => import('./pages/client/Badges'));
@@ -91,6 +92,7 @@ export default function App() {
           <Route index element={<ClientHome />} />
           <Route path="challenges" element={<ClientChallenges />} />
           <Route path="challenges/:id" element={<ChallengeDetail />} />
+          <Route path="session/:id" element={<SessionPlayer />} />
           <Route path="progress" element={<ClientProgress />} />
           <Route path="diet" element={<ClientDiet />} />
           <Route path="recipes" element={<ClientRecipes />} />

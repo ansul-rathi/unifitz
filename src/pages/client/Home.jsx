@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Video, PlayCircle, CheckCircle2, Megaphone,
   CalendarClock, Radio,
@@ -206,15 +207,13 @@ export default function ClientHome() {
                 </div>
                 {watched.has(s.id) && <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />}
                 {s.recording_link ? (
-                  <a
-                    href={s.recording_link}
-                    target="_blank"
-                    rel="noreferrer"
+                  <Link
+                    to={`/app/session/${s.id}`}
                     onClick={() => markWatched(s.id)}
                     className="btn-secondary !py-2 !px-3.5 text-xs shrink-0"
                   >
                     <PlayCircle className="w-4 h-4" /> Watch
-                  </a>
+                  </Link>
                 ) : (
                   <span className="text-[11px] font-semibold text-slate-400 shrink-0">
                     {s.recording_status === 'processing' ? 'Recording soon' : 'No recording'}

@@ -10,6 +10,7 @@ import { useToast } from '../../context/ToastContext';
 import { compressImage } from '../../lib/compressImage';
 import { createZoomMeeting, generateSessionImage, generateSeriesImage } from '../../lib/zoom';
 import { Card, Spinner, EmptyState, Avatar, StatCard, SessionThumb, CLASS_TYPES } from '../../components/ui';
+import { SessionStatusPill, SessionStatusSteps } from '../../components/SessionStatus';
 import Select from '../../components/Select';
 
 const blankSession = () => ({
@@ -55,6 +56,16 @@ export default function AdminSeriesDetail() {
     setLoading(false);
   }, [id]);
   useEffect(() => { load(); }, [load]);
+
+  // Realtime: when the Zoom webhook updates a session (started / ended / recording),
+  // refresh so the card's status + recording appear automatically.
+  useEffect(() => {
+    const channel = supabase
+      .channel(`series-${id}-sessions`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions', filter: `challenge_id=eq.${id}` }, () => load())
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, [id, load]);
 
   function startEdit() {
     setF({
@@ -348,7 +359,13 @@ export default function AdminSeriesDetail() {
                       {s.scheduled_at && <> · {new Date(s.scheduled_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</>}
                     </p>
                   </div>
+                  <SessionStatusPill session={s} className="shrink-0" />
                   {isAdmin && <button onClick={() => deleteSession(s.id)} title="Delete" className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 shrink-0"><Trash2 className="w-4 h-4" /></button>}
+                </div>
+
+                {/* Lifecycle checklist — auto-updates from the Zoom webhook */}
+                <div className="mt-2 border-t border-slate-100 pt-2">
+                  <SessionStatusSteps session={s} />
                 </div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-2">

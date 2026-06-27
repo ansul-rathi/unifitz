@@ -47,7 +47,14 @@ Deno.serve(async req => {
   const obj = payload.payload?.object ?? {};
 
   try {
-    if (event === 'meeting.participant_joined') {
+    if (event === 'meeting.started') {
+      const session = await findSession(db, obj.id);
+      if (session) {
+        await db.from('sessions').update({ started: true }).eq('id', session.id);
+      }
+    }
+
+    else if (event === 'meeting.participant_joined') {
       const session = await findSession(db, obj.id);
       if (session) {
         const p = obj.participant ?? {};
@@ -142,8 +149,11 @@ Deno.serve(async req => {
           }
         }
         // attendance trigger on_attendance_marked handles Day-7 referral check.
+        // Ended → mark complete + flag the recording as processing until it lands.
         await db.from('sessions').update({
-          completed: true, is_live_next: false, zoom_meeting_uuid: obj.uuid ?? session.zoom_meeting_uuid,
+          completed: true, is_live_next: false, started: true,
+          recording_status: session.recording_link ? session.recording_status : 'processing',
+          zoom_meeting_uuid: obj.uuid ?? session.zoom_meeting_uuid,
         }).eq('id', session.id);
       }
     }
