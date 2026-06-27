@@ -91,76 +91,85 @@ export default function SessionPlayer() {
     : null;
 
   return (
-    <div className="space-y-5 max-w-4xl">
+    // Mobile: edge-to-edge, tight, premium. Desktop (sm+): unchanged boxed layout.
+    <div className="-mt-5 sm:mt-0 -mx-4 sm:mx-0 max-w-4xl sm:space-y-5">
+      {/* Video — full-bleed on mobile, rounded card on desktop */}
+      <div className="relative w-full bg-black aspect-video overflow-hidden sm:rounded-2xl sm:border sm:border-slate-200">
+        {/* Floating back button (over the video on mobile) */}
+        <Link
+          to={challenge ? `/app/challenges/${challenge.id}` : '/app/challenges'}
+          className="absolute top-3 left-3 z-10 inline-flex items-center gap-1.5 bg-black/45 backdrop-blur text-white text-xs font-semibold px-2.5 py-1.5 rounded-full hover:bg-black/60 transition-colors duration-200 sm:hidden"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> Back
+        </Link>
+        {!url ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 gap-2">
+            <Loader2 className="w-7 h-7 animate-spin" />
+            <p className="text-sm font-semibold">Recording is processing…</p>
+          </div>
+        ) : embed?.type === 'video' ? (
+          <video src={embed.src} controls playsInline className="absolute inset-0 w-full h-full" />
+        ) : (
+          <iframe
+            src={embed.src}
+            title={session.title}
+            className="absolute inset-0 w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowFullScreen
+          />
+        )}
+      </div>
+
+      {/* Desktop-only back link above details */}
       <Link
         to={challenge ? `/app/challenges/${challenge.id}` : '/app/challenges'}
-        className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors duration-200"
+        className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors duration-200"
       >
         <ArrowLeft className="w-4 h-4" /> Back to series
       </Link>
 
-      {/* Player */}
-      <Card className="overflow-hidden">
-        <div className="relative w-full bg-slate-900 aspect-video">
-          {!url ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 gap-2">
-              <Loader2 className="w-7 h-7 animate-spin" />
-              <p className="text-sm font-semibold">Recording is processing…</p>
-            </div>
-          ) : embed?.type === 'video' ? (
-            <video src={embed.src} controls playsInline className="absolute inset-0 w-full h-full" />
-          ) : (
-            <iframe
-              src={embed.src}
-              title={session.title}
-              className="absolute inset-0 w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-              allowFullScreen
-            />
-          )}
-        </div>
-      </Card>
-
       {/* Details */}
-      <Card className="p-5 md:p-6">
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-          <span className="inline-flex items-center gap-1.5 bg-brand-100 text-brand-700 px-2.5 py-1 rounded-full">Day {session.day_number}</span>
-          {session.category && <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">{session.category}</span>}
-          {session.completed && <span className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full"><PlayCircle className="w-3.5 h-3.5" /> Recording</span>}
-        </div>
-
-        <h1 className="mt-3 text-xl md:text-2xl font-bold">{session.title}</h1>
-
-        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-600">
-          {challenge && (
-            <Link to={`/app/challenges/${challenge.id}`} className="inline-flex items-center gap-1.5 hover:text-brand-600">
-              <Layers className="w-4 h-4 text-slate-400" /> {challenge.name}
-            </Link>
-          )}
-          {teacher && (
-            <span className="inline-flex items-center gap-1.5"><Avatar name={teacher.full_name} url={teacher.avatar_url} size="w-5 h-5" /> {teacher.full_name}</span>
-          )}
-          {when && <span className="inline-flex items-center gap-1.5"><CalendarClock className="w-4 h-4 text-slate-400" /> {when}</span>}
-          {session.duration_minutes && <span className="inline-flex items-center gap-1.5"><Clock className="w-4 h-4 text-slate-400" /> {session.duration_minutes} min</span>}
-        </div>
-
-        {session.description && (
-          <p className="mt-4 text-sm text-slate-600 leading-relaxed whitespace-pre-line">{session.description}</p>
-        )}
-
-        {url && (
-          <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4">
-            <a href={url} target="_blank" rel="noreferrer" className="btn-secondary !py-2 text-sm">
-              <ExternalLink className="w-4 h-4" /> Open in new tab
-            </a>
-            {embed?.mayBlock && (
-              <p className="text-xs text-slate-400 inline-flex items-center gap-1.5">
-                <Video className="w-3.5 h-3.5" /> If the video doesn't load above, use "Open in new tab".
-              </p>
-            )}
+      <div className="px-4 pt-3 sm:px-0 sm:pt-0">
+        <Card className="p-4 sm:p-6">
+          <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
+            <span className="inline-flex items-center gap-1.5 bg-brand-100 text-brand-700 px-2.5 py-1 rounded-full">Day {session.day_number}</span>
+            {session.category && <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">{session.category}</span>}
+            {session.completed && <span className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full"><PlayCircle className="w-3.5 h-3.5" /> Recording</span>}
           </div>
-        )}
-      </Card>
+
+          <h1 className="mt-2.5 text-lg sm:text-2xl font-bold leading-snug">{session.title}</h1>
+
+          <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-slate-600">
+            {challenge && (
+              <Link to={`/app/challenges/${challenge.id}`} className="inline-flex items-center gap-1.5 hover:text-brand-600">
+                <Layers className="w-4 h-4 text-slate-400" /> {challenge.name}
+              </Link>
+            )}
+            {teacher && (
+              <span className="inline-flex items-center gap-1.5"><Avatar name={teacher.full_name} url={teacher.avatar_url} size="w-5 h-5" /> {teacher.full_name}</span>
+            )}
+            {when && <span className="inline-flex items-center gap-1.5"><CalendarClock className="w-4 h-4 text-slate-400" /> {when}</span>}
+            {session.duration_minutes && <span className="inline-flex items-center gap-1.5"><Clock className="w-4 h-4 text-slate-400" /> {session.duration_minutes} min</span>}
+          </div>
+
+          {session.description && (
+            <p className="mt-3.5 text-sm text-slate-600 leading-relaxed whitespace-pre-line">{session.description}</p>
+          )}
+
+          {url && (
+            <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-3.5">
+              <a href={url} target="_blank" rel="noreferrer" className="btn-secondary !py-2 text-sm">
+                <ExternalLink className="w-4 h-4" /> Open in new tab
+              </a>
+              {embed?.mayBlock && (
+                <p className="text-xs text-slate-400 inline-flex items-center gap-1.5">
+                  <Video className="w-3.5 h-3.5" /> If the video doesn't load above, use "Open in new tab".
+                </p>
+              )}
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
