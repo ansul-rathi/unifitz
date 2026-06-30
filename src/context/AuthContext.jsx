@@ -9,10 +9,17 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const loadProfile = useCallback(async userId => {
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    // maybeSingle: a not-yet-created row returns null instead of erroring, so a
+    // brand-new signup doesn't get stuck on the "Loading profile…" spinner.
+    const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
     setProfile(data ?? null);
     return data;
   }, []);
+
+  // Merge known-good fields into the cached profile without a refetch. Used after
+  // onboarding so the /app guard sees onboarding_complete=true immediately,
+  // instead of bouncing back when a replica-lagged refetch still reads false.
+  const patchProfile = useCallback(p => setProfile(prev => ({ ...prev, ...p })), []);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -32,7 +39,7 @@ export function AuthProvider({ children }) {
   const signOut = () => supabase.auth.signOut();
 
   return (
-    <AuthContext.Provider value={{ session, profile, loading, signOut, refreshProfile: () => session && loadProfile(session.user.id) }}>
+    <AuthContext.Provider value={{ session, profile, loading, signOut, patchProfile, refreshProfile: () => session && loadProfile(session.user.id) }}>
       {children}
     </AuthContext.Provider>
   );

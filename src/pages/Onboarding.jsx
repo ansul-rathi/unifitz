@@ -15,7 +15,7 @@ const GOALS = [
 ];
 
 export default function Onboarding() {
-  const { session, profile, refreshProfile, signOut } = useAuth();
+  const { session, profile, patchProfile, signOut } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -44,21 +44,26 @@ export default function Onboarding() {
     // Upsert keyed on id (self-heals a missing row) and read the flag back, so a
     // 0-row / RLS-filtered write can't silently succeed and bounce the user back
     // to this form. Only navigate once onboarding_complete is truly persisted.
-    const { data, error } = await supabase.from('profiles').upsert({
-      id: session.user.id,
+    const fields = {
       full_name: f.full_name.trim(), phone: f.phone.trim() || null,
       age: num(f.age), gender: f.gender, height_cm: num(f.height_cm),
       starting_weight_kg: num(f.weight_kg), target_weight_kg: num(f.target_weight_kg),
       activity_level: f.activity_level, fitness_goal: f.fitness_goal,
       onboarding_complete: true,
-    }, { onConflict: 'id' }).select('onboarding_complete').single();
+    };
+    const { data, error } = await supabase.from('profiles')
+      .upsert({ id: session.user.id, ...fields }, { onConflict: 'id' })
+      .select('onboarding_complete').single();
     setBusy(false);
 
     if (error || data?.onboarding_complete !== true) {
       return toast(error?.message || 'Could not save your profile — please try again', 'error');
     }
 
-    await refreshProfile();
+    // Write is confirmed persisted. Update the cached profile directly instead of
+    // refetching — a replica-lagged re-SELECT could still read onboarding_complete
+    // false and bounce the user straight back into this form (the restart loop).
+    patchProfile(fields);
     navigate('/app', { replace: true });
   }
 
