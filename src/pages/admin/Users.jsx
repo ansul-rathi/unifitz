@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Search, UserCog, ShieldCheck, Ban, GraduationCap, UserPlus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
@@ -8,6 +8,7 @@ import AddStudentModal from '../../components/AddStudentModal';
 
 export default function AdminUsers() {
   const toast = useToast();
+  const navigate = useNavigate();
   const [params] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState([]);
@@ -68,7 +69,7 @@ export default function AdminUsers() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filtered.map(u => (
-              <tr key={u.id} className="hover:bg-slate-50/60">
+              <tr key={u.id} onClick={() => navigate(`/admin/users/${u.id}`)} className="hover:bg-slate-50/60 cursor-pointer">
                 <td className="px-5 py-3">
                   <span className="flex items-center gap-2.5 font-semibold">
                     <Avatar name={u.full_name} url={u.avatar_url} size="w-8 h-8" /> {u.full_name}
@@ -88,12 +89,12 @@ export default function AdminUsers() {
                 <td className="px-5 py-3">
                   <div className="flex justify-end gap-1.5">
                     {u.role === 'client' && (
-                      <button onClick={() => patch(u.id, { role: 'teacher' }, `${u.full_name} promoted to teacher`)}
+                      <button onClick={e => { e.stopPropagation(); patch(u.id, { role: 'teacher' }, `${u.full_name} promoted to teacher`); }}
                         title="Promote to teacher" className="p-2 rounded-lg hover:bg-sky-50 text-sky-600">
                         <GraduationCap className="w-4 h-4" />
                       </button>
                     )}
-                    <button onClick={() => patch(u.id, { is_active: !u.is_active }, u.is_active ? 'Deactivated' : 'Reactivated')}
+                    <button onClick={e => { e.stopPropagation(); patch(u.id, { is_active: !u.is_active }, u.is_active ? 'Deactivated' : 'Reactivated'); }}
                       title={u.is_active ? 'Deactivate' : 'Reactivate'}
                       className={`p-2 rounded-lg ${u.is_active ? 'hover:bg-red-50 text-red-500' : 'hover:bg-emerald-50 text-emerald-600'}`}>
                       {u.is_active ? <Ban className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
@@ -108,18 +109,18 @@ export default function AdminUsers() {
 
       <div className="md:hidden space-y-2.5">
         {filtered.map(u => (
-          <Card key={u.id} className="p-4 flex items-center gap-3">
+          <Card key={u.id} onClick={() => navigate(`/admin/users/${u.id}`)} className="p-4 flex items-center gap-3 cursor-pointer">
             <Avatar name={u.full_name} url={u.avatar_url} />
             <div className="flex-1 min-w-0">
               <p className="font-bold text-sm truncate">{u.full_name}</p>
               <p className="text-xs text-slate-500">{u.role} · {u.is_active ? 'active' : 'deactivated'}</p>
             </div>
             {u.role === 'client' && (
-              <button onClick={() => patch(u.id, { role: 'teacher' }, 'Promoted to teacher')} className="p-2 rounded-lg bg-sky-50 text-sky-600">
+              <button onClick={e => { e.stopPropagation(); patch(u.id, { role: 'teacher' }, 'Promoted to teacher'); }} className="p-2 rounded-lg bg-sky-50 text-sky-600">
                 <GraduationCap className="w-4 h-4" />
               </button>
             )}
-            <button onClick={() => patch(u.id, { is_active: !u.is_active }, u.is_active ? 'Deactivated' : 'Reactivated')}
+            <button onClick={e => { e.stopPropagation(); patch(u.id, { is_active: !u.is_active }, u.is_active ? 'Deactivated' : 'Reactivated'); }}
               className={`p-2 rounded-lg ${u.is_active ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
               {u.is_active ? <Ban className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
             </button>

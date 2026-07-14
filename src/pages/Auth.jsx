@@ -9,7 +9,9 @@ const RESEND_SECONDS = 45;
 const REDIRECT_TO = `${window.location.origin}/auth/confirm`;
 // Master bypass code — enter instead of the emailed OTP to log into any existing
 // account (student/teacher/admin). Verified server-side in the master-login fn.
-const MASTER_CODE = '686868';
+// Set via VITE_MASTER_CODE and it must match the MASTER_LOGIN_CODE server secret.
+// Unset (e.g. production) → the master path is disabled and only real OTP works.
+const MASTER_CODE = import.meta.env.VITE_MASTER_CODE || null;
 
 export default function Auth() {
   const [params] = useSearchParams();
@@ -52,10 +54,26 @@ export default function Auth() {
     if (mode === 'signup' && !form.name.trim()) return toast('Enter your name', 'error');
     setBusy(true);
     try {
+      // Gate on whether the email already has an account so login never
+      // silently creates one, and signup never double-registers.
+      const { data: exists, error: chkErr } = await supabase.rpc('email_exists', { p_email: email });
+      if (chkErr) throw chkErr;
+      if (mode === 'login' && !exists) {
+        toast('Email does not exist — please sign up', 'error');
+        setMode('signup');
+        return;
+      }
+      if (mode === 'signup' && exists) {
+        toast('Email already registered — please log in', 'error');
+        setMode('login');
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          shouldCreateUser: ALLOW_SIGNUP_VIA_OTP,
+          // Only ever create a user during signup.
+          shouldCreateUser: mode === 'signup' && ALLOW_SIGNUP_VIA_OTP,
           emailRedirectTo: REDIRECT_TO,
           ...(mode === 'signup' && {
             data: {

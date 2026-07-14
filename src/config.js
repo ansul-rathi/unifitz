@@ -34,3 +34,13 @@ export function waLink(text = WA_PREFILL) {
 export function waSendLink(text = WA_PREFILL) {
   return `https://api.whatsapp.com/send?phone=${BUSINESS.whatsappNumber}&text=${encodeURIComponent(text)}`;
 }
+
+// Message a SPECIFIC member's number (admin follow-ups) — distinct from the
+// business-number links above. Normalizes to wa.me digits: strips non-digits and
+// assumes India (91) when no country code is present. Returns null if unusable.
+export function waTo(phone, text = '') {
+  const digits = String(phone ?? '').replace(/\D/g, '');
+  if (digits.length < 10) return null;
+  const withCc = digits.length === 10 ? `91${digits}` : digits;
+  return `https://wa.me/${withCc}?text=${encodeURIComponent(text)}`;
+}

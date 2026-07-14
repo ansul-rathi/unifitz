@@ -16,7 +16,7 @@ const cors = {
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   try {
-    const { challenge_id } = await req.json();
+    const { challenge_id, plan_id } = await req.json();
     if (!challenge_id) throw new Error('challenge_id required');
 
     // Identify the caller from their JWT.
@@ -27,9 +27,26 @@ Deno.serve(async req => {
     if (!user) throw new Error('not authenticated');
 
     const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
-    const { data: ch, error } = await db.from('challenges').select('id, name, price, currency, is_free').eq('id', challenge_id).single();
+    const { data: ch, error } = await db.from('challenges').select('id, name, price, currency, is_free, access_type').eq('id', challenge_id).single();
     if (error || !ch) throw new Error('series not found');
-    if (ch.is_free || !ch.price || ch.price <= 0) throw new Error('this series is free — just enroll');
+    if (ch.is_free) throw new Error('this series is free — just enroll');
+
+    // Recorded series sell by plan (server-trusted price/duration); live series
+    // use the single challenge price. Never trust a client-sent amount.
+    const recorded = ch.access_type === 'recorded';
+    let amount = Number(ch.price);
+    let planMonths: number | null = null;
+    let planLabel: string | null = null;
+    if (recorded) {
+      if (!plan_id) throw new Error('pick a plan');
+      const { data: plan } = await db.from('recorded_plans')
+        .select('price, months, label, is_active').eq('id', plan_id).eq('challenge_id', ch.id).single();
+      if (!plan || !plan.is_active) throw new Error('plan not available');
+      amount = Number(plan.price);
+      planMonths = plan.months;
+      planLabel = plan.label;
+    }
+    if (!amount || amount <= 0) throw new Error('nothing to pay for this series');
 
     const keyId = Deno.env.get('RAZORPAY_KEY_ID')!;
     const keySecret = Deno.env.get('RAZORPAY_KEY_SECRET')!;
@@ -39,7 +56,7 @@ Deno.serve(async req => {
       method: 'POST',
       headers: { Authorization: `Basic ${basic}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        amount: Math.round(ch.price * 100),       // paise
+        amount: Math.round(amount * 100),         // paise
         currency: ch.currency || 'INR',
         receipt: `series_${ch.id}_${user.id}`.slice(0, 40),
         notes: { challenge_id: ch.id, user_id: user.id },
@@ -49,8 +66,9 @@ Deno.serve(async req => {
     const order = await orderRes.json();
 
     await db.from('payments').insert({
-      user_id: user.id, challenge_id: ch.id, amount: ch.price, currency: ch.currency || 'INR',
+      user_id: user.id, challenge_id: ch.id, amount, currency: ch.currency || 'INR',
       method: 'razorpay', status: 'created', razorpay_order_id: order.id,
+      access_type: ch.access_type || 'live', plan_months: planMonths, plan_label: planLabel,
     });
 
     return new Response(JSON.stringify({

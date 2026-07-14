@@ -1,20 +1,23 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, Loader2, Pencil, Check, X, Plus, Trash2, Video, PlayCircle, Radio,
-  CheckCircle2, Copy, Eye, EyeOff, Users, IndianRupee, ImagePlus, CalendarDays, Layers, Sparkles, Upload,
+  CheckCircle2, Copy, Eye, EyeOff, Users, IndianRupee, ImagePlus, CalendarDays, Layers, Sparkles, Upload, Lock,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { compressImage } from '../../lib/compressImage';
 import { createZoomMeeting, generateSessionImage, generateSeriesImage } from '../../lib/zoom';
+import { DEFAULT_SESSION_DURATION_MIN, DEFAULT_CATEGORY, isValidUrl, sessionFormError } from '../../lib/seriesConstants';
+import { fmtDateTime } from '../../lib/datetime';
 import { Card, Spinner, EmptyState, Avatar, StatCard, SessionThumb, CLASS_TYPES } from '../../components/ui';
 import { SessionStatusPill, SessionStatusSteps } from '../../components/SessionStatus';
 import Select from '../../components/Select';
 
 const blankSession = () => ({
-  type: 'live', day_number: '', title: '', description: '', category: 'Strength Training',
+  type: 'live', day_number: '', title: '', description: '', category: DEFAULT_CATEGORY,
+  duration_minutes: DEFAULT_SESSION_DURATION_MIN,
   recording_link: '', date: new Date().toISOString().slice(0, 10), time: '07:00',
 });
 
@@ -22,7 +25,7 @@ export default function AdminSeriesDetail() {
   const { id } = useParams();
   const { profile } = useAuth();
   const isAdmin = profile.role === 'admin';
-  const backTo = isAdmin ? '/admin/challenges' : '/teacher/series';
+  const backTo = isAdmin ? '/admin/series' : '/teacher/series';
   const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [c, setC] = useState(null);
@@ -35,20 +38,25 @@ export default function AdminSeriesDetail() {
   const [f, setF] = useState(null);
   const [add, setAdd] = useState(blankSession());
   const [showAdd, setShowAdd] = useState(false);
+  const [aiBusy, setAiBusy] = useState(null); // 'series' | session id — spinner on the clicked AI button
+  const [plans, setPlans] = useState([]);     // recorded-access plans for this series
+  const [newPlan, setNewPlan] = useState({ label: '', months: '', price: '' });
 
   const load = useCallback(async () => {
-    const [{ data: ch }, { data: ses }, { data: t }, { data: cts }, { count: enrCount }, { data: pays }] = await Promise.all([
+    const [{ data: ch }, { data: ses }, { data: t }, { data: cts }, { count: enrCount }, { data: pays }, { data: rp }] = await Promise.all([
       supabase.from('challenges').select('*').eq('id', id).single(),
       supabase.from('sessions').select('*').eq('challenge_id', id).order('day_number'),
       supabase.from('profiles').select('id, full_name, avatar_url').eq('role', 'teacher'),
       supabase.from('challenge_teachers').select('teacher_id').eq('challenge_id', id),
       supabase.from('enrollments').select('id', { count: 'exact', head: true }).eq('challenge_id', id),
       supabase.from('payments').select('amount, status').eq('challenge_id', id),
+      supabase.from('recorded_plans').select('*').eq('challenge_id', id).order('sort_order').order('price'),
     ]);
     setC(ch);
     setSessions(ses ?? []);
     setTeachers(t ?? []);
     setTeacherIds((cts ?? []).map(x => x.teacher_id));
+    setPlans(rp ?? []);
     setStats({
       enrolled: enrCount ?? 0,
       gross: (pays ?? []).filter(p => ['paid', 'verified'].includes(p.status)).reduce((s, p) => s + Number(p.amount), 0),
@@ -73,6 +81,7 @@ export default function AdminSeriesDetail() {
       batch_name: c.batch_name ?? '', start_date: c.start_date ?? '', status: c.status,
       is_free: c.is_free, price: c.price ?? '', is_published: c.is_published !== false,
       free_session_count: c.free_session_count ?? 0,
+      attendance_threshold: c.attendance_threshold ?? 75,
       teacherIds: [...teacherIds], poster: null,
     });
     setEditing(true);
@@ -85,13 +94,14 @@ export default function AdminSeriesDetail() {
       // Teachers may edit content (name/description/schedule/sessions) but not
       // pricing, visibility or the teacher roster — those stay admin-only.
       const freePreview = Math.max(0, parseInt(f.free_session_count, 10) || 0);
+      const threshold = Math.min(100, Math.max(1, parseInt(f.attendance_threshold, 10) || 75));
       const update = isAdmin
         ? {
             name: f.name, description: f.description, duration_days: +f.duration_days,
             batch_name: f.batch_name, start_date: f.start_date || null, status: f.status,
             is_free: f.is_free, price: f.is_free ? 0 : (f.price === '' ? 0 : +f.price),
             is_published: f.is_published, teacher_id: f.teacherIds[0] || null,
-            free_session_count: freePreview,
+            free_session_count: freePreview, attendance_threshold: threshold,
           }
         : {
             name: f.name, description: f.description, duration_days: +f.duration_days,
@@ -122,8 +132,50 @@ export default function AdminSeriesDetail() {
     load();
   }
 
+  // Phase toggle. Live ⇄ Recorded is the access gate: in the recorded phase the
+  // series is no longer a live batch — every member (former live members too)
+  // must buy a recorded plan to watch. Blocked unless a plan is available.
+  async function toggleAccessType() {
+    const next = c.access_type === 'recorded' ? 'live' : 'recorded';
+    if (next === 'recorded') {
+      if (!plans.some(p => p.is_active)) return toast('Add an active recorded plan first', 'error');
+      if (!confirm('Switch to recorded? Members lose access and must buy a recorded plan to keep watching.')) return;
+    }
+    await supabase.from('challenges').update({ access_type: next }).eq('id', id);
+    toast(next === 'recorded' ? 'Switched to recorded — sold by plan' : 'Back to the live batch');
+    load();
+  }
+
+  // ── Recorded plans CRUD ──
+  async function addPlan(e) {
+    e.preventDefault();
+    if (!newPlan.label.trim()) return toast('Plan needs a label', 'error');
+    const price = newPlan.price === '' ? 0 : Number(newPlan.price);
+    const months = newPlan.months === '' ? null : Math.max(1, parseInt(newPlan.months, 10) || 1);
+    const { error } = await supabase.from('recorded_plans').insert({
+      challenge_id: id, label: newPlan.label.trim(), months, price, sort_order: plans.length,
+    });
+    if (error) return toast(error.message, 'error');
+    setNewPlan({ label: '', months: '', price: '' });
+    toast('Plan added');
+    load();
+  }
+  async function patchPlan(pid, patch) {
+    const { error } = await supabase.from('recorded_plans').update(patch).eq('id', pid);
+    if (error) return toast(error.message, 'error');
+    load();
+  }
+  async function deletePlan(pid) {
+    if (!confirm('Delete this plan?')) return;
+    await supabase.from('recorded_plans').delete().eq('id', pid);
+    toast('Plan deleted');
+    load();
+  }
+
   async function addSession(e) {
     e.preventDefault();
+    const invalid = sessionFormError(add);
+    if (invalid) return toast(invalid, 'error');
     setBusy(true);
     try {
       const isRec = add.type === 'recording';
@@ -131,12 +183,22 @@ export default function AdminSeriesDetail() {
         challenge_id: id, day_number: +add.day_number, title: add.title,
         description: add.description || null, category: add.category || null,
         scheduled_at: add.date && add.time ? new Date(`${add.date}T${add.time}`).toISOString() : null,
-        duration_minutes: 45, session_type: isRec ? 'recording' : 'live',
+        duration_minutes: +add.duration_minutes || DEFAULT_SESSION_DURATION_MIN,
+        session_type: isRec ? 'recording' : 'live',
         completed: isRec, recording_link: isRec ? (add.recording_link || null) : null,
       }).select('id').single();
       if (error) throw error;
-      if (!isRec) { try { await createZoomMeeting(created.id); } catch { /* zoom optional */ } }
-      toast(isRec ? 'Recording added' : 'Session added');
+      if (isRec) {
+        toast('Recording added');
+      } else {
+        // Surface Zoom failures — a live session without a meeting is a broken promise.
+        try {
+          await createZoomMeeting(created.id);
+          toast('Session added + Zoom meeting created');
+        } catch (zErr) {
+          toast(`Session added, but Zoom meeting failed: ${zErr.message || 'check Zoom secrets'}`, 'error');
+        }
+      }
       setAdd(blankSession()); setShowAdd(false); load();
     } catch (err) { toast(err.message, 'error'); } finally { setBusy(false); }
   }
@@ -146,6 +208,13 @@ export default function AdminSeriesDetail() {
     if (error) return toast(error.message, 'error');
     if (msg) toast(msg);
     load();
+  }
+
+  // Link fields: only persist real http(s) URLs (empty clears).
+  function patchLink(sid, field, value, msg) {
+    const v = value.trim();
+    if (v && !isValidUrl(v)) return toast('Enter a valid http(s) link', 'error');
+    patchSession(sid, { [field]: v || null }, msg);
   }
 
   async function deleteSession(sid) {
@@ -174,14 +243,14 @@ export default function AdminSeriesDetail() {
     } catch (err) { toast(err.message, 'error'); } finally { setBusy(false); }
   }
   async function aiSessionImage(s) {
-    setBusy(true);
+    setAiBusy(s.id);
     try { await generateSessionImage(s.id); toast('AI image generated'); load(); }
-    catch (err) { toast(err.message || 'AI image failed', 'error'); } finally { setBusy(false); }
+    catch (err) { toast(err.message || 'AI image failed', 'error'); } finally { setAiBusy(null); }
   }
   async function aiSeriesImage() {
-    setBusy(true);
+    setAiBusy('series');
     try { await generateSeriesImage(id); toast('AI banner generated'); load(); }
-    catch (err) { toast(err.message || 'AI image failed', 'error'); } finally { setBusy(false); }
+    catch (err) { toast(err.message || 'AI image failed', 'error'); } finally { setAiBusy(null); }
   }
   async function uploadSeriesImage(file) {
     if (!file) return;
@@ -218,8 +287,8 @@ export default function AdminSeriesDetail() {
               <Upload className="w-4 h-4" /> Upload
               <input type="file" accept="image/*" className="hidden" onChange={e => uploadSeriesImage(e.target.files?.[0])} />
             </label>
-            <button onClick={aiSeriesImage} disabled={busy} className="inline-flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow disabled:opacity-50">
-              {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} AI image
+            <button onClick={aiSeriesImage} disabled={!!aiBusy} className="inline-flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow disabled:opacity-50">
+              {aiBusy === 'series' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} {aiBusy === 'series' ? 'Generating…' : 'AI image'}
             </button>
           </div>
         </div>
@@ -231,11 +300,13 @@ export default function AdminSeriesDetail() {
                 <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${c.status === 'active' ? 'bg-emerald-100 text-emerald-700' : c.status === 'upcoming' ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600'}`}>{c.status}</span>
                 <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${c.is_free ? 'bg-brand-100 text-brand-700' : 'bg-amber-100 text-amber-700'}`}>{c.is_free ? 'FREE' : `₹${c.price}`}</span>
                 {!c.is_published && <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-900 text-white">Hidden</span>}
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${c.access_type === 'recorded' ? 'bg-violet-100 text-violet-700' : 'bg-red-100 text-red-700'}`}>{c.access_type === 'recorded' ? 'RECORDED' : 'LIVE'}</span>
               </div>
               <p className="mt-1 text-sm text-slate-600">{c.description}</p>
               <p className="mt-1 text-xs text-slate-500 flex items-center gap-1"><CalendarDays className="w-3.5 h-3.5" /> {c.batch_name || 'No batch'} · {c.duration_days} days · starts {c.start_date ?? 'TBD'}</p>
             </div>
             <div className="flex gap-2 shrink-0">
+              {isAdmin && <button onClick={toggleAccessType} className="btn-secondary !py-2 !px-3 text-sm" title="Switch between selling the live batch and its recordings">{c.access_type === 'recorded' ? <><Radio className="w-4 h-4 text-red-500" /> Sell live</> : <><PlayCircle className="w-4 h-4 text-violet-500" /> Open recorded sales</>}</button>}
               {isAdmin && <button onClick={togglePublish} className="btn-secondary !py-2 !px-3 text-sm">{c.is_published ? <><EyeOff className="w-4 h-4" /> Hide</> : <><Eye className="w-4 h-4" /> Publish</>}</button>}
               <button onClick={startEdit} className="btn-primary !py-2 !px-3 text-sm"><Pencil className="w-4 h-4" /> Edit details</button>
             </div>
@@ -249,11 +320,54 @@ export default function AdminSeriesDetail() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={Users} label="Enrolled" value={stats.enrolled} to={isAdmin ? '/admin/users?role=client' : undefined} />
+        <StatCard icon={Users} label="Enrolled" value={stats.enrolled} to={`${isAdmin ? '/admin' : '/teacher'}/series/${id}/members`} />
         <StatCard icon={Video} label="Sessions" value={sessions.length} accent="text-violet-500" />
         <StatCard icon={CheckCircle2} label="Completed" value={`${completed} (${pct}%)`} accent="text-emerald-500" />
         <StatCard icon={IndianRupee} label="Revenue" value={c.is_free ? '—' : `₹${stats.gross.toLocaleString('en-IN')}`} accent="text-emerald-500" to={isAdmin ? '/admin/revenue' : undefined} />
       </div>
+
+      {/* Recorded-access plans — admin only. Sold when the series is in the recorded phase. */}
+      {isAdmin && (
+        <Card className="p-5 md:p-6">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h2 className="font-bold text-lg flex items-center gap-2"><PlayCircle className="w-5 h-5 text-violet-500" /> Recorded plans ({plans.length})</h2>
+            <span className="text-xs text-slate-500">{c.access_type === 'recorded' ? 'Currently selling recordings by plan' : 'Set these before switching to recorded'}</span>
+          </div>
+
+          {plans.length > 0 && (
+            <ul className="mt-4 space-y-2">
+              {plans.map(pl => (
+                <li key={pl.id} className={`flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 p-3 ${pl.is_active ? '' : 'opacity-60'}`}>
+                  <input defaultValue={pl.label} onBlur={e => e.target.value !== pl.label && patchPlan(pl.id, { label: e.target.value })}
+                    className="input !py-1.5 text-sm flex-1 min-w-[120px]" placeholder="Label" />
+                  <div className="flex items-center gap-1 text-sm">
+                    <input type="number" min="1" defaultValue={pl.months ?? ''} placeholder="∞"
+                      onBlur={e => { const v = e.target.value === '' ? null : Math.max(1, parseInt(e.target.value, 10) || 1); if (v !== pl.months) patchPlan(pl.id, { months: v }); }}
+                      className="input !py-1.5 text-sm w-16" title="Months (blank = lifetime)" />
+                    <span className="text-slate-400 text-xs">mo</span>
+                  </div>
+                  <div className="flex items-center gap-1"><span className="text-slate-400">₹</span>
+                    <input type="number" min="0" defaultValue={pl.price} onBlur={e => Number(e.target.value) !== Number(pl.price) && patchPlan(pl.id, { price: Number(e.target.value) })}
+                      className="input !py-1.5 text-sm w-24" placeholder="Price" />
+                  </div>
+                  <button onClick={() => patchPlan(pl.id, { is_active: !pl.is_active })} className={`btn-secondary !py-1.5 !px-2.5 text-xs ${pl.is_active ? 'text-emerald-600' : ''}`}>
+                    {pl.is_active ? <><Eye className="w-4 h-4" /> On</> : <><EyeOff className="w-4 h-4" /> Off</>}
+                  </button>
+                  <button onClick={() => deletePlan(pl.id)} title="Delete plan" className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50"><Trash2 className="w-4 h-4" /></button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <form onSubmit={addPlan} className="mt-3 flex flex-wrap items-end gap-2 border-t border-slate-100 pt-3">
+            <input value={newPlan.label} onChange={e => setNewPlan(x => ({ ...x, label: e.target.value }))} placeholder="Label (e.g. Monthly)" className="input !py-2 text-sm flex-1 min-w-[140px]" />
+            <input type="number" min="1" value={newPlan.months} onChange={e => setNewPlan(x => ({ ...x, months: e.target.value }))} placeholder="Months (∞)" className="input !py-2 text-sm w-28" title="Blank = lifetime" />
+            <div className="flex items-center gap-1"><span className="text-slate-400">₹</span>
+              <input type="number" min="0" value={newPlan.price} onChange={e => setNewPlan(x => ({ ...x, price: e.target.value }))} placeholder="Price" className="input !py-2 text-sm w-24" /></div>
+            <button type="submit" className="btn-primary !py-2 text-sm"><Plus className="w-4 h-4" /> Add plan</button>
+          </form>
+        </Card>
+      )}
 
       {/* Edit details modal */}
       {editing && (
@@ -276,6 +390,14 @@ export default function AdminSeriesDetail() {
                 onChange={e => setF(x => ({ ...x, free_session_count: e.target.value }))} placeholder="e.g. 3" />
               <p className="mt-1 text-xs text-slate-400">Students can watch the first {f.free_session_count || 0} session{(+f.free_session_count === 1) ? '' : 's'} free; the rest stay locked until they enroll.</p>
             </div>
+            {isAdmin && (
+              <div className="sm:col-span-2">
+                <label className="label" htmlFor="attendance_threshold">Attendance threshold <span className="font-normal text-slate-400">(% of a live class to count as attended)</span></label>
+                <input id="attendance_threshold" type="number" min="1" max="100" className="input" value={f.attendance_threshold}
+                  onChange={e => setF(x => ({ ...x, attendance_threshold: e.target.value }))} placeholder="75" />
+                <p className="mt-1 text-xs text-slate-400">A student must be present for at least {f.attendance_threshold || 75}% of a live session for it to count.</p>
+              </div>
+            )}
             {isAdmin && (
               <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 sm:col-span-2">
                 <input type="checkbox" checked={f.is_published} onChange={e => setF(x => ({ ...x, is_published: e.target.checked }))} className="w-5 h-5 accent-brand-500" /> Visible to students &amp; teachers
@@ -333,6 +455,10 @@ export default function AdminSeriesDetail() {
             <textarea rows="2" placeholder="Description" className="input !py-2 text-sm sm:col-span-2" value={add.description} onChange={e => setAdd(x => ({ ...x, description: e.target.value }))} />
             <input required type="date" className="input !py-2 text-sm" value={add.date} onChange={e => setAdd(x => ({ ...x, date: e.target.value }))} />
             <input required type="time" className="input !py-2 text-sm" value={add.time} onChange={e => setAdd(x => ({ ...x, time: e.target.value }))} />
+            <div className="sm:col-span-2 flex items-center gap-2">
+              <label htmlFor="add-duration" className="text-xs font-semibold text-slate-500 shrink-0">Duration (min)</label>
+              <input id="add-duration" required type="number" min="10" max="240" step="5" className="input !py-2 text-sm w-24" value={add.duration_minutes} onChange={e => setAdd(x => ({ ...x, duration_minutes: e.target.value }))} />
+            </div>
             {add.type === 'recording'
               ? <input required type="url" placeholder="Recording link" className="input !py-2 text-sm sm:col-span-2" value={add.recording_link} onChange={e => setAdd(x => ({ ...x, recording_link: e.target.value }))} />
               : <p className="sm:col-span-2 text-xs text-slate-500">A Zoom meeting is auto-created.</p>}
@@ -356,7 +482,7 @@ export default function AdminSeriesDetail() {
                     />
                     <p className="text-xs text-slate-500">
                       Day {s.day_number} · {s.category || '—'} · {s.session_type}
-                      {s.scheduled_at && <> · {new Date(s.scheduled_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</>}
+                      {s.scheduled_at && <> · {fmtDateTime(s.scheduled_at, { withYear: true })}</>}
                     </p>
                   </div>
                   <SessionStatusPill session={s} className="shrink-0" />
@@ -369,33 +495,32 @@ export default function AdminSeriesDetail() {
                 </div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                  {/* recording link inline — keyed on value so the webhook-set
-                      link shows after reload (uncontrolled input otherwise sticks). */}
-                  <input
-                    key={`rec-${s.id}-${s.recording_link ?? ''}`}
-                    type="url"
-                    defaultValue={s.recording_link ?? ''}
+                  {/* Controlled input: syncs when the webhook updates the link
+                      (unless the admin is mid-edit). No remount key hack. */}
+                  <LinkInput
+                    value={s.recording_link}
                     placeholder="Recording link"
-                    onBlur={e => e.target.value !== (s.recording_link ?? '') && patchSession(s.id, { recording_link: e.target.value }, 'Recording link saved')}
+                    onSave={v => patchLink(s.id, 'recording_link', v, 'Recording link saved')}
                     className="input !py-1.5 !px-2.5 text-xs flex-1 min-w-[180px]"
                   />
                   {s.recording_link && <a href={s.recording_link} target="_blank" rel="noreferrer" className="btn-secondary !py-1.5 !px-2.5 text-xs"><PlayCircle className="w-4 h-4" /></a>}
                   {s.zoom_meeting_id
                     ? <button onClick={() => { navigator.clipboard.writeText(s.zoom_join_url || ''); toast('Join link copied'); }} className="btn-secondary !py-1.5 !px-2.5 text-xs"><Copy className="w-4 h-4 text-sky-500" /></button>
                     : <button onClick={() => createZoom(s.id)} disabled={busy} className="btn-secondary !py-1.5 !px-2.5 text-xs"><Video className="w-4 h-4 text-sky-500" /> Zoom</button>}
-                  {/* Join link — auto-filled when Zoom meeting is created; editable.
-                      Keyed on value so the auto-created link appears after reload. */}
-                  <input
-                    key={`zl-${s.id}-${s.zoom_link ?? ''}`}
-                    type="url"
-                    defaultValue={s.zoom_link ?? ''}
+                  {/* Join link — auto-filled when the Zoom meeting is created; editable. */}
+                  <LinkInput
+                    value={s.zoom_link}
                     placeholder="Join link (auto-filled from Zoom)"
-                    onBlur={e => e.target.value !== (s.zoom_link ?? '') && patchSession(s.id, { zoom_link: e.target.value || null }, 'Manual link saved')}
+                    onSave={v => patchLink(s.id, 'zoom_link', v, 'Manual link saved')}
                     className="input !py-1.5 !px-2.5 text-xs flex-1 min-w-[160px]"
                   />
                   <button onClick={() => patchSession(s.id, { completed: !s.completed }, s.completed ? 'Marked incomplete' : 'Marked completed')}
                     className={`btn-secondary !py-1.5 !px-2.5 text-xs ${s.completed ? 'text-emerald-600' : ''}`}>
-                    <CheckCircle2 className="w-4 h-4" /> {s.completed ? 'Done' : 'Mark done'}
+                    <CheckCircle2 className="w-4 h-4" /> {s.completed ? 'Completed' : 'Mark completed'}
+                  </button>
+                  <button onClick={() => patchSession(s.id, { is_free: !s.is_free }, s.is_free ? 'Now a paid session' : 'Now free to preview')}
+                    title="Toggle free preview / paid" className={`btn-secondary !py-1.5 !px-2.5 text-xs ${s.is_free ? 'text-emerald-600' : ''}`}>
+                    {s.is_free ? <><Eye className="w-4 h-4" /> Free</> : <><Lock className="w-4 h-4" /> Paid</>}
                   </button>
                   {!s.is_live_next && !s.completed && (
                     <button onClick={async () => { await supabase.from('sessions').update({ is_live_next: false }).eq('challenge_id', id); patchSession(s.id, { is_live_next: true }, 'Pinned live'); }}
@@ -406,7 +531,9 @@ export default function AdminSeriesDetail() {
                     <Upload className="w-4 h-4 text-slate-500" />
                     <input type="file" accept="image/*" className="hidden" onChange={e => uploadSessionImage(s, e.target.files?.[0])} />
                   </label>
-                  <button onClick={() => aiSessionImage(s)} disabled={busy} title="Generate AI image" className="btn-secondary !py-1.5 !px-2.5 text-xs"><Sparkles className="w-4 h-4 text-violet-500" /></button>
+                  <button onClick={() => aiSessionImage(s)} disabled={!!aiBusy} title="Generate AI image" className="btn-secondary !py-1.5 !px-2.5 text-xs">
+                    {aiBusy === s.id ? <Loader2 className="w-4 h-4 animate-spin text-violet-500" /> : <Sparkles className="w-4 h-4 text-violet-500" />}
+                  </button>
                 </div>
               </li>
             ))}
@@ -414,5 +541,25 @@ export default function AdminSeriesDetail() {
         )}
       </Card>
     </div>
+  );
+}
+
+// Controlled link field that stays in sync with server updates (e.g. the Zoom
+// webhook filling in a recording link) WITHOUT clobbering what the admin is
+// actively typing. Replaces the old `key={...}` remount hack.
+function LinkInput({ value, placeholder, onSave, className }) {
+  const [v, setV] = useState(value ?? '');
+  const focused = useRef(false);
+  useEffect(() => { if (!focused.current) setV(value ?? ''); }, [value]);
+  return (
+    <input
+      type="url"
+      value={v}
+      placeholder={placeholder}
+      className={className}
+      onFocus={() => { focused.current = true; }}
+      onChange={e => setV(e.target.value)}
+      onBlur={() => { focused.current = false; if (v !== (value ?? '')) onSave(v); }}
+    />
   );
 }

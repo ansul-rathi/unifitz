@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, PlayCircle, Video, CalendarClock, Clock, Layers, Loader2, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import { fmtDateTime } from '../../lib/datetime';
 import { Card, Spinner, Avatar } from '../../components/ui';
 
 // Turn a recording URL into an embeddable player. Falls back to an iframe (with
@@ -41,6 +43,7 @@ function embedFor(url) {
 export default function SessionPlayer() {
   const { id } = useParams();
   const { profile } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState(undefined); // undefined=loading, null=not found
@@ -53,8 +56,24 @@ export default function SessionPlayer() {
       const { data: s } = await supabase.from('sessions').select('*').eq('id', id).maybeSingle();
       setSession(s ?? null);
       if (s) {
-        const { data: c } = await supabase.from('challenges').select('id, name, teacher_id').eq('id', s.challenge_id).maybeSingle();
+        const { data: c } = await supabase.from('challenges').select('id, name, teacher_id, is_free, access_type').eq('id', s.challenge_id).maybeSingle();
         setChallenge(c ?? null);
+        // Paywall guard (mirrors the phase rule on the series page): live phase
+        // needs any active enrollment; recorded phase needs an active, non-expired
+        // recorded plan. Free session/series always open. No deep-linking around it.
+        if (c && !s.is_free && !c.is_free) {
+          const { data: enr } = await supabase.from('enrollments').select('status, access_type, expires_at').eq('user_id', profile.id).eq('challenge_id', c.id).maybeSingle();
+          const active = enr && enr.status === 'active';
+          const notExpired = !enr?.expires_at || new Date(enr.expires_at) > new Date();
+          const ok = c.access_type === 'recorded'
+            ? (active && enr.access_type === 'recorded' && notExpired)
+            : active;
+          if (!ok) {
+            toast(c.access_type === 'recorded' ? 'Choose a recorded plan to watch this' : (enr ? 'Your access is paused — make the payment to continue' : 'Enroll to watch this session'), 'error');
+            navigate(`/app/series/${c.id}`);
+            return;
+          }
+        }
         if (c?.teacher_id) {
           const { data: t } = await supabase.from('profiles').select('full_name, avatar_url').eq('id', c.teacher_id).maybeSingle();
           setTeacher(t ?? null);
@@ -62,12 +81,27 @@ export default function SessionPlayer() {
         // Watching the recording credits attendance (RPC checks enrolment; ignore if not).
         if (s.completed && !markedRef.current) {
           markedRef.current = true;
-          supabase.rpc('self_mark_attendance', { p_session: s.id });
+          let { error } = await supabase.rpc('self_mark_attendance', { p_session: s.id });
+          const notEnrolled = e => e?.message?.includes('not enrolled');
+          if (error && !notEnrolled(error)) ({ error } = await supabase.rpc('self_mark_attendance', { p_session: s.id })); // one retry
+          if (!error) toast('Attendance recorded ✓');
+          // Not enrolled → RPC refuses; that's expected for previews, stay silent.
         }
       }
       setLoading(false);
     })();
-  }, [id]);
+  }, [id, toast, navigate, profile.id]);
+
+  // Recording still processing → poll so the player appears without a manual reload.
+  const processing = session && !(session.recording_link || session.zoom_link || session.zoom_join_url);
+  useEffect(() => {
+    if (!processing) return;
+    const t = setInterval(async () => {
+      const { data: s } = await supabase.from('sessions').select('*').eq('id', id).maybeSingle();
+      if (s?.recording_link) setSession(s);
+    }, 60_000);
+    return () => clearInterval(t);
+  }, [processing, id]);
 
   if (loading) return <Spinner />;
 
@@ -78,7 +112,7 @@ export default function SessionPlayer() {
           <AlertTriangle className="w-10 h-10 text-amber-400 mx-auto" />
           <p className="mt-3 font-bold text-slate-700">Recording not available</p>
           <p className="mt-1 text-sm text-slate-500">It may be processing, or you need to enroll to watch it.</p>
-          <button onClick={() => navigate('/app/challenges')} className="btn-primary mt-5 inline-flex">Browse series</button>
+          <button onClick={() => navigate('/app/series')} className="btn-primary mt-5 inline-flex">Browse series</button>
         </Card>
       </div>
     );
@@ -86,9 +120,7 @@ export default function SessionPlayer() {
 
   const url = session.recording_link || session.zoom_link || session.zoom_join_url || '';
   const embed = embedFor(url);
-  const when = session.scheduled_at
-    ? new Date(session.scheduled_at).toLocaleString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })
-    : null;
+  const when = session.scheduled_at ? fmtDateTime(session.scheduled_at, { withYear: true }) : null;
 
   return (
     // Mobile: edge-to-edge, tight, premium. Desktop (sm+): unchanged boxed layout.
@@ -97,7 +129,7 @@ export default function SessionPlayer() {
       <div className="relative w-full bg-black aspect-video overflow-hidden sm:rounded-2xl sm:border sm:border-slate-200">
         {/* Floating back button (over the video, all sizes) */}
         <Link
-          to={challenge ? `/app/challenges/${challenge.id}` : '/app/challenges'}
+          to={challenge ? `/app/series/${challenge.id}` : '/app/series'}
           className="absolute top-3 left-3 z-10 inline-flex items-center gap-1.5 bg-black/45 backdrop-blur text-white text-xs font-semibold px-2.5 py-1.5 rounded-full hover:bg-black/60 transition-colors duration-200"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back
@@ -133,7 +165,7 @@ export default function SessionPlayer() {
 
           <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-slate-600">
             {challenge && (
-              <Link to={`/app/challenges/${challenge.id}`} className="inline-flex items-center gap-1.5 hover:text-brand-600">
+              <Link to={`/app/series/${challenge.id}`} className="inline-flex items-center gap-1.5 hover:text-brand-600">
                 <Layers className="w-4 h-4 text-slate-400" /> {challenge.name}
               </Link>
             )}

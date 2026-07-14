@@ -32,12 +32,13 @@ Deno.serve(async req => {
       );
     }
 
-    // Zoom rule: a start_time WITH a "Z" is treated as GMT and the timezone
-    // field is ignored. We instead send the naive local wall-clock (no Z) and
-    // set timezone explicitly, so Zoom shows the exact IST time the teacher picked.
-    // scheduled_at is stored as UTC; shift +5:30 (IST, no DST) to get IST wall time.
+    // scheduled_at is an absolute UTC instant. Send it to Zoom AS UTC (with the
+    // trailing "Z") and set timezone 'UTC' — Zoom then shows every registrant the
+    // meeting in THEIR OWN local timezone. The old code added a hardcoded +5:30
+    // IST offset, which showed the wrong wall-clock time to students in the USA,
+    // Germany, or anywhere outside India.
     const baseUtc = session.scheduled_at ? new Date(session.scheduled_at) : new Date(Date.now() + 3600 * 1000);
-    const istLocal = new Date(baseUtc.getTime() + 5.5 * 3600 * 1000).toISOString().slice(0, 19);
+    const startUtc = baseUtc.toISOString().slice(0, 19) + 'Z';
 
     const userId = Deno.env.get('ZOOM_USER_ID')!;
     const meeting = await zoomFetch(`/users/${userId}/meetings`, {
@@ -45,9 +46,9 @@ Deno.serve(async req => {
       body: JSON.stringify({
         topic: session.title,
         type: 2, // scheduled
-        start_time: istLocal, // naive local time, no Z
+        start_time: startUtc, // absolute UTC — Zoom localizes per registrant
         duration: session.duration_minutes ?? 60,
-        timezone: 'Asia/Kolkata',
+        timezone: 'UTC',
         settings: {
           approval_type: 0,        // auto-approve registrants → identity-bound join links
           registration_type: 1,
@@ -59,14 +60,27 @@ Deno.serve(async req => {
       }),
     });
 
-    await db.from('sessions').update({
+    // Race guard: only claim the slot if it's still empty. Two concurrent
+    // requests both pass the check above; the conditional update makes exactly
+    // one win. The loser deletes its orphan Zoom meeting and returns the winner's.
+    const { data: claimed } = await db.from('sessions').update({
       zoom_meeting_id: String(meeting.id),
       zoom_join_url: meeting.join_url,
       zoom_start_url: meeting.start_url, // host only
       // Also seed the editable "manual join link" field so the auto-created link
       // shows in the UI immediately and can be overridden later if needed.
       zoom_link: meeting.join_url,
-    }).eq('id', session_id);
+    }).eq('id', session_id).is('zoom_meeting_id', null).select('id');
+
+    if (!claimed?.length) {
+      await zoomFetch(`/meetings/${meeting.id}`, { method: 'DELETE' }).catch(() => {});
+      const { data: winner } = await db.from('sessions')
+        .select('zoom_meeting_id, zoom_join_url').eq('id', session_id).single();
+      return new Response(
+        JSON.stringify({ join_url: winner?.zoom_join_url, meeting_id: winner?.zoom_meeting_id, existing: true }),
+        { headers: { ...cors, 'Content-Type': 'application/json' } },
+      );
+    }
 
     return new Response(
       JSON.stringify({ join_url: meeting.join_url, meeting_id: String(meeting.id) }),

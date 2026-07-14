@@ -3,7 +3,7 @@ import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   Home, Trophy, TrendingUp, Gift, User, Calendar, Users, Megaphone,
   LayoutDashboard, ListChecks, UserCog, Share2, IndianRupee, Flame, LogOut, Dumbbell,
-  Salad, Medal, Mailbox, BarChart3, X, CalendarCheck, Sparkles, ChefHat, Eye,
+  Salad, Medal, Mailbox, BarChart3, X, CalendarCheck, Sparkles, ChefHat, Eye, Bell,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useViewMode } from '../context/ViewModeContext';
@@ -13,7 +13,7 @@ import { Avatar } from './ui';
 const NAV = {
   client: [
     { to: '/app', label: 'Home', icon: Home, end: true },
-    { to: '/app/challenges', label: 'Series', icon: Trophy },
+    { to: '/app/series', label: 'Series', icon: Trophy },
     { to: '/app/progress', label: 'Progress', icon: TrendingUp },
     { to: '/app/diet', label: 'Diet Plan', icon: Salad },
     { to: '/app/recipes', label: 'Recipes', icon: ChefHat },
@@ -31,8 +31,9 @@ const NAV = {
   ],
   admin: [
     { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
+    { to: '/admin/notifications', label: 'Notifications', icon: Bell },
     { to: '/admin/reports', label: 'Reports', icon: BarChart3 },
-    { to: '/admin/challenges', label: 'Series', icon: ListChecks },
+    { to: '/admin/series', label: 'Series', icon: ListChecks },
     { to: '/admin/users', label: 'Users', icon: UserCog },
     { to: '/admin/referrals', label: 'Referrals', icon: Share2 },
     { to: '/admin/badges', label: 'Badges', icon: Medal },
@@ -51,6 +52,8 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const [streak, setStreak] = useState(null);
   const [showStreak, setShowStreak] = useState(false);
+  const [pendingCash, setPendingCash] = useState(0); // admin: cash payments awaiting verification
+  const [unread, setUnread] = useState(0); // admin: unread activity notifications
 
   const isStaff = profile.role === 'teacher' || profile.role === 'admin';
   // While a staff member previews the student app, render the client nav/shell.
@@ -70,10 +73,44 @@ export default function DashboardLayout() {
     supabase.rpc('current_streak', { p_user: profile.id }).then(({ data }) => setStreak(data ?? 0));
   }, [profile.id, profile.role, effectiveRole]);
 
+  // Admin: badge the Revenue nav item with the count of cash payments still
+  // awaiting verification, so the queue that enrolls paying students is visible
+  // without digging into the Revenue tab.
+  useEffect(() => {
+    if (profile.role !== 'admin') return;
+    const fetchPending = () => supabase
+      .from('payments').select('id', { count: 'exact', head: true }).eq('status', 'pending_verification')
+      .then(({ count }) => setPendingCash(count ?? 0));
+    fetchPending();
+    const channel = supabase.channel('admin-pending-cash')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'payments' }, fetchPending)
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, [profile.role]);
+
+  // Admin: live unread-notification count for the Notifications nav badge.
+  useEffect(() => {
+    if (profile.role !== 'admin') return;
+    const fetchUnread = () => supabase
+      .from('notifications').select('id', { count: 'exact', head: true }).eq('is_read', false)
+      .then(({ count }) => setUnread(count ?? 0));
+    fetchUnread();
+    const channel = supabase.channel('admin-unread-notifications')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, fetchUnread)
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, [profile.role]);
+
+  const badgeFor = to => {
+    if (to === '/admin/revenue' && pendingCash > 0) return pendingCash;
+    if (to === '/admin/notifications' && unread > 0) return unread;
+    return null;
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Top bar */}
-      <header className="sticky top-0 z-40 bg-white border-b border-slate-200">
+    <div className="min-h-screen bg-slate-50 lg:bg-gradient-to-br lg:from-slate-50 lg:via-orange-50/30 lg:to-slate-100">
+      {/* Top bar — mobile/tablet only; desktop uses the full-height sidebar */}
+      <header className="sticky top-0 z-40 bg-white border-b border-slate-200 lg:hidden">
         <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold text-slate-900">
             <Dumbbell className="w-6 h-6 text-brand-500" />
@@ -137,8 +174,8 @@ export default function DashboardLayout() {
 
       {/* Student-preview banner (staff only) */}
       {preview && isStaff && (
-        <div className="sticky top-14 md:top-16 z-30 bg-brand-500 text-white text-sm font-semibold">
-          <div className="max-w-6xl mx-auto px-4 md:px-6 py-2 flex items-center justify-between gap-3">
+        <div className="sticky top-14 md:top-16 lg:top-0 z-30 bg-brand-500 text-white text-sm font-semibold lg:ml-72">
+          <div className="max-w-6xl mx-auto lg:mx-0 lg:max-w-none px-4 md:px-6 lg:px-10 py-2 flex items-center justify-between gap-3">
             <span className="inline-flex items-center gap-2"><Eye className="w-4 h-4" /> Student preview — how students see the app</span>
             <button onClick={exitPreview} className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg transition-colors duration-150">
               <X className="w-4 h-4" /> Exit
@@ -195,33 +232,92 @@ export default function DashboardLayout() {
         );
       })()}
 
-      <div className="max-w-6xl mx-auto lg:flex">
-        {/* Sidebar — desktop (lg+) */}
-        <aside className="hidden lg:block w-56 shrink-0 px-3 py-6">
-          <nav className="flex flex-col gap-1 sticky top-20">
-            {items.map(({ to, label, icon: Icon, end }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={end}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-200 ${
-                    isActive ? 'bg-brand-500 text-white shadow-sm' : 'text-slate-600 hover:bg-white hover:text-slate-900'
-                  }`
-                }
-              >
-                <Icon className="w-5 h-5" />
-                {label}
-              </NavLink>
-            ))}
-          </nav>
-        </aside>
+      {/* Sidebar — desktop (lg+): fixed full-height glass panel */}
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-72 flex-col bg-white/60 backdrop-blur-2xl border-r border-white/70 shadow-[1px_0_24px_rgba(15,23,42,0.04)]">
+        {/* Logo */}
+        <div className="px-6 pt-7 pb-6">
+          <Link to="/" className="flex items-center gap-2.5 font-display text-2xl font-bold text-slate-900">
+            <span className="inline-flex w-10 h-10 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-orange-600 text-white shadow-lg shadow-orange-500/30">
+              <Dumbbell className="w-5 h-5" />
+            </span>
+            Uni<span className="text-brand-500">Fitz</span>
+          </Link>
+        </div>
 
-        {/* Main */}
-        <main className="flex-1 min-w-0 px-4 md:px-6 py-5 md:py-8 pb-24 lg:pb-10">
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto px-4 space-y-1">
+          {items.map(({ to, label, icon: Icon, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                  isActive
+                    ? 'bg-gradient-to-r from-brand-500 to-orange-500 text-white shadow-lg shadow-orange-500/25'
+                    : 'text-slate-600 hover:bg-white/80 hover:text-slate-900 hover:shadow-sm'
+                }`
+              }
+            >
+              <Icon className="w-5 h-5" />
+              <span className="flex-1">{label}</span>
+              {badgeFor(to) && (
+                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-[11px] font-bold">{badgeFor(to)}</span>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Bottom — actions + profile */}
+        <div className="px-4 pb-5 pt-4 border-t border-slate-200/60 space-y-2">
+          {isStaff && !preview && (
+            <button
+              onClick={enterPreview}
+              className="w-full inline-flex items-center justify-center gap-2 text-xs font-bold text-slate-600 border border-slate-200/80 bg-white/70 hover:bg-white px-3 py-2.5 rounded-xl transition-colors duration-150"
+            >
+              <Eye className="w-4 h-4" /> View as student
+            </button>
+          )}
+          {profile.role === 'client' && streak !== null && (
+            <button
+              onClick={() => setShowStreak(true)}
+              aria-label={`Day ${streak} streak — view details`}
+              className="w-full inline-flex items-center justify-between bg-orange-50/80 border border-orange-200/80 text-orange-700 text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-orange-100/80 transition-colors duration-150"
+            >
+              <span className="inline-flex items-center gap-2"><Flame className="w-4 h-4 text-orange-500" /> Streak</span>
+              <span>{streak} {streak === 1 ? 'day' : 'days'}</span>
+            </button>
+          )}
+          <div className="flex items-center gap-2 rounded-2xl bg-white/80 border border-slate-200/70 p-3 shadow-sm">
+            <Link
+              to={`${HOME_BASE[effectiveRole] ?? '/app'}/profile`}
+              className="flex items-center gap-3 flex-1 min-w-0 rounded-xl hover:opacity-80 transition-opacity duration-150"
+              title="Your profile"
+            >
+              <Avatar name={profile.full_name} url={profile.avatar_url} />
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-slate-800 truncate">{profile.full_name || 'Member'}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 truncate">{effectiveRole}</p>
+              </div>
+            </Link>
+            <button
+              onClick={signOut}
+              aria-label="Sign out"
+              title="Sign out"
+              className="p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors duration-200 shrink-0"
+            >
+              <LogOut className="w-[18px] h-[18px]" />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main — flush against the sidebar, full width */}
+      <main className="lg:pl-72">
+        <div className="px-4 md:px-6 lg:px-10 xl:px-12 py-5 md:py-8 lg:py-9 pb-24 lg:pb-12 max-w-6xl mx-auto lg:mx-0 lg:max-w-[1440px]">
           <Outlet />
-        </main>
-      </div>
+        </div>
+      </main>
 
       {/* Bottom tabs — mobile + tablet (below lg) */}
       <nav
@@ -239,7 +335,12 @@ export default function DashboardLayout() {
               }`
             }
           >
-            <Icon className="w-5 h-5" />
+            <span className="relative">
+              <Icon className="w-5 h-5" />
+              {badgeFor(to) && (
+                <span className="absolute -top-1.5 -right-2 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold">{badgeFor(to)}</span>
+              )}
+            </span>
             {label}
           </NavLink>
         ))}

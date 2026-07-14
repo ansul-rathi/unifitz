@@ -18,9 +18,9 @@ function loadCheckout() {
 }
 
 // Full online flow: create order → open checkout → verify → resolve on success.
-export async function payWithRazorpay({ challengeId, profile, email }) {
+export async function payWithRazorpay({ challengeId, profile, email, planId }) {
   await loadCheckout();
-  const { data, error } = await supabase.functions.invoke('razorpay-create-order', { body: { challenge_id: challengeId } });
+  const { data, error } = await supabase.functions.invoke('razorpay-create-order', { body: { challenge_id: challengeId, plan_id: planId } });
   if (error) throw error;
   if (data?.error) throw new Error(data.error);
 
@@ -52,10 +52,11 @@ export async function payWithRazorpay({ challengeId, profile, email }) {
 }
 
 // Cash flow: record a pending-verification payment the admin will approve.
-export async function payWithCash({ challengeId, userId, amount, currency, collectorId }) {
+export async function payWithCash({ challengeId, userId, amount, currency, collectorId, accessType, planMonths, planLabel }) {
   const { error } = await supabase.from('payments').insert({
     user_id: userId, challenge_id: challengeId, amount, currency: currency || 'INR',
     method: 'cash', status: 'pending_verification', cash_collector_id: collectorId,
+    access_type: accessType || 'live', plan_months: planMonths ?? null, plan_label: planLabel ?? null,
   });
   if (error) throw error;
 }

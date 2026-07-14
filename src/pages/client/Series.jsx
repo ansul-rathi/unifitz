@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Dialog, DialogPanel, DialogBackdrop } from '@headlessui/react';
-import { Trophy, ArrowRight, CheckCircle2, CreditCard, Wallet, X, Loader2, Clock } from 'lucide-react';
+import { Trophy, ArrowRight, CheckCircle2, Clock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { payWithRazorpay, payWithCash } from '../../lib/razorpay';
-import { Card, Spinner, ProgressBar, EmptyState, Avatar } from '../../components/ui';
+import PaymentSheet from '../../components/PaymentSheet';
+import { Card, Spinner, ProgressBar, EmptyState } from '../../components/ui';
 
 
-export default function ClientChallenges() {
+export default function ClientSeries() {
   const { profile, session } = useAuth();
   const toast = useToast();
   const [loading, setLoading] = useState(true);
@@ -18,10 +17,6 @@ export default function ClientChallenges() {
   const [pending, setPending] = useState(new Set());      // challenge ids awaiting cash verification
   const [sessionCounts, setSessionCounts] = useState({}); // challenge_id → { total, done }
   const [payFor, setPayFor] = useState(null);             // series being paid for
-  const [collectors, setCollectors] = useState([]);
-  const [mode, setMode] = useState(null);                 // 'cash'
-  const [collector, setCollector] = useState('');
-  const [busy, setBusy] = useState(false);
 
   async function load() {
     const [{ data: ch }, { data: enr }, { data: pays }, { data: ses }, { data: att }] = await Promise.all([
@@ -58,43 +53,6 @@ export default function ClientChallenges() {
     if (error) return toast(error.message, 'error');
     setEnrolled(s => new Set([...s, id]));
     toast("You're in! See your sessions on Home.");
-  }
-
-  async function openPay(c) {
-    setPayFor(c); setMode(null); setCollector('');
-    // Collector list (teachers of this series + admins) via SECURITY DEFINER rpc,
-    // since RLS otherwise hides other people's profiles from clients.
-    const { data } = await supabase.rpc('series_collectors', { p_challenge: c.id });
-    setCollectors((data ?? []).map(p => ({ id: p.id, name: p.full_name, avatar: p.avatar_url, role: p.role === 'admin' ? 'Admin' : 'Teacher' })));
-  }
-
-  async function payOnline() {
-    setBusy(true);
-    try {
-      await payWithRazorpay({ challengeId: payFor.id, profile, email: session?.user?.email });
-      toast("Payment successful — you're enrolled!");
-      setPayFor(null);
-      load();
-    } catch (err) {
-      toast(err.message || 'Payment failed', 'error');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function submitCash() {
-    if (!collector) return toast('Pick who you paid', 'error');
-    setBusy(true);
-    try {
-      await payWithCash({ challengeId: payFor.id, userId: profile.id, amount: payFor.price, currency: payFor.currency, collectorId: collector });
-      toast('Recorded — admin will verify your cash payment');
-      setPayFor(null);
-      load();
-    } catch (err) {
-      toast(err.message, 'error');
-    } finally {
-      setBusy(false);
-    }
   }
 
   if (loading) return <Spinner />;
@@ -158,13 +116,16 @@ export default function ClientChallenges() {
                 )}
                 <div className="mt-5">
                   {isIn ? (
-                    <Link to={`/app/challenges/${c.id}`} className="btn-secondary w-full text-sm">
+                    <Link to={`/app/series/${c.id}`} className="btn-secondary w-full text-sm">
                       <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Enrolled — View Details <ArrowRight className="w-4 h-4" />
                     </Link>
                   ) : isPending ? (
-                    <span className="flex items-center justify-center gap-2 w-full text-sm font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl py-3">
-                      <Clock className="w-4 h-4" /> Cash payment — awaiting verification
-                    </span>
+                    <div className="w-full rounded-xl bg-amber-50 border border-amber-200 px-3 py-2.5">
+                      <p className="flex items-center gap-2 text-sm font-bold text-amber-800">
+                        <Clock className="w-4 h-4" /> Cash payment under verification
+                      </p>
+                      <p className="mt-0.5 text-xs text-amber-700">Usually confirmed within a few hours. You'll be enrolled automatically once verified.</p>
+                    </div>
                   ) : c.is_free ? (
                     <button onClick={() => joinFree(c.id)} className="btn-primary w-full text-sm">
                       Join Series <ArrowRight className="w-4 h-4" />
@@ -175,7 +136,7 @@ export default function ClientChallenges() {
                         Enroll · ₹{c.price} <ArrowRight className="w-4 h-4" />
                       </button>
                       {c.free_session_count > 0 && (
-                        <Link to={`/app/challenges/${c.id}`} className="btn-secondary w-full text-sm">
+                        <Link to={`/app/series/${c.id}`} className="btn-secondary w-full text-sm">
                           Watch {c.free_session_count} free session{c.free_session_count === 1 ? '' : 's'}
                         </Link>
                       )}
@@ -188,58 +149,15 @@ export default function ClientChallenges() {
         })}
       </div>
 
-      {/* Payment modal */}
-      <Dialog open={!!payFor} onClose={() => !busy && setPayFor(null)} className="relative z-[80]">
-        <DialogBackdrop transition className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity duration-200 data-[closed]:opacity-0" />
-        <div className="fixed inset-0 flex items-end md:items-center justify-center p-0 md:p-6">
-          <DialogPanel transition className="bg-white w-full max-w-md rounded-t-3xl md:rounded-3xl p-5 md:p-6 max-h-[92vh] overflow-y-auto shadow-2xl transition duration-200 data-[closed]:translate-y-8 data-[closed]:opacity-0">
-            {payFor && (
-              <>
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-lg">Enroll in {payFor.name}</h3>
-                  <button onClick={() => !busy && setPayFor(null)} aria-label="Close" className="p-1.5 rounded-lg hover:bg-slate-100"><X className="w-5 h-5" /></button>
-                </div>
-                <p className="mt-1 text-2xl font-display font-bold text-slate-900">₹{payFor.price}</p>
-
-                {!mode ? (
-                  <div className="mt-5 space-y-3">
-                    <button onClick={payOnline} disabled={busy} className="w-full flex items-center gap-3 rounded-xl border border-slate-200 hover:border-brand-400 px-4 py-4 text-left transition-colors duration-200">
-                      {busy ? <Loader2 className="w-5 h-5 animate-spin text-brand-500" /> : <CreditCard className="w-5 h-5 text-brand-500" />}
-                      <span><span className="block font-bold text-sm">Pay online</span><span className="block text-xs text-slate-500">UPI, card, netbanking — instant enrollment</span></span>
-                    </button>
-                    <button onClick={() => setMode('cash')} className="w-full flex items-center gap-3 rounded-xl border border-slate-200 hover:border-brand-400 px-4 py-4 text-left transition-colors duration-200">
-                      <Wallet className="w-5 h-5 text-emerald-500" />
-                      <span><span className="block font-bold text-sm">Pay by cash</span><span className="block text-xs text-slate-500">Tell us who you paid — admin verifies</span></span>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="mt-5">
-                    <p className="text-sm font-semibold text-slate-700 mb-2">Who did you pay the cash to?</p>
-                    <ul className="space-y-1.5 max-h-60 overflow-y-auto">
-                      {collectors.map(p => (
-                        <li key={p.id}>
-                          <label className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 cursor-pointer transition-colors duration-150 ${collector === p.id ? 'border-brand-400 bg-brand-50' : 'border-slate-200'}`}>
-                            <input type="radio" name="collector" checked={collector === p.id} onChange={() => setCollector(p.id)} className="w-4 h-4 accent-brand-500" />
-                            <Avatar name={p.name} url={p.avatar} size="w-8 h-8" />
-                            <span className="text-sm font-semibold flex-1">{p.name}</span>
-                            <span className="text-[11px] font-bold text-slate-400">{p.role}</span>
-                          </label>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="mt-4 flex gap-2">
-                      <button onClick={() => setMode(null)} className="btn-secondary text-sm">Back</button>
-                      <button onClick={submitCash} disabled={busy} className="btn-primary flex-1 text-sm">
-                        {busy && <Loader2 className="w-4 h-4 animate-spin" />} I've paid cash
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </DialogPanel>
-        </div>
-      </Dialog>
+      {payFor && (
+        <PaymentSheet
+          series={payFor}
+          profile={profile}
+          email={session?.user?.email}
+          onClose={() => setPayFor(null)}
+          onEnrolled={() => { setPayFor(null); load(); }}
+        />
+      )}
     </div>
   );
 }

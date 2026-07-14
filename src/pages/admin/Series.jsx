@@ -5,6 +5,8 @@ import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
 import { compressImage } from '../../lib/compressImage';
 import { createZoomMeeting } from '../../lib/zoom';
+import { DEFAULT_SESSION_DURATION_MIN, DEFAULT_CATEGORY, sessionFormError } from '../../lib/seriesConstants';
+import { fmtDate } from '../../lib/datetime';
 import { Card, Spinner, EmptyState, SessionThumb, CLASS_TYPES, Avatar, StatCard } from '../../components/ui';
 
 const EMPTY = { name: '', description: '', duration_days: 30, is_free: true, price: '', currency: 'INR', teacher_id: '', batch_name: '', start_date: '', status: 'upcoming', poster_url: '', is_published: true, teacherIds: [], poster: null };
@@ -12,14 +14,14 @@ const EMPTY = { name: '', description: '', duration_days: 30, is_free: true, pri
 // Fresh Add-session defaults — today's date, 7:00 PM start.
 function freshSession() {
   return {
-    day_number: '', title: '', description: '', category: 'Zumba', type: 'live',
+    day_number: '', title: '', description: '', category: DEFAULT_CATEGORY, type: 'live',
     recording_link: '',
     date: new Date().toISOString().slice(0, 10),
-    time: '19:00', poster: null,
+    time: '19:00', duration_minutes: DEFAULT_SESSION_DURATION_MIN, poster: null,
   };
 }
 
-export default function AdminChallenges() {
+export default function AdminSeries() {
   const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState([]);
@@ -147,6 +149,8 @@ export default function AdminChallenges() {
 
   async function addSession(e) {
     e.preventDefault();
+    const invalid = sessionFormError(newSession);
+    if (invalid) return toast(invalid, 'error');
     setBusy(true);
     try {
       const isRec = newSession.type === 'recording';
@@ -157,7 +161,7 @@ export default function AdminChallenges() {
         description: newSession.description || null,
         category: newSession.category || null,
         scheduled_at: newSession.date && newSession.time ? new Date(`${newSession.date}T${newSession.time}`).toISOString() : null,
-        duration_minutes: 60,
+        duration_minutes: +newSession.duration_minutes || DEFAULT_SESSION_DURATION_MIN,
         session_type: isRec ? 'recording' : 'live',
         completed: isRec,
         recording_link: isRec ? (newSession.recording_link || null) : null,
@@ -449,7 +453,7 @@ export default function AdminChallenges() {
                 <li key={s.id} className="py-2 flex items-center gap-3 text-sm">
                   <SessionThumb poster={s.poster_url} day={s.day_number} live={s.is_live_next} size="w-16 h-10" />
                   <span className="flex-1 truncate">{s.title}</span>
-                  <span className="text-xs text-slate-400">{s.scheduled_at && new Date(s.scheduled_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+                  <span className="text-xs text-slate-400">{s.scheduled_at && fmtDate(s.scheduled_at)}</span>
                 </li>
               ))}
               {sessions.length === 0 && <li className="py-3 text-sm text-slate-400">No sessions yet.</li>}
@@ -476,12 +480,16 @@ export default function AdminChallenges() {
                 <label className="label !text-xs" htmlFor="admin-time">{newSession.type === 'recording' ? 'Time' : 'Start time'}</label>
                 <input id="admin-time" required type="time" className="input !py-2 text-sm" value={newSession.time} onChange={e => setNewSession(x => ({ ...x, time: e.target.value }))} />
               </div>
+              <div className="col-span-2 flex items-center gap-2">
+                <label className="label !text-xs !mb-0 shrink-0" htmlFor="admin-duration">Duration (min)</label>
+                <input id="admin-duration" required type="number" min="10" max="240" step="5" className="input !py-2 text-sm w-24" value={newSession.duration_minutes} onChange={e => setNewSession(x => ({ ...x, duration_minutes: e.target.value }))} />
+              </div>
               {newSession.type === 'recording' ? (
                 <input required type="url" placeholder="Recording link (Zoom/YouTube/Drive)" className="input !py-2 text-sm col-span-2" value={newSession.recording_link} onChange={e => setNewSession(x => ({ ...x, recording_link: e.target.value }))} />
               ) : (
                 <p className="col-span-2 flex items-center gap-2 text-xs text-slate-500">
                   <Video className="w-4 h-4 text-sky-500 shrink-0" />
-                  A Zoom meeting (cloud-recorded, 60 min) is created automatically.
+                  A Zoom meeting (cloud-recorded, {newSession.duration_minutes || DEFAULT_SESSION_DURATION_MIN} min) is created automatically.
                 </p>
               )}
               <div className="col-span-2">

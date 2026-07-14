@@ -41,8 +41,8 @@ export function EmptyState({ icon: Icon, title, hint }) {
   );
 }
 
-export function Card({ children, className = '' }) {
-  return <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm ${className}`}>{children}</div>;
+export function Card({ children, className = '', ...rest }) {
+  return <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm ${className}`} {...rest}>{children}</div>;
 }
 
 export function StatCard({ icon: Icon, label, value, sub, accent = 'text-brand-500', alert = false, to, onClick }) {

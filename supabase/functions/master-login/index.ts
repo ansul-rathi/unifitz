@@ -6,10 +6,11 @@
 //          ({ token_hash, type: 'magiclink' }) to get a real session.
 //
 // SECURITY: this bypasses normal auth. The code is checked against the
-// MASTER_LOGIN_CODE secret (server-side) so the client can't forge it. Set the
-// secret and keep it private. Remove this function to disable the backdoor.
+// MASTER_LOGIN_CODE secret (server-side) so the client can't forge it. If the
+// secret is unset the backdoor is DISABLED (403). Keep the secret private and
+// rotate it; delete this function to remove the backdoor entirely.
+//   supabase secrets set MASTER_LOGIN_CODE=<private-code>
 //   supabase functions deploy master-login
-//   supabase secrets set MASTER_LOGIN_CODE=686868
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -19,8 +20,9 @@ const cors = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-// Falls back to 686868 if the secret isn't set, so it works out of the box.
-const MASTER_CODE = Deno.env.get('MASTER_LOGIN_CODE') ?? '686868';
+// No insecure default — if MASTER_LOGIN_CODE is unset, the backdoor is DISABLED.
+// Set a private secret to enable it: supabase secrets set MASTER_LOGIN_CODE=…
+const MASTER_CODE = Deno.env.get('MASTER_LOGIN_CODE');
 
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -28,6 +30,11 @@ Deno.serve(async req => {
   try {
     const { email, code } = await req.json();
     if (!email || !code) throw new Error('email and code are required');
+    if (!MASTER_CODE) {
+      return new Response(JSON.stringify({ error: 'master login disabled' }), {
+        status: 403, headers: { ...cors, 'Content-Type': 'application/json' },
+      });
+    }
     if (String(code).trim() !== MASTER_CODE) {
       return new Response(JSON.stringify({ error: 'invalid code' }), {
         status: 401, headers: { ...cors, 'Content-Type': 'application/json' },

@@ -8,12 +8,10 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { registerForSession } from '../../lib/zoom';
+import { fmtDateTime } from '../../lib/datetime';
 import { Card, Spinner, CountdownTimer, SessionThumb } from '../../components/ui';
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
-
-// Temp: hide session poster images from students.
-const HIDE_SESSION_IMAGES = true;
 
 export default function ClientHome() {
   const { profile, session: authSession } = useAuth();
@@ -138,7 +136,7 @@ export default function ClientHome() {
       {/* Pinned live session — hidden entirely when nothing is pinned */}
       {liveSession && (
         <Card className="overflow-hidden">
-          {!HIDE_SESSION_IMAGES && liveSession.poster_url && (
+          {liveSession.poster_url && (
             <img src={liveSession.poster_url} alt={liveSession.title} className="w-full aspect-video object-cover" />
           )}
           <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 md:p-6">
@@ -156,7 +154,7 @@ export default function ClientHome() {
             </div>
             <h2 className="mt-3 text-xl md:text-2xl font-bold text-white">{liveSession.title}</h2>
             <p className="mt-1 text-sm text-slate-300">
-              {new Date(liveSession.scheduled_at).toLocaleString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}
+              {fmtDateTime(liveSession.scheduled_at)}
               {' · '}{liveSession.duration_minutes} min
             </p>
 
@@ -200,7 +198,7 @@ export default function ClientHome() {
           <ul className="mt-3 divide-y divide-slate-100">
             {recordings.map(s => (
               <li key={s.id} className="flex items-center gap-3 py-3">
-                <SessionThumb poster={HIDE_SESSION_IMAGES ? null : s.poster_url} day={s.day_number} />
+                <SessionThumb poster={s.poster_url} day={s.day_number} />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-slate-900 truncate">{s.title}</p>
                   <p className="text-xs text-slate-500">{s.challenges?.name} · {s.duration_minutes} min</p>

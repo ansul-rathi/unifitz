@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { useViewMode } from './context/ViewModeContext';
 import { Spinner } from './components/ui';
@@ -16,8 +16,8 @@ const StaffProfile = lazy(() => import('./pages/StaffProfile'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const ClientHome = lazy(() => import('./pages/client/Home'));
-const ClientChallenges = lazy(() => import('./pages/client/Challenges'));
-const ChallengeDetail = lazy(() => import('./pages/client/ChallengeDetail'));
+const ClientSeries = lazy(() => import('./pages/client/Series'));
+const ClientSeriesDetail = lazy(() => import('./pages/client/SeriesDetail'));
 const SessionPlayer = lazy(() => import('./pages/client/SessionPlayer'));
 const ClientProgress = lazy(() => import('./pages/client/Progress'));
 const ClientDiet = lazy(() => import('./pages/client/Diet'));
@@ -34,16 +34,26 @@ const TeacherAnnouncements = lazy(() => import('./pages/teacher/Announcements'))
 const TeacherSeries = lazy(() => import('./pages/teacher/Series'));
 
 const AdminOverview = lazy(() => import('./pages/admin/Overview'));
-const AdminChallenges = lazy(() => import('./pages/admin/Challenges'));
+const AdminSeries = lazy(() => import('./pages/admin/Series'));
 const AdminUsers = lazy(() => import('./pages/admin/Users'));
+const AdminUserDetail = lazy(() => import('./pages/admin/UserDetail'));
+const AdminNotifications = lazy(() => import('./pages/admin/Notifications'));
 const AdminReferrals = lazy(() => import('./pages/admin/Referrals'));
 const AdminRevenue = lazy(() => import('./pages/admin/Revenue'));
 const AdminBadges = lazy(() => import('./pages/admin/Badges'));
 const AdminLeads = lazy(() => import('./pages/admin/Leads'));
 const AdminReports = lazy(() => import('./pages/admin/Reports'));
 const AdminSeriesDetail = lazy(() => import('./pages/admin/SeriesDetail'));
+const SeriesMembersPage = lazy(() => import('./pages/admin/SeriesMembersPage'));
 
 const HOME_BY_ROLE = { admin: '/admin', teacher: '/teacher', client: '/app' };
+
+// Old "challenges" URLs are renamed to "series". Redirect bookmarked links,
+// preserving the :id where present.
+function RedirectToSeries({ base }) {
+  const { id } = useParams();
+  return <Navigate to={id ? `${base}/${id}` : base} replace />;
+}
 
 function Protected({ role, children }) {
   const { session, profile, loading } = useAuth();
@@ -90,8 +100,11 @@ export default function App() {
 
         <Route path="/app" element={<Protected role="client"><DashboardLayout /></Protected>}>
           <Route index element={<ClientHome />} />
-          <Route path="challenges" element={<ClientChallenges />} />
-          <Route path="challenges/:id" element={<ChallengeDetail />} />
+          <Route path="series" element={<ClientSeries />} />
+          <Route path="series/:id" element={<ClientSeriesDetail />} />
+          {/* Legacy /app/challenges links → /app/series */}
+          <Route path="challenges" element={<RedirectToSeries base="/app/series" />} />
+          <Route path="challenges/:id" element={<RedirectToSeries base="/app/series" />} />
           <Route path="session/:id" element={<SessionPlayer />} />
           <Route path="progress" element={<ClientProgress />} />
           <Route path="diet" element={<ClientDiet />} />
@@ -107,16 +120,22 @@ export default function App() {
           <Route path="announcements" element={<TeacherAnnouncements />} />
           <Route path="series" element={<TeacherSeries />} />
           <Route path="series/:id" element={<AdminSeriesDetail />} />
+          <Route path="series/:id/members" element={<SeriesMembersPage />} />
           <Route path="recipes" element={<StaffRecipes />} />
           <Route path="profile" element={<StaffProfile />} />
         </Route>
 
         <Route path="/admin" element={<Protected role="admin"><DashboardLayout /></Protected>}>
           <Route index element={<AdminOverview />} />
+          <Route path="notifications" element={<AdminNotifications />} />
           <Route path="reports" element={<AdminReports />} />
-          <Route path="challenges" element={<AdminChallenges />} />
+          <Route path="series" element={<AdminSeries />} />
           <Route path="series/:id" element={<AdminSeriesDetail />} />
+          <Route path="series/:id/members" element={<SeriesMembersPage />} />
+          {/* Legacy /admin/challenges → /admin/series */}
+          <Route path="challenges" element={<RedirectToSeries base="/admin/series" />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="users/:id" element={<AdminUserDetail />} />
           <Route path="referrals" element={<AdminReferrals />} />
           <Route path="badges" element={<AdminBadges />} />
           <Route path="recipes" element={<StaffRecipes />} />

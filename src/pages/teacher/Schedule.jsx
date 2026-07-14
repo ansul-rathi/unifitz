@@ -8,16 +8,18 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { compressImage } from '../../lib/compressImage';
 import { createZoomMeeting, generateSessionImage } from '../../lib/zoom';
+import { DEFAULT_SESSION_DURATION_MIN, DEFAULT_CATEGORY, sessionFormError } from '../../lib/seriesConstants';
+import { fmtDateTime } from '../../lib/datetime';
 import { Card, Spinner, EmptyState, Avatar, SessionThumb, CategoryIcon, CLASS_TYPES } from '../../components/ui';
 import { SessionStatusPill } from '../../components/SessionStatus';
 
 // Fresh Add-session defaults — today's date, 7:00 PM start.
 function freshAdd() {
   return {
-    challenge_id: '', day_number: '', title: '', description: '', category: 'Zumba',
+    challenge_id: '', day_number: '', title: '', description: '', category: DEFAULT_CATEGORY,
     type: 'live', recording_link: '',
     date: new Date().toISOString().slice(0, 10),
-    time: '19:00', duration_minutes: 60, poster: null,
+    time: '19:00', duration_minutes: DEFAULT_SESSION_DURATION_MIN, poster: null,
   };
 }
 
@@ -158,9 +160,7 @@ export default function TeacherSchedule() {
   // text with the public poster URL (preview). Last resort: copy message.
   async function shareWhatsApp(session) {
     const link = session.zoom_join_url || session.zoom_link;
-    const when = session.scheduled_at
-      ? new Date(session.scheduled_at).toLocaleString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
-      : '';
+    const when = session.scheduled_at ? fmtDateTime(session.scheduled_at) : '';
     const text = [
       session.title,
       session.description || '',
@@ -239,9 +239,12 @@ export default function TeacherSchedule() {
   }
 
   // Reconcile a Zoom participant that couldn't auto-match to a UniFit user.
+  // Audit trail: record who matched and when (matched_by / matched_at).
   async function reconcile(participantId, userId) {
     if (!userId) return;
-    const { error } = await supabase.from('session_participants').update({ user_id: userId }).eq('id', participantId);
+    const { error } = await supabase.from('session_participants')
+      .update({ user_id: userId, matched_by: profile.id, matched_at: new Date().toISOString() })
+      .eq('id', participantId);
     if (error) return toast(error.message, 'error');
     setUnmatched(u => u.filter(p => p.id !== participantId));
     toast('Participant matched — re-runs at next meeting.ended, or mark manually here');
@@ -265,6 +268,8 @@ export default function TeacherSchedule() {
 
   async function addSession(e) {
     e.preventDefault();
+    const invalid = sessionFormError(add);
+    if (invalid) return toast(invalid, 'error');
     setBusy(true);
     try {
       const challengeId = add.challenge_id || challenges[0]?.id;
@@ -336,7 +341,7 @@ export default function TeacherSchedule() {
               ))}
             </div>
             <select required className="input" value={add.challenge_id} onChange={e => setAdd(x => ({ ...x, challenge_id: e.target.value }))}>
-              <option value="">Select challenge…</option>
+              <option value="">Select series…</option>
               {challenges.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
             <input required type="number" min="1" placeholder="Day number" className="input" value={add.day_number} onChange={e => setAdd(x => ({ ...x, day_number: e.target.value }))} />
@@ -438,7 +443,7 @@ export default function TeacherSchedule() {
                   {s.description && <p className="mt-0.5 text-xs text-slate-600 line-clamp-2">{s.description}</p>}
                   <p className="mt-0.5 text-xs text-slate-500">
                     {s.challenges?.name} · {s.challenges?.batch_name}
-                    {s.scheduled_at && <> · {new Date(s.scheduled_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}</>}
+                    {s.scheduled_at && <> · {fmtDateTime(s.scheduled_at)}</>}
                   </p>
                   <div className="mt-1.5 flex items-center gap-2 flex-wrap">
                     <SessionStatusPill session={s} />
@@ -525,9 +530,12 @@ export default function TeacherSchedule() {
                 </li>
               ))}
             </ul>
-            <button onClick={saveAttendance} disabled={busy} className="btn-primary w-full mt-4">
-              {busy && <Loader2 className="w-4 h-4 animate-spin" />} Save ({marked.size}/{roster.length} present)
-            </button>
+            <div className="mt-4 flex gap-2">
+              <button onClick={() => setAttendanceFor(null)} disabled={busy} className="btn-secondary">Cancel</button>
+              <button onClick={saveAttendance} disabled={busy} className="btn-primary flex-1">
+                {busy && <Loader2 className="w-4 h-4 animate-spin" />} Save ({marked.size}/{roster.length} present)
+              </button>
+            </div>
 
             {/* Unmatched Zoom participants — reconcile to a UniFit member */}
             {unmatched.length > 0 && (

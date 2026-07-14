@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { TIERS, TIER_ORDER } from '../../lib/badges';
+import { TIERS, TIER_ORDER, evaluateBadges } from '../../lib/badges';
 import { Card, Spinner, Confetti } from '../../components/ui';
 
 // Explicit map (only the icons badges actually use) — avoids bundling all of
@@ -54,9 +54,13 @@ export default function ClientBadges() {
   const [earned, setEarned] = useState(new Map());
   const [cat, setCat] = useState('All');
   const [show, setShow] = useState('all');
+  const [freshCodes, setFreshCodes] = useState([]); // newly-earned badges → celebration modal
 
   useEffect(() => {
     (async () => {
+      // Run the rules engine first so any newly-qualified badges (e.g. finishing
+      // a series) are awarded before we render the grid.
+      const fresh = await evaluateBadges(profile.id);
       const [{ data: d }, { data: ub }] = await Promise.all([
         supabase.from('badge_definitions').select('*').eq('is_active', true).order('sort_order'),
         supabase.from('user_badges').select('badge_code, earned_at').eq('user_id', profile.id),
@@ -64,6 +68,7 @@ export default function ClientBadges() {
       setDefs(d ?? []);
       setEarned(new Map((ub ?? []).map(b => [b.badge_code, b.earned_at])));
       setLoading(false);
+      if (fresh.length) setFreshCodes(fresh);
     })();
   }, [profile.id]);
 
@@ -181,6 +186,8 @@ export default function ClientBadges() {
           );
         })}
       </div>
+
+      <BadgeEarnModal codes={freshCodes} defs={defs} onClose={() => setFreshCodes([])} />
     </div>
   );
 }

@@ -132,11 +132,19 @@ Deno.serve(async req => {
           byUser.set(row.user_id, (byUser.get(row.user_id) ?? 0) + (row.total_minutes ?? 0));
         }
 
+        // Per-series attendance threshold (default 75) — no longer hardcoded.
+        let threshold = 75;
+        if (session.challenge_id) {
+          const { data: ch } = await db.from('challenges')
+            .select('attendance_threshold').eq('id', session.challenge_id).maybeSingle();
+          if (ch?.attendance_threshold != null) threshold = ch.attendance_threshold;
+        }
+
         for (const [user_id, mins] of byUser) {
           const pct = sessionMinutes ? Math.round((mins / sessionMinutes) * 100) : 0;
           await db.from('attendance').upsert({
             session_id: session.id, user_id,
-            attended: pct >= 75,
+            attended: pct >= threshold,
             attended_minutes: mins, session_minutes: sessionMinutes,
             attendance_pct: pct, source: 'zoom', marked_by: null,
           }, { onConflict: 'session_id,user_id' });
@@ -177,7 +185,13 @@ Deno.serve(async req => {
     }
   } catch (err) {
     console.error('zoom-webhook error', event, err);
-    // Still return 200 so Zoom doesn't endlessly retry; we logged it.
+    // Persist the failure so attendance/lifecycle gaps are visible to admins
+    // (webhook_events table, migration_series_hardening.sql). Still return
+    // 2xx so Zoom doesn't endlessly retry.
+    await db.from('webhook_events').insert({
+      source: 'zoom', event_type: event, status: 'error',
+      error: String((err as Error)?.message ?? err), payload,
+    }).then(({ error: logErr }) => { if (logErr) console.error('webhook_events insert failed', logErr); });
   }
 
   return new Response(null, { status: 204 });

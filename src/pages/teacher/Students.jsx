@@ -101,7 +101,7 @@ export default function TeacherStudents() {
       <p className="text-xs text-slate-500 -mt-2">New students are linked to your referrals. They appear here once enrolled in your series.</p>
 
       {students.length === 0 ? (
-        <Card><EmptyState icon={Users} title="No students yet" hint="Students appear here once they enroll in your challenges." /></Card>
+        <Card><EmptyState icon={Users} title="No students yet" hint="Students appear here once they enroll in your series." /></Card>
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {students.map(s => (
