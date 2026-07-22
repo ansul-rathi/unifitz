@@ -3,7 +3,7 @@ import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   Home, Trophy, TrendingUp, Gift, User, Calendar, Users, Megaphone,
   LayoutDashboard, ListChecks, UserCog, Share2, IndianRupee, Flame, LogOut, Dumbbell,
-  Salad, Medal, Mailbox, BarChart3, X, CalendarCheck, Sparkles, ChefHat, Eye, Bell,
+  Salad, Medal, Mailbox, BarChart3, X, CalendarCheck, Sparkles, ChefHat, Eye, Bell, Menu,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useViewMode } from '../context/ViewModeContext';
@@ -54,6 +54,7 @@ export default function DashboardLayout() {
   const [showStreak, setShowStreak] = useState(false);
   const [pendingCash, setPendingCash] = useState(0); // admin: cash payments awaiting verification
   const [unread, setUnread] = useState(0); // admin: unread activity notifications
+  const [drawerOpen, setDrawerOpen] = useState(false); // admin mobile hamburger nav
 
   const isStaff = profile.role === 'teacher' || profile.role === 'admin';
   // While a staff member previews the student app, render the client nav/shell.
@@ -64,6 +65,9 @@ export default function DashboardLayout() {
   const bottomItems = effectiveRole === 'client'
     ? items.filter(i => !['/app/refer', '/app/profile'].includes(i.to))
     : items;
+  // Admin has too many nav items for bottom tabs (they overflowed and hid
+  // Notifications). On mobile the admin shell uses a hamburger drawer instead.
+  const useDrawer = effectiveRole === 'admin';
 
   function enterPreview() { setPreview(true); navigate('/app'); }
   function exitPreview() { setPreview(false); navigate(HOME_BASE[profile.role] ?? '/'); }
@@ -112,12 +116,32 @@ export default function DashboardLayout() {
       {/* Top bar — mobile/tablet only; desktop uses the full-height sidebar */}
       <header className="sticky top-0 z-40 bg-white border-b border-slate-200 lg:hidden">
         <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-3">
-          <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold text-slate-900">
-            <Dumbbell className="w-6 h-6 text-brand-500" />
-            Uni<span className="text-brand-500">Fitz</span>
-          </Link>
+          <div className="flex items-center gap-2 min-w-0">
+            {useDrawer && (
+              <button
+                onClick={() => setDrawerOpen(true)}
+                aria-label="Open menu"
+                className="relative p-2 -ml-2 rounded-lg text-slate-600 hover:bg-slate-100"
+              >
+                <Menu className="w-6 h-6" />
+                {(unread + pendingCash) > 0 && <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />}
+              </button>
+            )}
+            <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold text-slate-900">
+              <Dumbbell className="w-6 h-6 text-brand-500" />
+              Uni<span className="text-brand-500">Fitz</span>
+            </Link>
+          </div>
 
           <div className="flex items-center gap-3">
+            {useDrawer && (
+              <Link to="/admin/notifications" aria-label="Notifications" title="Notifications" className="relative p-2 rounded-lg text-slate-600 hover:bg-slate-100">
+                <Bell className="w-5 h-5" />
+                {unread > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold">{unread}</span>
+                )}
+              </Link>
+            )}
             {isStaff && !preview && (
               <button
                 onClick={enterPreview}
@@ -171,6 +195,54 @@ export default function DashboardLayout() {
           </div>
         </div>
       </header>
+
+      {/* Admin mobile nav drawer — replaces the overflowing bottom tabs */}
+      {useDrawer && drawerOpen && (
+        <div className="lg:hidden fixed inset-0 z-50" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
+          <aside className="absolute inset-y-0 left-0 w-72 max-w-[85%] bg-white shadow-2xl flex flex-col">
+            <div className="px-5 pt-5 pb-4 flex items-center justify-between">
+              <span className="font-display text-xl font-bold text-slate-900">Uni<span className="text-brand-500">Fitz</span></span>
+              <button onClick={() => setDrawerOpen(false)} aria-label="Close menu" className="p-1.5 rounded-lg hover:bg-slate-100"><X className="w-5 h-5" /></button>
+            </div>
+
+            <nav className="flex-1 overflow-y-auto px-3 space-y-1">
+              {items.map(({ to, label, icon: Icon, end }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  onClick={() => setDrawerOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-150 ${
+                      isActive ? 'bg-gradient-to-r from-brand-500 to-orange-500 text-white shadow' : 'text-slate-600 hover:bg-slate-100'
+                    }`
+                  }
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="flex-1">{label}</span>
+                  {badgeFor(to) && (
+                    <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-[11px] font-bold">{badgeFor(to)}</span>
+                  )}
+                </NavLink>
+              ))}
+            </nav>
+
+            <div className="px-3 pb-5 pt-3 border-t border-slate-200 space-y-2">
+              {isStaff && !preview && (
+                <button onClick={() => { setDrawerOpen(false); enterPreview(); }}
+                  className="w-full inline-flex items-center justify-center gap-2 text-xs font-bold text-slate-600 border border-slate-200 hover:bg-slate-50 px-3 py-2.5 rounded-xl">
+                  <Eye className="w-4 h-4" /> View as student
+                </button>
+              )}
+              <button onClick={signOut}
+                className="w-full inline-flex items-center justify-center gap-2 text-xs font-bold text-red-600 border border-red-200 hover:bg-red-50 px-3 py-2.5 rounded-xl">
+                <LogOut className="w-4 h-4" /> Sign out
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
 
       {/* Student-preview banner (staff only) */}
       {preview && isStaff && (
@@ -314,12 +386,13 @@ export default function DashboardLayout() {
 
       {/* Main — flush against the sidebar, full width */}
       <main className="lg:pl-72">
-        <div className="px-4 md:px-6 lg:px-10 xl:px-12 py-5 md:py-8 lg:py-9 pb-24 lg:pb-12 max-w-6xl mx-auto lg:mx-0 lg:max-w-[1440px]">
+        <div className={`px-4 md:px-6 lg:px-10 xl:px-12 py-5 md:py-8 lg:py-9 ${useDrawer ? 'pb-10' : 'pb-24'} lg:pb-12 max-w-6xl mx-auto lg:mx-0 lg:max-w-[1440px]`}>
           <Outlet />
         </div>
       </main>
 
-      {/* Bottom tabs — mobile + tablet (below lg) */}
+      {/* Bottom tabs — mobile + tablet (below lg). Admin uses the drawer instead. */}
+      {!useDrawer && (
       <nav
         className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 grid grid-flow-col shadow-[0_-1px_8px_rgba(0,0,0,0.04)]"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
@@ -345,6 +418,7 @@ export default function DashboardLayout() {
           </NavLink>
         ))}
       </nav>
+      )}
     </div>
   );
 }
