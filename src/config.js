@@ -7,11 +7,11 @@
 export const ALLOW_SIGNUP_VIA_OTP = true;
 
 export const BUSINESS = {
-  name: 'UniFit',
+  name: 'Unifitz',
   // wa.me needs digits only, country code first, no + or spaces.
   whatsappNumber: '917387846841',
   phoneDisplay: '+91 73878 46841',
-  email: 'hello@unifit.in',
+  email: 'hello@unifitz.in',
   area: 'Jaipur',
   region: 'Rajasthan',
   country: 'India',
@@ -24,7 +24,7 @@ export const BUSINESS = {
   },
 };
 
-export const WA_PREFILL = "Hi UniFit! I'd like to book a free demo class.";
+export const WA_PREFILL = "Hi Unifitz! I'd like to know more about your plans.";
 
 export function waLink(text = WA_PREFILL) {
   return `https://wa.me/${BUSINESS.whatsappNumber}?text=${encodeURIComponent(text)}`;

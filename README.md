@@ -1,8 +1,10 @@
-# UniFit — Women's Online Fitness Platform
+# Unifitz — Women's Online Fitness Platform
 
-Production-ready fitness platform for live online classes (Zumba, Yoga, Meditation, Strength & Weight Training) with free challenges, Zoom automation, progress tracking, an AI diet planner, a 54-badge gamification system, referrals, and an SEO landing page with lead capture.
+Production-ready platform for **live online fitness classes for women** (Zumba, Yoga, Meditation, Strength & Weight Training). Live Zoom classes, subscription **membership plans** (paid — Monthly / Quarterly / Annual with a $19 one-week trial), a diet engine, progress tracking, a 54-badge gamification system, referrals, paid series with Razorpay/cash, and a **US-targeted marketing landing page** with lead capture.
 
-**Stack:** React 18 (Vite) · Tailwind CSS · lucide-react · recharts · framer-motion · Supabase (Auth, Postgres + RLS, Storage, Realtime, Edge Functions) · Gemini · Zoom (Server-to-Server OAuth).
+> **Brand:** the product is **Unifitz** (domain `unifitz.in`). The public landing page targets the **USA** — prices are in **USD**, times are in US zones, and there is **no free class** (the entry point is the paid **$19 one-week trial**). The seed/demo data below is still the older India dataset — see [Localization TODO](#localization-todo).
+
+**Stack:** React 18 (Vite) · Tailwind CSS · lucide-react · recharts · framer-motion · Supabase (Auth, Postgres + RLS, Storage, Realtime, Edge Functions) · Gemini · Zoom (Server-to-Server OAuth) · Razorpay.
 
 ---
 
@@ -33,7 +35,7 @@ cp .env.example .env
 ```
 The anon key is browser-safe **only because RLS does the real security** — every table has policies.
 
-Edit [`src/config.js`](src/config.js): WhatsApp business number (digits only, e.g. `919810000000`), phone, email, Jaipur NAP, social links. Landing CTAs, floating WhatsApp, footer + JSON-LD all read from it.
+Edit [`src/config.js`](src/config.js) `BUSINESS`: brand name (`Unifitz`), WhatsApp/phone number (digits only, e.g. `919810000000`), email, address/NAP, social links. Landing CTAs, floating WhatsApp, footer + JSON-LD all read from it. **Still holds the old India phone/handles — swap for your US number, domain and socials.**
 
 ### 4. Run
 ```bash
@@ -138,11 +140,11 @@ Anonymous joiners land in the teacher attendance modal → "Unmatched Zoom parti
 
 **Auth & onboarding** — single login, role routing, 4-step wizard → BMI + TDEE.
 
-**Client** — Home (pinned live card w/ countdown→LIVE NOW, daily check-in, recordings, badge nudges), Challenges + detail (consistency leaderboard), Progress (weight/BMI/inches charts, attendance %, weekly form + photo), **Diet Plan**, **Badges**, Profile (view/edit + embedded Refer & Earn; mobile-restructured).
+**Client** — Home (pinned live card w/ countdown→LIVE NOW, daily check-in, recordings, badge nudges), **Series** + detail (free/paid, consistency leaderboard), Session player, Progress (weight/BMI/inches charts, attendance %, weekly form + photo), **Diet Plan**, **Recipes**, **Badges**, Profile (view/edit + embedded Refer & Earn; mobile-restructured).
 
-**Teacher** — Schedule (sessions newest-first, class-type icons, description, AI poster, Zoom create/copy/slot-lock/regenerate, WhatsApp share, go-live, attendance + reconcile), Students (red-flags, nudge, avg %, award badge), Announcements (realtime).
+**Teacher** — Schedule (sessions newest-first, class-type icons, description, AI poster, Zoom create/copy/slot-lock/regenerate, WhatsApp share, go-live, attendance + reconcile), Students (red-flags, nudge, avg %, award badge), Announcements (realtime), Series (own series + member management).
 
-**Admin** — Overview (stats + CSV export), Challenges (+ sessions), Users, Referrals, Badges (definitions/leaderboard/award/revoke), Leads (CSV + reviews moderation + testimonials), Revenue (paid-phase placeholder).
+**Admin** — Overview (stats + CSV export), Series (+ sessions, detail, member management), Users + detail (Member 360), Notifications, Reports, Referrals, Badges (definitions/leaderboard/award/revoke), Leads (CSV + reviews moderation + testimonials), **Revenue** (Razorpay + cash payments, verify-to-enroll, gross + 20/80 split, per-teacher payouts).
 
 ### Diet Plan (fixed dietician engine — NO AI)
 Free for everyone, gated only by a complete profile. Run [`supabase/migration_diet_engine.sql`](supabase/migration_diet_engine.sql): seeds `diet_plan_template` (fixed dietician plan, base 1650 kcal), `diet_rules`, `workout_plan`, and recipe rows (with `code`).
@@ -153,8 +155,22 @@ Free for everyone, gated only by a complete profile. Run [`supabase/migration_di
 ### Badges
 54 badges, 10 categories × 5 tiers (bronze 10 → diamond 200 pts). Postgres rules engine: `user_metrics` → `evaluate_badges` (awards + bumps points + returns new codes for confetti); `nearest_badges` powers the "You're close!" nudge; `award_manual_badge` / `revoke_badge` for staff. Premium medallion UI w/ tier gradients + glow.
 
-### Landing page (SEO + leads)
-Single-CTA conversion page at `/`. Live testimonials + approved reviews from Supabase; 3-field lead form → `leads`; review submit → `reviews` (pending). New reviews are hidden until approved in **Admin → Leads → Reviews**. SEO: title/desc/OG/canonical in [index.html](index.html) + JSON-LD (Organization/LocalBusiness/HealthClub + FAQPage + live aggregateRating), [robots.txt](public/robots.txt) + [sitemap.xml](public/sitemap.xml) (update domain), floating WhatsApp button. Add a real `public/og-image.jpg` (1200×630).
+### Landing page (US marketing + leads)
+Conversion page at `/` ([src/pages/Landing.jsx](src/pages/Landing.jsx)) — served to logged-out visitors; logged-in users auto-redirect to their dashboard. **US-targeted, USD, no free class.** Sections, in order:
+
+1. **Hero** — headline + live "Today's classes" schedule card, rating/avatar proof, primary CTA → `#pricing` ("Start your $19 trial").
+2. **Stat band** — animated count-up (women / classes / badges / rating), respects `prefers-reduced-motion`.
+3. **Programs** — Zumba, Yoga, Meditation, Strength, Weight Training.
+4. **Membership** — everything a membership includes (feature grid).
+5. **How it works** · **Diet spotlight** (weekly custom plan preview + PDF).
+6. **Results** — live testimonials from Supabase + 54-badge wall.
+7. **Why Unifitz** (women-only, US time zones, cancel anytime…).
+8. **Pricing** — a **Monthly / Quarterly (−12%) / Annual (−20%) billing toggle** driving a **horizontally-scrollable row of 5 plans** (Trial $19/wk · Starter · Regular · Complete ⭐ · 1:1 Coaching), plus a **specialized add-ons** strip (Starter+Diet, PCOS/PCOD Care, Weight-Loss Intensive, Couple Fitness). Plan data lives in the `PLANS` / `ADDONS` / `BILLING` consts at the top of `Landing.jsx`.
+9. **Lead form** ("Talk to a coach") → `leads` · **Reviews** (submit → `reviews` pending) · **FAQ** · final CTA · footer.
+
+New reviews are hidden until approved in **Admin → Leads → Reviews**. SEO is injected client-side in `Landing.jsx` (`useSEO`): title/desc/OG/Twitter/canonical + JSON-LD (Organization/LocalBusiness/HealthClub with `areaServed: United States` + FAQPage + live aggregateRating). Also update [robots.txt](public/robots.txt) + [sitemap.xml](public/sitemap.xml) domain and add a real `public/og-image.jpg` (1200×630).
+
+Backend for the landing lives in [`supabase/migration_landing.sql`](supabase/migration_landing.sql) — **run it or the lead/review forms error** `Could not find the table 'public.leads'`. It creates `leads` / `reviews` / `testimonials` + RLS (anon INSERT, admin/public read) and seeds 6 testimonials.
 
 ---
 
@@ -171,24 +187,38 @@ Single-CTA conversion page at `/`. Live testimonials + approved reviews from Sup
 ## Architecture
 ```
 supabase/
-  migration.sql                    core schema + functions + triggers + RLS + storage + realtime
-  seed.sql                         demo data (relative dates)
-  migration_landing.sql            leads / reviews / testimonials (idempotent)
-  migration_diet_badges.sql        diet + badges (idempotent add-on)
-  migration_session_description.sql sessions.description + category (idempotent add-on)
+  migration.sql                     core schema + functions + triggers + RLS + storage + realtime
+  seed.sql                          demo data (relative dates)
+  migration_landing.sql             leads / reviews / testimonials (idempotent)
+  migration_series.sql              series price + teachers join + payments + earnings (idempotent)
+  migration_diet_engine.sql         diet templates / rules / workout / recipes (idempotent)
+  migration_diet_badges.sql         diet + badges (idempotent add-on)
+  migration_session_description.sql  sessions.description + category (idempotent add-on)
   functions/
-    _shared/zoom.ts                OAuth token cache, zoomFetch, HMAC, service client
+    _shared/zoom.ts                 OAuth token cache, zoomFetch, HMAC, service client
     zoom-create-meeting/ zoom-register-student/ zoom-webhook/
     generate-diet-plan/ generate-session-image/
+    razorpay-create-order/ razorpay-verify/
 src/
-  config.js          business NAP, WhatsApp number, socials
-  lib/               supabase, calc (BMI/TDEE), compressImage, csv, zoom, diet, badges
-  context/           AuthContext (session+role routing), ToastContext
+  config.js          BUSINESS (brand, NAP, WhatsApp number, socials), waLink helpers
+  lib/               supabase, calc (BMI/TDEE), compressImage, csv, zoom, dietEngine, dietPdf, badges, razorpay
+  context/           AuthContext (session+role routing), ViewModeContext, ToastContext
   components/        DashboardLayout, FloatingWhatsApp, ui.jsx (cards, medallions, class-type icons…)
   pages/
-    Landing.jsx Auth.jsx Onboarding.jsx
-    client/  Home Challenges ChallengeDetail Progress Diet Badges Refer Profile
-    teacher/ Schedule Students Announcements
-    admin/   Overview Challenges Users Referrals Badges Leads Revenue
+    Landing.jsx Auth.jsx AuthConfirm.jsx Onboarding.jsx RecipeDetail.jsx StaffProfile.jsx NotFound.jsx
+    client/  Home Series SeriesDetail SessionPlayer Progress Diet Recipes Badges Refer Profile
+    teacher/ Schedule Students Announcements Series
+    admin/   Overview Series SeriesDetail SeriesMembersPage Users UserDetail Notifications Reports Referrals Badges Leads Revenue
 ```
-### New Plan
+
+---
+
+## Localization TODO
+
+The app was originally built for India and the public landing was re-pointed to the **USA / Unifitz**. These still carry old India data and should be updated before a US launch:
+
+- [`src/config.js`](src/config.js) `BUSINESS` — phone is `+91…`, socials are `@unifit`; set the US number, `unifitz.in` handles.
+- [`supabase/seed.sql`](supabase/seed.sql) — demo users use `@unifit.in` emails and Indian names/cities; testimonials seeded in [`migration_landing.sql`](supabase/migration_landing.sql) are Indian (Jaipur/Bangalore). Reseed with US names/results for a real launch.
+- [`supabase/migration_diet_engine.sql`](supabase/migration_diet_engine.sql) — the in-app diet engine is a fixed **1650 kcal Indian** plan; the landing's diet **preview** shows US meals for marketing only. Localize the engine/recipes if US members will use it.
+- Zoom meeting times are sent as **IST** (`Asia/Kolkata`) — change to the target US zone in `zoom-create-meeting`.
+- Payments use **Razorpay** (INR-oriented); a US launch typically wants Stripe. The landing prices ($19/$39/…) are display-only until checkout is wired for USD.

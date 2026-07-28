@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, MotionConfig, useInView } from 'framer-motion';
 import {
   Dumbbell, Menu, X, Music, Flower2, Brain, BicepsFlexed, Video, LineChart,
-  Trophy, Users, BadgeCheck, ArrowRight, Star, Instagram, Facebook, Youtube,
+  Trophy, ArrowRight, Star, Instagram, Facebook, Youtube,
   Mail, Phone, CheckCircle2, Loader2, MapPin, ChevronDown, Heart,
   Salad, PlayCircle, FileDown, MessageCircle, Medal, Zap, Target, ShieldCheck,
   Sparkles, Clock, Quote, Calendar, Globe, Radio,
@@ -121,7 +121,7 @@ const GOALS = ['Lose weight', 'Get fit & toned', 'Build strength', 'Reduce stres
 // Inject SEO <head> tags + JSON-LD (client-side; fine for most crawlers/social).
 function useSEO(reviewAgg) {
   useEffect(() => {
-    document.title = 'Live Online Fitness Classes for Women in the USA | UniFit';
+    document.title = 'Live Online Fitness Classes for Women in the USA | Unifitz';
     const set = (sel, val) => {
       let el = document.head.querySelector(sel);
       if (!el) { el = document.createElement('meta'); document.head.appendChild(el); }
@@ -130,13 +130,13 @@ function useSEO(reviewAgg) {
     };
     const desc = 'Live online Zumba, Yoga, Meditation, Strength & Weight Training for women across the USA. Coaches on your time zone, custom weekly diet plans and progress tracking. Start with a $19 one-week trial.';
     set('meta[name="description"]', desc);
-    set('meta[property="og:title"]', 'UniFit — Live Online Fitness for Women · USA');
+    set('meta[property="og:title"]', 'Unifitz — Live Online Fitness for Women · USA');
     set('meta[property="og:description"]', desc);
     set('meta[property="og:type"]', 'website');
     set('meta[property="og:url"]', BUSINESS.url);
     set('meta[property="og:image"]', `${BUSINESS.url}/og-image.jpg`);
     set('meta[name="twitter:card"]', 'summary_large_image');
-    set('meta[name="twitter:title"]', 'UniFit — Live Online Fitness for Women · USA');
+    set('meta[name="twitter:title"]', 'Unifitz — Live Online Fitness for Women · USA');
     set('meta[name="twitter:description"]', desc);
 
     let canonical = document.head.querySelector('link[rel="canonical"]');
@@ -227,7 +227,7 @@ export default function Landing() {
           <nav className="max-w-6xl mx-auto flex items-center justify-between px-4 md:px-6 h-16">
             <a href="#top" className="flex items-center gap-2 font-display text-2xl font-extrabold uppercase tracking-wide text-slate-900">
               <span className="grid place-items-center w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-brand-600 text-white"><Dumbbell className="w-4.5 h-4.5" /></span>
-              Uni<span className="text-brand-500">Fit</span>
+              Uni<span className="text-brand-500">fitz</span>
             </a>
             <ul className="hidden lg:flex items-center gap-7">
               {NAV.map(l => <li key={l.href}><a href={l.href} className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors duration-200">{l.label}</a></li>)}
@@ -486,7 +486,7 @@ export default function Landing() {
             </div>
           </section>
 
-          {/* ── Why UniFit ── */}
+          {/* ── Why Unifitz ── */}
           <Section id="why" eyebrow="Why women choose us" title={<>Built for how you <span className="text-brand-500">actually live.</span></>}>
             <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: '-60px' }} variants={{ show: { transition: { staggerChildren: 0.05 } } }} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {WHY.map(w => (
@@ -598,7 +598,7 @@ export default function Landing() {
           <div className="max-w-6xl mx-auto px-4 md:px-6 py-14 grid gap-10 md:grid-cols-3">
             <div>
               <span className="flex items-center gap-2 font-display text-2xl font-extrabold uppercase text-white">
-                <span className="grid place-items-center w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-brand-600 text-white"><Dumbbell className="w-4.5 h-4.5" /></span> UniFit
+                <span className="grid place-items-center w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-brand-600 text-white"><Dumbbell className="w-4.5 h-4.5" /></span> Unifitz
               </span>
               <p className="mt-4 text-sm max-w-xs leading-relaxed">Live online fitness for women across the USA. Zumba, Yoga, Meditation, Strength — with custom diet plans and coaching.</p>
               <div className="mt-5 flex gap-3">
@@ -624,7 +624,7 @@ export default function Landing() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-white/10"><p className="max-w-6xl mx-auto px-4 md:px-6 py-5 text-xs text-stone-500">© 2026 UniFit. Live online fitness for women.</p></div>
+          <div className="border-t border-white/10"><p className="max-w-6xl mx-auto px-4 md:px-6 py-5 text-xs text-stone-500">© 2026 Unifitz. Live online fitness for women.</p></div>
         </footer>
 
         {/* Sticky mobile CTA + floating WhatsApp */}
@@ -714,7 +714,7 @@ function LeadForm({ compact }) {
         <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
         <p className="mt-3 font-bold text-emerald-900">You’re all set! 🎉</p>
         <p className="mt-1 text-sm text-emerald-700">A coach will message you with a plan recommendation shortly.</p>
-        <a href={waLink('Hi UniFit! I’d like a plan recommendation.')} target="_blank" rel="noreferrer"
+        <a href={waLink('Hi Unifitz! I’d like a plan recommendation.')} target="_blank" rel="noreferrer"
           className="mt-4 inline-flex items-center justify-center gap-2 bg-brand-500 text-white font-bold px-5 py-3 rounded-xl text-sm">
           Message us now
         </a>
@@ -741,7 +741,7 @@ function LeadForm({ compact }) {
       </div>
       <label className="flex items-start gap-2 text-xs text-slate-500">
         <input type="checkbox" checked={f.consent} onChange={e => setF(x => ({ ...x, consent: e.target.checked }))} className="w-4 h-4 accent-brand-500 mt-0.5" />
-        I agree to receive messages from UniFit about my plan.
+        I agree to receive messages from Unifitz about my plan.
       </label>
       {err && <p className="text-sm text-red-600" role="alert">{err}</p>}
       <button type="submit" disabled={busy} className="btn-primary w-full py-3.5">
