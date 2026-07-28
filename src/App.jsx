@@ -76,16 +76,17 @@ export default function App() {
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Spinner /></div>}>
       <Routes>
-        {/* Temporary: landing hidden — send everyone to login/signup.
-            Restore <Landing /> here to bring the marketing page back. */}
+        {/* Marketing landing page at root. Logged-in users go straight to
+            their dashboard; everyone else sees the landing (not /auth). */}
         <Route
           path="/"
           element={
             !loading && session && profile
               ? <Navigate to={HOME_BY_ROLE[profile.role] ?? '/app'} replace />
-              : <Navigate to="/auth" replace />
+              : <Landing />
           }
         />
+        <Route path="/landing" element={<Landing />} />
         <Route path="/auth" element={session && profile ? <Navigate to={HOME_BY_ROLE[profile.role]} replace /> : <Auth />} />
         <Route path="/auth/confirm" element={<AuthConfirm />} />
         <Route path="/recipes/:code" element={<RecipeDetail />} />
