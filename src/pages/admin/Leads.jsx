@@ -8,6 +8,7 @@ import { Card, Spinner } from '../../components/ui';
 export default function AdminLeads() {
   const toast = useToast();
   const [tab, setTab] = useState('leads');
+  const [source, setSource] = useState('all');
   const [loading, setLoading] = useState(true);
   const [leads, setLeads] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -32,6 +33,7 @@ export default function AdminLeads() {
   }
 
   const pendingCount = reviews.filter(r => r.status === 'pending').length;
+  const shownLeads = source === 'all' ? leads : leads.filter(l => l.source === source);
 
   if (loading) return <Spinner />;
 
@@ -50,26 +52,43 @@ export default function AdminLeads() {
       {/* LEADS */}
       {tab === 'leads' && (
         <Card className="p-5">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
             <h2 className="font-bold">Inquiries</h2>
-            <button onClick={() => leads.length ? downloadCSV(leads, `unifit-leads-${new Date().toISOString().slice(0, 10)}.csv`) : toast('No leads yet', 'error')} className="btn-secondary !py-2 text-sm">
+            <button onClick={() => shownLeads.length ? downloadCSV(shownLeads, `unifit-leads-${new Date().toISOString().slice(0, 10)}.csv`) : toast('No leads yet', 'error')} className="btn-secondary !py-2 text-sm">
               <Download className="w-4 h-4" /> Export CSV
             </button>
           </div>
-          {leads.length === 0 ? <p className="text-sm text-slate-500 py-6 text-center">No leads yet.</p> : (
+
+          {/* Source filter — client-side over the already-loaded rows. */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {[['all', 'All'], ['landing', 'Landing'], ['morning-session', 'Morning session']].map(([k, l]) => {
+              const n = k === 'all' ? leads.length : leads.filter(x => x.source === k).length;
+              return (
+                <button key={k} onClick={() => setSource(k)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors duration-200 ${source === k ? 'bg-brand-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                  {l} ({n})
+                </button>
+              );
+            })}
+          </div>
+
+          {shownLeads.length === 0 ? <p className="text-sm text-slate-500 py-6 text-center">No leads yet.</p> : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-left text-xs uppercase tracking-wide text-slate-500 border-b border-slate-100">
-                  <tr><th className="py-2 pr-4 font-bold">Name</th><th className="py-2 pr-4 font-bold">WhatsApp</th><th className="py-2 pr-4 font-bold">Goal</th><th className="py-2 pr-4 font-bold">Consent</th><th className="py-2 font-bold">When</th></tr>
+                  <tr><th className="py-2 pr-4 font-bold">Name</th><th className="py-2 pr-4 font-bold">WhatsApp</th><th className="py-2 pr-4 font-bold">Occupation</th><th className="py-2 pr-4 font-bold">Goal</th><th className="py-2 pr-4 font-bold">Source</th><th className="py-2 pr-4 font-bold">Consent</th><th className="py-2 font-bold">When</th></tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {leads.map(l => (
+                  {shownLeads.map(l => (
                     <tr key={l.id}>
                       <td className="py-2.5 pr-4 font-semibold">{l.name}</td>
                       <td className="py-2.5 pr-4"><a href={`https://wa.me/${l.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-emerald-600 font-semibold">{l.whatsapp}</a></td>
+                      <td className="py-2.5 pr-4 text-slate-600">{l.occupation === 'Other' ? (l.occupation_other || 'Other') : (l.occupation || '—')}</td>
                       <td className="py-2.5 pr-4 text-slate-600">{l.goal}</td>
+                      <td className="py-2.5 pr-4">
+                        <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${l.source === 'morning-session' ? 'bg-brand-100 text-brand-700' : 'bg-slate-100 text-slate-600'}`}>{l.source}</span>
+                      </td>
                       <td className="py-2.5 pr-4">{l.consent ? <Check className="w-4 h-4 text-emerald-500" /> : <X className="w-4 h-4 text-slate-300" />}</td>
-                      <td className="py-2.5 text-slate-400 text-xs">{new Date(l.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}</td>
+                      <td className="py-2.5 text-slate-400 text-xs whitespace-nowrap">{new Date(l.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}</td>
                     </tr>
                   ))}
                 </tbody>

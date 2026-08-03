@@ -1,0 +1,133 @@
+/* ══════════════════════════════════════════════════════════════
+   Unifitz landing — ORANGE + WHITE theme (matches the app brand).
+   Scoped under `.uf` so it never leaks into the rest of the app.
+   Buttons: white bg, orange border + orange text, fill on hover.
+   ══════════════════════════════════════════════════════════════ */
+
+.uf {
+  /* — base: white + soft orange tints — */
+  --cream: #FFFFFF;      /* page / card base */
+  --cream-2: #FFF7ED;    /* orange-50 alt panel */
+  --cream-3: #FFEEDD;    /* image-placeholder fill */
+  --ink: #20293A;        /* dark slate text */
+  --ink-soft: #5B6472;   /* muted body */
+  --ink-faint: #98A2B0;  /* captions */
+
+  /* — brand hue: orange — */
+  --clay: #EA580C;       /* orange-600 (brand-600) */
+  --clay-deep: #C2410C;  /* orange-700 */
+  --clay-tint: #FFE7D3;  /* soft orange chip fill */
+
+  /* — conversion accent: orange (buttons) — */
+  --go: #EA580C;
+  --go-deep: #C2410C;
+
+  /* — small marks — */
+  --gold: #F59E0B;       /* stars */
+  --line: #F1E4D6;       /* warm light hairline border */
+
+  --r: 14px;
+  --r-lg: 22px;
+  --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* — fluid type scale, 1.25 ratio, body ≥17px on mobile — */
+  --t-eyebrow: 0.8rem;
+  --t-body: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  --t-lead: clamp(1.1875rem, 1.1rem + 0.6vw, 1.4rem);
+  --t-h3: clamp(1.25rem, 1.1rem + 0.7vw, 1.5rem);
+  --t-h2: clamp(1.9rem, 1.4rem + 2.4vw, 3rem);
+  --t-h1: clamp(2.6rem, 1.9rem + 3.6vw, 4.4rem);
+
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--t-body);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+.uf ::selection { background: var(--clay-tint); color: var(--clay-deep); }
+
+/* — type — */
+.uf-serif { font-family: var(--serif); }
+.uf h1, .uf h2, .uf h3 { font-family: var(--serif); font-weight: 500; line-height: 1.08; letter-spacing: -0.015em; text-wrap: balance; color: var(--ink); margin: 0; }
+.uf-h1 { font-size: var(--t-h1); }
+.uf-h2 { font-size: var(--t-h2); }
+.uf-h3 { font-size: var(--t-h3); }
+.uf-lead { font-size: var(--t-lead); color: var(--ink-soft); line-height: 1.5; }
+.uf-measure { max-width: 62ch; }
+.uf-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--sans); font-size: var(--t-eyebrow); font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--clay);
+}
+.uf-ink-soft { color: var(--ink-soft); }
+.uf-tabular { font-variant-numeric: tabular-nums; }
+
+/* — buttons: white bg, orange outline, fill on hover — */
+.uf-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-family: var(--sans); font-weight: 700; font-size: 1.0625rem;
+  padding: 0.9rem 1.6rem; border-radius: 999px; border: 1.5px solid transparent;
+  text-decoration: none; cursor: pointer; min-height: 48px;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+.uf-btn--primary { background: #FFFFFF; color: var(--clay); border-color: var(--clay); }
+.uf-btn--primary:hover { background: var(--clay); color: #FFFFFF; }
+.uf-btn--ghost { background: #FFFFFF; color: var(--ink); border-color: var(--line); }
+.uf-btn--ghost:hover { border-color: var(--clay); color: var(--clay); }
+.uf-btn--full { width: 100%; }
+
+/* — flat surfaces — */
+.uf-card { background: var(--cream); border: 1px solid var(--line); border-radius: var(--r-lg); }
+.uf-panel { background: var(--cream-2); border: 1px solid var(--line); border-radius: var(--r-lg); }
+.uf-hr { height: 1px; background: var(--line); border: 0; }
+
+.uf-chip {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.85rem; font-weight: 600; color: var(--ink-soft);
+  background: var(--cream); border: 1px solid var(--line);
+  padding: 0.4rem 0.8rem; border-radius: 999px;
+}
+.uf-tag {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--clay-deep); background: var(--clay-tint);
+  padding: 0.3rem 0.7rem; border-radius: 999px;
+}
+
+/* — image placeholder slot (real photos go here) — */
+.uf-photo {
+  position: relative; background: var(--cream-3); border: 1px solid var(--line);
+  border-radius: var(--r-lg); overflow: hidden;
+  display: grid; place-items: center; text-align: center;
+}
+.uf-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+/* — form controls — */
+.uf-label { display: block; font-family: var(--sans); font-size: 0.9rem; font-weight: 600; color: var(--ink); margin-bottom: 0.35rem; }
+.uf-input {
+  width: 100%; font-family: var(--sans); font-size: 1.0625rem; color: var(--ink);
+  background: var(--cream); border: 1.5px solid var(--line); border-radius: var(--r);
+  padding: 0.8rem 1rem; transition: border-color .15s ease;
+}
+.uf-input::placeholder { color: var(--ink-faint); }
+.uf-input:focus { outline: none; border-color: var(--clay); }
+
+/* — orange contrast band (formerly the dark band) — */
+.uf-dark { background: var(--clay); color: #FFF3EA; }
+.uf-dark h1, .uf-dark h2, .uf-dark h3 { color: #FFFFFF; }
+
+/* — accessible focus ring — */
+.uf a:focus-visible, .uf button:focus-visible, .uf input:focus-visible,
+.uf select:focus-visible, .uf textarea:focus-visible, .uf [tabindex]:focus-visible {
+  outline: 3px solid var(--clay); outline-offset: 2px; border-radius: 6px;
+}
+
+.uf-scroll-x { overflow-x: auto; scrollbar-width: none; }
+.uf-scroll-x::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .uf * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

@@ -8,6 +8,7 @@ import DashboardLayout from './components/DashboardLayout';
 // Route-level code splitting — each page ships as its own chunk, so the first
 // load (landing/auth) no longer downloads the entire app + recharts + jspdf.
 const Landing = lazy(() => import('./pages/Landing'));
+const MorningSession = lazy(() => import('./pages/MorningSession'));
 const Auth = lazy(() => import('./pages/Auth'));
 const AuthConfirm = lazy(() => import('./pages/AuthConfirm'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
@@ -87,6 +88,8 @@ export default function App() {
           }
         />
         <Route path="/landing" element={<Landing />} />
+        {/* Shareable open link for the free 5 AM session — public even when logged in. */}
+        <Route path="/morning" element={<MorningSession />} />
         <Route path="/auth" element={session && profile ? <Navigate to={HOME_BY_ROLE[profile.role]} replace /> : <Auth />} />
         <Route path="/auth/confirm" element={<AuthConfirm />} />
         <Route path="/recipes/:code" element={<RecipeDetail />} />

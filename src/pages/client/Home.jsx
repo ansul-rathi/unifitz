@@ -10,6 +10,7 @@ import { useToast } from '../../context/ToastContext';
 import { registerForSession } from '../../lib/zoom';
 import { fmtDateTime } from '../../lib/datetime';
 import { Card, Spinner, CountdownTimer, SessionThumb } from '../../components/ui';
+import DailyCheckin from '../../components/DailyCheckin';
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
@@ -130,6 +131,9 @@ export default function ClientHome() {
           <p className="text-sm text-amber-900">{announcement.message}</p>
         </div>
       )}
+
+      {/* Daily check-in — quick self-report of the habits that add up */}
+      <DailyCheckin profile={profile} checkin={checkin} onSaved={setCheckin} />
 
       {/* Weekly check-in reminder — temporarily hidden for students. */}
 

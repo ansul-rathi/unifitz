@@ -130,21 +130,29 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-slate-50 flex flex-col items-center justify-center px-4 py-10">
-      <Link to="/" className="flex items-center gap-2 font-display text-2xl font-bold text-slate-900 mb-8">
-        <Dumbbell className="w-7 h-7 text-brand-500" />
-        Uni<span className="text-brand-500">Fitz</span>
+    <div className="relative min-h-screen bg-white flex flex-col items-center justify-center px-4 py-10 overflow-hidden">
+      {/* soft brand glow */}
+      <div aria-hidden="true" className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[42rem] h-[42rem] rounded-full bg-gradient-to-br from-orange-200/50 to-brand-100/40 blur-3xl" />
+
+      <Link to="/" className="relative flex items-center gap-2.5 font-display text-2xl font-bold text-slate-900 mb-8">
+        <span className="inline-flex w-10 h-10 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-orange-600 text-white shadow-lg shadow-orange-500/30">
+          <Dumbbell className="w-5 h-5" />
+        </span>
+        Uni<span className="text-brand-500">fitz</span>
       </Link>
 
-      <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8">
+      <div className="relative w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-[0_8px_40px_rgba(234,88,12,0.08)] p-6 md:p-8">
         {step === 'enter' ? (
           <>
+            <h1 className="font-display text-2xl font-extrabold text-slate-900">{mode === 'login' ? 'Welcome back' : 'Create your account'}</h1>
+            <p className="mt-1 text-sm text-slate-500">{mode === 'login' ? 'Log in to your live classes and progress.' : 'Join live, women-only classes — no password needed.'}</p>
+
             {/* Tabs */}
-            <div className="grid grid-cols-2 bg-slate-100 rounded-xl p-1 mb-6">
+            <div className="grid grid-cols-2 bg-orange-50 rounded-xl p-1 my-6 border border-orange-100">
               {['login', 'signup'].map(m => (
                 <button key={m} onClick={() => setMode(m)}
                   className={`py-2.5 rounded-lg text-sm font-bold transition-colors duration-200 ${
-                    mode === m ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                    mode === m ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                   }`}>
                   {m === 'login' ? 'Login' : 'Sign Up'}
                 </button>
