@@ -15,18 +15,25 @@
 
 export const MARKET = 'US';
 
-// Weekly class schedule — CANONICAL TIMES ARE UTC. The timetable
-// component converts each to the viewer's own timezone at render, so
-// no time is ever hardcoded to a single zone. day: 0=Sun … 6=Sat.
-// TODO:PROOF — replace with Ansul's real schedule + real instructor names.
+// Weekly class schedule. CANONICAL TIMES ARE UTC, derived from the real
+// Indian (IST = UTC+5:30) class slots so the timetable can convert them to
+// whichever US zone the viewer picks:
+//   6:00–7:00 AM IST  → 00:30 UTC      7:00–8:00 AM IST  → 01:30 UTC
+//   6:30–7:30 PM IST  → 13:00 UTC      7:30–8:30 PM IST  → 14:00 UTC
+// day: 0=Sun … 6=Sat (same weekday in UTC as IST for these times).
+// TODO:PROOF — confirm which classes run on which days + real instructor names.
 const SCHEDULE = [
-  { day: 1, utc: '11:00', dur: 45, title: 'Morning Yoga Flow', coach: 'Sana', format: 'Yoga' },
-  { day: 1, utc: '23:30', dur: 45, title: 'Zumba Burn', coach: 'Priya', format: 'Zumba' },
-  { day: 2, utc: '11:30', dur: 50, title: 'Strength Foundations', coach: 'Mia', format: 'Strength' },
-  { day: 3, utc: '11:00', dur: 30, title: 'Meditation & Breath', coach: 'Anjali', format: 'Meditation' },
-  { day: 4, utc: '23:30', dur: 50, title: 'Post-40 Strength', coach: 'Mia', format: 'Strength' },
-  { day: 5, utc: '11:00', dur: 45, title: 'Yoga for PCOS', coach: 'Sana', format: 'Yoga' },
-  { day: 6, utc: '14:00', dur: 45, title: 'Weekend Zumba', coach: 'Priya', format: 'Zumba' },
+  { day: 1, utc: '00:30', dur: 60, title: 'Morning Yoga Flow', coach: 'Sana', format: 'Yoga' },
+  { day: 1, utc: '13:00', dur: 60, title: 'Strength Foundations', coach: 'Mia', format: 'Strength' },
+  { day: 2, utc: '01:30', dur: 60, title: 'Zumba Burn', coach: 'Priya', format: 'Zumba' },
+  { day: 2, utc: '14:00', dur: 60, title: 'Yoga for PCOS', coach: 'Sana', format: 'Yoga' },
+  { day: 3, utc: '00:30', dur: 60, title: 'Meditation & Breath', coach: 'Anjali', format: 'Meditation' },
+  { day: 3, utc: '13:00', dur: 60, title: 'Zumba Burn', coach: 'Priya', format: 'Zumba' },
+  { day: 4, utc: '01:30', dur: 60, title: 'Post-40 Strength', coach: 'Mia', format: 'Strength' },
+  { day: 4, utc: '14:00', dur: 60, title: 'Evening Yoga', coach: 'Sana', format: 'Yoga' },
+  { day: 5, utc: '00:30', dur: 60, title: 'Morning Yoga Flow', coach: 'Sana', format: 'Yoga' },
+  { day: 5, utc: '13:00', dur: 60, title: 'Zumba Burn', coach: 'Priya', format: 'Zumba' },
+  { day: 6, utc: '01:30', dur: 60, title: 'Weekend Zumba', coach: 'Priya', format: 'Zumba' },
 ];
 
 export const CONTENT = {
@@ -46,6 +53,7 @@ export const CONTENT = {
 
     // Hero — Direction A (accountability). Outcome + mechanism.
     hero: {
+      img: '/landing/hero.jpg',
       eyebrow: 'Live classes for women',
       h1: 'The class that notices when you’re not there.',
       sub: 'Live, instructor-led Zumba, Yoga, Strength and Meditation — from home, on your timezone, in small cohorts where the instructor actually knows your name. Not another video library you’ll forget by Friday.',
@@ -66,8 +74,9 @@ export const CONTENT = {
     timetable: {
       eyebrow: 'This week, live',
       heading: 'Real classes. Real instructors. At times that fit your day.',
-      sub: 'Every class below is live on Zoom this week — shown in your timezone, detected automatically.',
+      sub: 'Every class below is live on Zoom this week. Pick your timezone and the times convert instantly.',
       tzPrefix: 'Times shown for',
+      tzLabel: 'Show times in',
       schedule: SCHEDULE,
       cta: 'Choose your plan',
       ctaHref: '#pricing',
@@ -99,9 +108,9 @@ export const CONTENT = {
       heading: 'Real women. Real living rooms. Real Mondays.',
       note: 'TODO:ASSET — replace with real class screenshots / member photos: women 30–50, mid-class, at home. No stock athleisure.',
       photos: [
-        { cap: 'A live Strength cohort, mid-set.' },
-        { cap: 'Morning Yoga — cameras on, coach cueing.' },
-        { cap: 'The post-class check-in.' },
+        { img: '/landing/gallery-1.jpg', cap: 'A live Strength cohort, mid-set.' },
+        { img: '/landing/gallery-2.jpg', cap: 'Morning Yoga — cameras on, coach cueing.' },
+        { img: '/landing/gallery-3.jpg', cap: 'The post-class check-in.' },
       ],
     },
 
@@ -122,10 +131,10 @@ export const CONTENT = {
       heading: 'Real instructors, with names and faces.',
       note: 'TODO:PROOF + TODO:ASSET — replace the four cards below with Ansul’s real instructors: photo, full name, certification, and years teaching.',
       items: [
-        { name: 'TODO:PROOF — Instructor name', cred: 'TODO:PROOF — certification', years: 'TODO:PROOF — yrs', focus: 'Zumba & cardio' },
-        { name: 'TODO:PROOF — Instructor name', cred: 'TODO:PROOF — certification', years: 'TODO:PROOF — yrs', focus: 'Yoga & mobility' },
-        { name: 'TODO:PROOF — Instructor name', cred: 'TODO:PROOF — certification', years: 'TODO:PROOF — yrs', focus: 'Strength & post-40' },
-        { name: 'TODO:PROOF — Instructor name', cred: 'TODO:PROOF — certification', years: 'TODO:PROOF — yrs', focus: 'Meditation & breath' },
+        { img: '/landing/coach-1.jpg', name: 'TODO:PROOF — Instructor name', cred: 'TODO:PROOF — certification', years: 'TODO:PROOF — yrs', focus: 'Zumba & cardio' },
+        { img: '/landing/coach-2.jpg', name: 'TODO:PROOF — Instructor name', cred: 'TODO:PROOF — certification', years: 'TODO:PROOF — yrs', focus: 'Yoga & mobility' },
+        { img: '/landing/coach-3.jpg', name: 'TODO:PROOF — Instructor name', cred: 'TODO:PROOF — certification', years: 'TODO:PROOF — yrs', focus: 'Strength & post-40' },
+        { img: '/landing/coach-4.jpg', name: 'TODO:PROOF — Instructor name', cred: 'TODO:PROOF — certification', years: 'TODO:PROOF — yrs', focus: 'Meditation & breath' },
       ],
     },
 

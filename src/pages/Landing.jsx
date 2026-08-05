@@ -23,6 +23,24 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const rise = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } } };
 const stagger = { show: { transition: { staggerChildren: 0.06 } } };
 
+// Renders a real image when `src` is set (and loads); otherwise a labelled
+// placeholder. So the page looks intentional before assets arrive, and each
+// photo appears the moment its file exists in /public — no code change needed.
+function PhotoInner({ src, alt, caption, hint }) {
+  const [failed, setFailed] = useState(false);
+  if (src && !failed) {
+    return <img src={src} alt={alt || ''} loading="lazy" onError={() => setFailed(true)} className="w-full h-full object-cover" />;
+  }
+  return (
+    <div className="p-5 text-center">
+      <Camera className="w-8 h-8 mx-auto" style={{ color: 'var(--ink-faint)' }} />
+      <p className="mt-2 text-[0.8rem] font-semibold" style={{ color: 'var(--ink-faint)' }}>Add photo</p>
+      {caption && <p className="mt-1.5 text-[0.9rem] uf-ink-soft">{caption}</p>}
+      {hint && <p className="mt-1 text-[0.8rem]" style={{ color: 'var(--ink-faint)' }}>{hint}</p>}
+    </div>
+  );
+}
+
 // ── timezone conversion: canonical UTC schedule → viewer's local zone ──
 function nextOccurrence(day, utcHHMM) {
   const [h, m] = utcHHMM.split(':').map(Number);
@@ -33,21 +51,32 @@ function nextOccurrence(day, utcHHMM) {
   d.setUTCDate(d.getUTCDate() + delta);
   return d;
 }
-function useLocalSchedule() {
-  return useMemo(() => {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const tzName = (new Intl.DateTimeFormat('en-US', { timeZoneName: 'short', timeZone: tz })
-      .formatToParts(new Date()).find(p => p.type === 'timeZoneName') || {}).value || tz;
-    const rows = L.timetable.schedule.map(c => {
-      const when = nextOccurrence(c.day, c.utc);
-      return {
-        ...c, when,
-        dayLabel: new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: tz }).format(when),
-        timeLabel: new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: tz }).format(when),
-      };
-    }).sort((a, b) => a.when - b.when);
-    return { tz, tzName, rows };
-  }, []);
+// Selectable timezones — California/Pacific through Eastern, plus IST.
+const ZONES = [
+  { label: 'Pacific · California (PT)', tz: 'America/Los_Angeles' },
+  { label: 'Mountain (MT)', tz: 'America/Denver' },
+  { label: 'Central (CT)', tz: 'America/Chicago' },
+  { label: 'Eastern (ET)', tz: 'America/New_York' },
+  { label: 'India (IST)', tz: 'Asia/Kolkata' },
+];
+function tzShort(tz) {
+  return (new Intl.DateTimeFormat('en-US', { timeZoneName: 'short', timeZone: tz })
+    .formatToParts(new Date()).find(p => p.type === 'timeZoneName') || {}).value || tz;
+}
+function buildRows(tz) {
+  return L.timetable.schedule.map(c => {
+    const when = nextOccurrence(c.day, c.utc);
+    return {
+      ...c, when,
+      dayLabel: new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: tz }).format(when),
+      timeLabel: new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: tz }).format(when),
+    };
+  }).sort((a, b) => a.when - b.when);
+}
+// Detected zone if we offer it, else default to Eastern (US).
+function defaultZone() {
+  const d = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return ZONES.some(z => z.tz === d) ? d : 'America/New_York';
 }
 
 // SEO + JSON-LD (Organization + Product + FAQPage), injected client-side.
@@ -83,14 +112,14 @@ export default function Landing() {
   const [scrolled, setScrolled] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
-  const { tz, tzName, rows } = useLocalSchedule();
+  const detectedTz = useMemo(() => defaultZone(), []);
 
   useEffect(() => {
     captureUtm();
-    track('timezone_detected', { tz });
+    track('timezone_detected', { tz: detectedTz });
     supabase.from('testimonials').select('*').eq('is_active', true).order('sort_order').then(({ data }) => setTestimonials(data ?? []));
     supabase.from('reviews').select('name, rating, text, created_at').eq('status', 'approved').order('created_at', { ascending: false }).limit(9).then(({ data }) => setReviews(data ?? []));
-  }, [tz]);
+  }, [detectedTz]);
 
   // scroll: condense nav + fire 50/90 depth once.
   useEffect(() => {
@@ -156,12 +185,8 @@ export default function Landing() {
             {/* Hero visual: real class-in-progress frame (TODO:ASSET) */}
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}>
               <div className="uf-card overflow-hidden">
-                <div className="aspect-[4/3] grid place-items-center text-center px-6" style={{ background: 'var(--cream-3)' }}>
-                  <div>
-                    <Camera className="w-9 h-9 mx-auto" style={{ color: 'var(--ink-faint)' }} />
-                    <p className="mt-3 text-[0.9rem] font-semibold" style={{ color: 'var(--ink-soft)' }}>TODO:ASSET</p>
-                    <p className="mt-1 text-[0.85rem]" style={{ color: 'var(--ink-faint)' }}>Real class-in-progress frame — women 30–50, live on Zoom, instructor mid-cue.</p>
-                  </div>
+                <div className="aspect-[4/3] grid place-items-center text-center" style={{ background: 'var(--cream-3)' }}>
+                  <PhotoInner src={L.hero.img} alt="Live Unifitz class in progress" caption="Class-in-progress frame" hint="women 30–50, live on Zoom" />
                 </div>
                 <div className="flex items-center gap-3 p-4" style={{ borderTop: '1px solid var(--line)' }}>
                   <span className="inline-flex items-center gap-1.5 uf-tag" style={{ color: '#8B2F2F', background: '#F3E0DA' }}><span className="w-1.5 h-1.5 rounded-full" style={{ background: '#C0392B' }} /> Live now</span>
@@ -172,7 +197,7 @@ export default function Landing() {
           </section>
 
           {/* ── Timetable strip (the differentiator) ── */}
-          <TimetableStrip rows={rows} tzName={tzName} clickCta={clickCta} />
+          <TimetableStrip initialTz={detectedTz} clickCta={clickCta} />
 
           {/* ── Problem ── */}
           <Band>
@@ -209,12 +234,7 @@ export default function Landing() {
             <div className="grid gap-5 sm:grid-cols-3 mt-8">
               {L.gallery.photos.map((ph, i) => (
                 <figure key={i} className="uf-photo aspect-[4/5]">
-                  {/* real <img src="…" alt="…" loading="lazy" /> goes here */}
-                  <figcaption className="p-5">
-                    <Camera className="w-8 h-8 mx-auto" style={{ color: 'var(--ink-faint)' }} />
-                    <p className="mt-2 text-[0.8rem] font-semibold" style={{ color: 'var(--ink-faint)' }}>TODO:ASSET</p>
-                    <p className="mt-1.5 text-[0.9rem] uf-ink-soft">{ph.cap}</p>
-                  </figcaption>
+                  <PhotoInner src={ph.img} alt={ph.cap} caption={ph.cap} />
                 </figure>
               ))}
             </div>
@@ -248,7 +268,7 @@ export default function Landing() {
               {L.instructors.items.map((t, i) => (
                 <div key={i} className="uf-card p-6">
                   <div className="uf-photo aspect-square">
-                    <div><Camera className="w-7 h-7 mx-auto" style={{ color: 'var(--ink-faint)' }} /><p className="mt-1.5 text-[0.7rem]" style={{ color: 'var(--ink-faint)' }}>TODO:ASSET · photo</p></div>
+                    <PhotoInner src={t.img} alt={t.name} />
                   </div>
                   <p className="mt-4 uf-serif" style={{ fontSize: '1.15rem' }}>{t.name}</p>
                   <p className="text-[0.85rem] uf-ink-soft">{t.cred} · {t.years}</p>
@@ -404,14 +424,16 @@ function Head({ eyebrow, heading, lead, onDark }) {
   );
 }
 
-function TimetableStrip({ rows, tzName, clickCta }) {
+function TimetableStrip({ initialTz, clickCta }) {
   const ref = useRef(null);
   const seen = useRef(false);
+  const [tz, setTz] = useState(initialTz);
+  const rows = useMemo(() => buildRows(tz), [tz]);
   useEffect(() => {
     const el = ref.current; if (!el) return;
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting && !seen.current) { seen.current = true; track('timetable_view', { tz: tzName }); } }, { threshold: 0.3 });
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting && !seen.current) { seen.current = true; track('timetable_view', { tz }); } }, { threshold: 0.3 });
     io.observe(el); return () => io.disconnect();
-  }, [tzName]);
+  }, [tz]);
   return (
     <section id="timetable" ref={ref} style={{ background: 'var(--cream-2)', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
       <div className="max-w-6xl mx-auto px-5 md:px-8 py-14 md:py-20">
@@ -421,7 +443,15 @@ function TimetableStrip({ rows, tzName, clickCta }) {
             <h2 className="uf-h2 mt-3">{L.timetable.heading}</h2>
             <p className="mt-3 uf-ink-soft">{L.timetable.sub}</p>
           </div>
-          <span className="uf-chip shrink-0"><Clock className="w-4 h-4" /> {L.timetable.tzPrefix} {tzName}</span>
+          {/* Timezone picker */}
+          <label className="shrink-0 flex items-center gap-2 uf-chip !py-2 cursor-pointer">
+            <Clock className="w-4 h-4" style={{ color: 'var(--clay)' }} />
+            <span className="sr-only">{L.timetable.tzLabel}</span>
+            <select value={tz} onChange={e => { setTz(e.target.value); track('timezone_changed', { tz: e.target.value }); }}
+              className="bg-transparent font-semibold text-[0.9rem] outline-none cursor-pointer" style={{ color: 'var(--ink)' }} aria-label={L.timetable.tzLabel}>
+              {ZONES.map(z => <option key={z.tz} value={z.tz}>{z.label}</option>)}
+            </select>
+          </label>
         </div>
 
         <div className="uf-scroll-x mt-8 -mx-5 px-5 md:mx-0 md:px-0">
