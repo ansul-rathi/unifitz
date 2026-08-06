@@ -4,6 +4,7 @@ import {
   Home, Trophy, TrendingUp, Gift, User, Calendar, Users, Megaphone,
   LayoutDashboard, ListChecks, UserCog, Share2, IndianRupee, Flame, LogOut, Dumbbell,
   Salad, Medal, Mailbox, BarChart3, X, CalendarCheck, Sparkles, ChefHat, Eye, Bell, Menu,
+  ClipboardCheck, ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useViewMode } from '../context/ViewModeContext';
@@ -35,6 +36,7 @@ const NAV = {
     { to: '/admin/reports', label: 'Reports', icon: BarChart3 },
     { to: '/admin/series', label: 'Series', icon: ListChecks },
     { to: '/admin/users', label: 'Users', icon: UserCog },
+    { to: '/admin/checkins', label: 'Check-ins', icon: ClipboardCheck },
     { to: '/admin/referrals', label: 'Referrals', icon: Share2 },
     { to: '/admin/badges', label: 'Badges', icon: Medal },
     { to: '/admin/recipes', label: 'Recipes', icon: ChefHat },
@@ -55,6 +57,7 @@ export default function DashboardLayout() {
   const [pendingCash, setPendingCash] = useState(0); // admin: cash payments awaiting verification
   const [unread, setUnread] = useState(0); // admin: unread activity notifications
   const [drawerOpen, setDrawerOpen] = useState(false); // admin mobile hamburger nav
+  const [accountOpen, setAccountOpen] = useState(false); // client mobile account sheet
 
   const isStaff = profile.role === 'teacher' || profile.role === 'admin';
   // While a staff member previews the student app, render the client nav/shell.
@@ -164,16 +167,19 @@ export default function DashboardLayout() {
                 {streak}
               </button>
             )}
-            {/* Mobile/tablet (client): avatar links to Profile, no header logout */}
-            {profile.role === 'client' && (
-              <Link
-                to="/app/profile"
-                aria-label="Your profile"
-                title="Profile"
-                className="lg:hidden rounded-full ring-2 ring-transparent hover:ring-brand-200 transition-shadow duration-200"
+            {/* Mobile/tablet (client): avatar opens the account sheet — the only
+                route to Profile, Refer & Earn and sign-out, since bottom tabs
+                can't hold them. */}
+            {effectiveRole === 'client' && (
+              <button
+                onClick={() => setAccountOpen(true)}
+                aria-label="Account menu"
+                aria-haspopup="dialog"
+                title="Account"
+                className="lg:hidden rounded-full ring-2 ring-transparent hover:ring-brand-200 active:scale-95 transition duration-200"
               >
                 <Avatar name={profile.full_name} url={profile.avatar_url} />
-              </Link>
+              </button>
             )}
             {/* Desktop client + all teacher/admin: avatar links to Profile + logout */}
             <div className={`items-center gap-2 ${effectiveRole === 'client' ? 'hidden lg:flex' : 'flex'}`}>
@@ -246,6 +252,76 @@ export default function DashboardLayout() {
               </button>
             </div>
           </aside>
+        </div>
+      )}
+
+      {/* Client mobile account sheet — profile, Refer & Earn, streak, sign out */}
+      {accountOpen && (
+        <div className="lg:hidden fixed inset-0 z-[60] bg-slate-900/50 flex items-end justify-center" role="dialog" aria-modal="true" onClick={() => setAccountOpen(false)}>
+          <div className="bg-white w-full rounded-t-3xl p-5 pb-8 animate-fade-up" style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-start justify-between">
+              <h3 className="font-bold text-lg">Account</h3>
+              <button onClick={() => setAccountOpen(false)} aria-label="Close" className="p-1.5 rounded-lg hover:bg-slate-100"><X className="w-5 h-5" /></button>
+            </div>
+
+            {/* Profile — same card the desktop sidebar shows */}
+            <Link
+              to="/app/profile"
+              onClick={() => setAccountOpen(false)}
+              className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5 active:scale-[0.99] transition"
+            >
+              <Avatar name={profile.full_name} url={profile.avatar_url} size="w-12 h-12" />
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-slate-800 truncate">{profile.full_name || 'Member'}</p>
+                <p className="text-xs font-semibold text-slate-500">View and edit your profile</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-slate-400 shrink-0" />
+            </Link>
+
+            {/* Refer & Earn */}
+            <Link
+              to="/app/refer"
+              onClick={() => setAccountOpen(false)}
+              className="mt-2.5 flex items-center gap-3 rounded-2xl border border-orange-200 bg-orange-50/70 p-3.5 active:scale-[0.99] transition"
+            >
+              <span className="inline-flex w-10 h-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-orange-600 text-white shadow-sm shadow-orange-500/30">
+                <Gift className="w-5 h-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-slate-800">Refer &amp; Earn</p>
+                <p className="text-xs font-semibold text-slate-500">Invite a friend, get rewarded</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-orange-400 shrink-0" />
+            </Link>
+
+            {profile.role === 'client' && streak !== null && (
+              <button
+                onClick={() => { setAccountOpen(false); setShowStreak(true); }}
+                className="mt-2.5 w-full flex items-center gap-3 rounded-2xl border border-slate-200 p-3.5 active:scale-[0.99] transition"
+              >
+                <span className="inline-flex w-10 h-10 shrink-0 items-center justify-center rounded-xl bg-orange-100"><Flame className="w-5 h-5 text-orange-500" /></span>
+                <div className="min-w-0 flex-1 text-left">
+                  <p className="font-bold text-slate-800">Your streak</p>
+                  <p className="text-xs font-semibold text-slate-500">{streak} {streak === 1 ? 'day' : 'days'} going</p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-slate-400 shrink-0" />
+              </button>
+            )}
+
+            {isStaff && preview && (
+              <button onClick={() => { setAccountOpen(false); exitPreview(); }}
+                className="mt-2.5 w-full inline-flex items-center justify-center gap-2 text-sm font-bold text-slate-600 border border-slate-200 hover:bg-slate-50 px-3 py-3 rounded-2xl">
+                <X className="w-4 h-4" /> Exit student preview
+              </button>
+            )}
+
+            <button
+              onClick={signOut}
+              className="mt-2.5 w-full inline-flex items-center justify-center gap-2 text-sm font-bold text-red-600 border border-red-200 hover:bg-red-50 px-3 py-3 rounded-2xl"
+            >
+              <LogOut className="w-4 h-4" /> Sign out
+            </button>
+          </div>
         </div>
       )}
 

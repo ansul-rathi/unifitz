@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Video, PlayCircle, CheckCircle2, Megaphone,
-  CalendarClock, Radio,
+  CalendarClock, Radio, Gift, ChevronRight,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
@@ -12,7 +12,13 @@ import { fmtDateTime } from '../../lib/datetime';
 import { Card, Spinner, CountdownTimer, SessionThumb } from '../../components/ui';
 import DailyCheckin from '../../components/DailyCheckin';
 
-const todayStr = () => new Date().toISOString().slice(0, 10);
+// Local calendar date — toISOString() would roll the day over at UTC midnight,
+// which is the wrong day for anyone not on UTC.
+const todayStr = () => {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+};
 
 export default function ClientHome() {
   const { profile, session: authSession } = useAuth();
@@ -226,6 +232,21 @@ export default function ClientHome() {
           </ul>
       </Card>
       )}
+
+      {/* Refer & Earn — mobile only; the desktop sidebar already links to it */}
+      <Link
+        to="/app/refer"
+        className="lg:hidden flex items-center gap-3 rounded-2xl border border-orange-200 bg-orange-50/70 p-4 active:scale-[0.99] transition"
+      >
+        <span className="inline-flex w-10 h-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-orange-600 text-white shadow-sm shadow-orange-500/30">
+          <Gift className="w-5 h-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-bold text-slate-800">Refer &amp; Earn</p>
+          <p className="text-xs font-semibold text-slate-500">Invite a friend, get rewarded</p>
+        </div>
+        <ChevronRight className="w-5 h-5 text-orange-400 shrink-0" />
+      </Link>
     </div>
   );
 }

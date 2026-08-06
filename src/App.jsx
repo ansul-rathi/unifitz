@@ -37,6 +37,7 @@ const TeacherSeries = lazy(() => import('./pages/teacher/Series'));
 const AdminOverview = lazy(() => import('./pages/admin/Overview'));
 const AdminSeries = lazy(() => import('./pages/admin/Series'));
 const AdminUsers = lazy(() => import('./pages/admin/Users'));
+const AdminCheckins = lazy(() => import('./pages/admin/Checkins'));
 const AdminUserDetail = lazy(() => import('./pages/admin/UserDetail'));
 const AdminNotifications = lazy(() => import('./pages/admin/Notifications'));
 const AdminReferrals = lazy(() => import('./pages/admin/Referrals'));
@@ -140,6 +141,7 @@ export default function App() {
           <Route path="challenges" element={<RedirectToSeries base="/admin/series" />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="users/:id" element={<AdminUserDetail />} />
+          <Route path="checkins" element={<AdminCheckins />} />
           <Route path="referrals" element={<AdminReferrals />} />
           <Route path="badges" element={<AdminBadges />} />
           <Route path="recipes" element={<StaffRecipes />} />
