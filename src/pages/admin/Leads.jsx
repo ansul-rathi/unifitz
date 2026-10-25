@@ -33,7 +33,9 @@ export default function AdminLeads() {
   }
 
   const pendingCount = reviews.filter(r => r.status === 'pending').length;
-  const shownLeads = source === 'all' ? leads : leads.filter(l => l.source === source);
+  // Sources may carry a UTM suffix ("masterclass:instagram") — match the base.
+  const inSource = (l, k) => k === 'all' || (l.source ?? '').split(':')[0] === k;
+  const shownLeads = leads.filter(l => inSource(l, source));
 
   if (loading) return <Spinner />;
 
@@ -61,8 +63,8 @@ export default function AdminLeads() {
 
           {/* Source filter — client-side over the already-loaded rows. */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {[['all', 'All'], ['landing', 'Landing'], ['morning-session', 'Morning session']].map(([k, l]) => {
-              const n = k === 'all' ? leads.length : leads.filter(x => x.source === k).length;
+            {[['all', 'All'], ['landing', 'Landing'], ['masterclass', 'Masterclass'], ['morning-session', 'Morning session'], ['20min-waitlist', '20-min waitlist']].map(([k, l]) => {
+              const n = leads.filter(x => inSource(x, k)).length;
               return (
                 <button key={k} onClick={() => setSource(k)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors duration-200 ${source === k ? 'bg-brand-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                   {l} ({n})

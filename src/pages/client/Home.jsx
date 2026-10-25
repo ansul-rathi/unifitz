@@ -109,19 +109,14 @@ export default function ClientHome() {
     return () => { cancelled = true; };
   }, [liveSession?.id, liveSession?.zoom_meeting_id, authSession?.user?.email, profile]);
 
-  // Joining the live class. With a Zoom meeting, attendance comes from the
-  // webhook (join/leave → %). For pure manual sessions, fall back to self-mark.
+  // Joining the live class. Members never mark live attendance themselves:
+  // it comes from the Zoom webhook (join/leave → %) or the instructor.
   function joinLive() {
     if (!liveSession) return;
-    saveCheckin({ attended_session: true }); // streak credit either way
-    if (!liveSession.zoom_meeting_id) {
-      supabase.from('attendance').upsert(
-        { session_id: liveSession.id, user_id: profile.id, attended: true, marked_by: profile.id, source: 'manual' },
-        { onConflict: 'session_id,user_id', ignoreDuplicates: true }
-      ).then(({ error }) => { if (!error) toast('Marked present — enjoy the class!'); });
-    } else {
-      toast('Enjoy the class! Attendance is tracked automatically.');
-    }
+    saveCheckin({ attended_session: true }); // daily check-in streak credit
+    toast(liveSession.zoom_meeting_id
+      ? 'Enjoy the class! Attendance is tracked automatically.'
+      : 'Enjoy the class! Your instructor will mark attendance.');
   }
 
   if (loading) return <Spinner />;

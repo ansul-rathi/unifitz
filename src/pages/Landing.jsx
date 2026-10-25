@@ -2,15 +2,17 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, MotionConfig } from 'framer-motion';
 import {
-  Menu, X, Music, Flower2, Dumbbell, Brain, ArrowRight, ArrowUpRight, Check,
-  Radio, Clock, Camera, ChevronDown, Loader2, Quote, CalendarClock,
+  Menu, X, Music, Flower2, Dumbbell, Brain, Timer, ArrowRight, Check,
+  Radio, Clock, Camera, ChevronDown, ChevronLeft, ChevronRight, Quote, CalendarClock,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { BUSINESS, DIAL_CODES, toE164, waLink } from '../config';
+import { BUSINESS, waLink } from '../config';
 import { L } from '../content/landing';
 import { track, captureUtm } from '../lib/track';
 import FloatingWhatsApp from '../components/FloatingWhatsApp';
 import SiteFooter from '../components/SiteFooter';
+import WhatsAppIcon from '../components/WhatsAppIcon';
+import LeadForm from '../components/LeadForm';
 import './landing.css';
 
 const PRIMARY = 'Choose your plan';        // repeated verbatim ≥4×
@@ -19,20 +21,22 @@ const CURRENCY = 'USD';
 // Dev-only placeholders for unfilled content. `import.meta.env.DEV` is a
 // build-time constant, so every `DEV &&` branch is stripped from production.
 const DEV = import.meta.env.DEV;
-const FORMAT_ICON = { Zumba: Music, Yoga: Flower2, Strength: Dumbbell, Meditation: Brain };
+const FORMAT_ICON = { Zumba: Music, Yoga: Flower2, Strength: Dumbbell, Tabata: Timer, Meditation: Brain };
 const GOALS = ['Lose weight', 'Get stronger', 'PCOS / PCOD support', 'Post-40 strength', 'Postpartum return', 'Just exploring'];
-const PHONE_PH = { 1: '(555) 123-4567', 91: '98765 43210', 44: '7700 900123', 971: '50 123 4567', 61: '412 345 678', 65: '8123 4567' };
 
 // warm-editorial reveal: fade + 8px rise, 200ms (reduced-motion via MotionConfig).
 const rise = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } } };
 const stagger = { show: { transition: { staggerChildren: 0.06 } } };
 
+// Sections parked for now — flip to true to bring one back.
+const SHOW_TIMETABLE = false;
+const SHOW_INSTRUCTORS = false;
+const SHOW_TRACKS = false;
+
 // What actually ships. Blocks with nothing real to show hide themselves.
 const INSTRUCTORS = L.instructors.items.filter(i => i.name);
 const GALLERY = L.gallery.photos.filter(p => p.img);
-const SHOW_INSTRUCTORS = DEV || INSTRUCTORS.length > 0;
-const SHOW_GALLERY = DEV || GALLERY.length > 0;
-const NAV_LINKS = L.nav.links.filter(l => l.href !== '#instructors' || SHOW_INSTRUCTORS);
+const NAV_LINKS = L.nav.links;
 
 // Real image when `src` is set; on a load failure it falls back to the plain
 // tinted slot. The "Add photo" hint only ever renders in dev.
@@ -161,10 +165,10 @@ export default function Landing() {
   const nowMs = now ?? REF_NOW;
   const rows = useMemo(() => buildRows(tz, nowMs), [tz, nowMs]);
   const next = now ? rows[0] : null;   // rows are sorted by next occurrence
-  const proof = testimonials.length ? testimonials.map(t => ({ quote: t.quote, name: t.name, city: t.location, result: t.result }))
-    : reviews.length ? reviews.map(r => ({ quote: r.text, name: r.name, city: '', result: '' }))
-    : DEV ? [1, 2, 3].map(() => ({ quote: 'Placeholder (dev only) — a real member’s words with a specific change.', name: 'Member name', city: 'City' }))
-    : [];
+  const fetched = testimonials.length ? testimonials.map(t => ({ quote: t.quote, name: t.name, city: t.location, result: t.result }))
+    : reviews.map(r => ({ quote: r.text, name: r.name, city: '', result: '' }));
+  const proof = [...L.gallery.quotes, ...fetched];
+  if (DEV && !proof.length) proof.push(...[1, 2, 3].map(() => ({ quote: 'Placeholder (dev only) — a real member’s words with a specific change.', name: 'Member name', city: 'City' })));
 
   const clickCta = (location, extra = {}) => track('cta_click', { location, market: MARKET, ...extra });
   const blur = scrolled ? 'blur(8px)' : 'none';
@@ -234,21 +238,8 @@ export default function Landing() {
             </div>
           </section>
 
-          {/* ── Timetable strip (the differentiator) ── */}
-          <TimetableStrip tz={tz} setTz={setTz} rows={rows} nowMs={nowMs} clickCta={clickCta} />
-
-          {/* ── Problem ── */}
-          <Band>
-            <Head eyebrow={L.problem.eyebrow} heading={L.problem.heading} />
-            <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: '-60px' }} variants={stagger} className="grid gap-5 md:grid-cols-3 mt-10">
-              {L.problem.items.map(it => (
-                <motion.div key={it.k} variants={rise} className="uf-panel p-7">
-                  <p className="uf-serif text-[2rem]" style={{ color: 'var(--clay)' }}>{it.k}</p>
-                  <p className="mt-2 uf-ink-soft">{it.t}</p>
-                </motion.div>
-              ))}
-            </motion.div>
-          </Band>
+          {/* ── Timetable strip ── */}
+          {SHOW_TIMETABLE && <TimetableStrip tz={tz} setTz={setTz} rows={rows} nowMs={nowMs} clickCta={clickCta} />}
 
           {/* ── Why live ── */}
           <Band>
@@ -265,20 +256,8 @@ export default function Landing() {
             </div>
           </Band>
 
-          {/* ── In-action gallery (trust images) — hidden until real photos exist ── */}
-          {SHOW_GALLERY && (
-            <Band>
-              <Head eyebrow={L.gallery.eyebrow} heading={L.gallery.heading} />
-              {L.gallery.note && <p className="mt-3 text-[0.9rem] uf-ink-soft">{L.gallery.note}</p>}
-              <div className="grid gap-5 sm:grid-cols-3 mt-8">
-                {(GALLERY.length ? GALLERY : L.gallery.photos).map((ph, i) => (
-                  <figure key={i} className="uf-photo aspect-[4/5]">
-                    <PhotoInner src={ph.img} alt={ph.cap} caption={ph.cap} />
-                  </figure>
-                ))}
-              </div>
-            </Band>
-          )}
+          {/* ── Photos + member stories carousel — hides with nothing real to show ── */}
+          <Stories photos={DEV && !GALLERY.length ? L.gallery.photos : GALLERY} quotes={proof} />
 
           {/* ── Formats (alternating, not identical cards) ── */}
           <Band id="formats">
@@ -321,7 +300,7 @@ export default function Landing() {
           )}
 
           {/* ── Goal tracks (named conditions) ── */}
-          <Band id="tracks">
+          {SHOW_TRACKS && <Band id="tracks">
             <Head eyebrow={L.tracks.eyebrow} heading={L.tracks.heading} />
             <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: '-60px' }} variants={stagger} className="grid gap-5 sm:grid-cols-2 mt-10">
               {L.tracks.items.map(t => (
@@ -331,49 +310,25 @@ export default function Landing() {
                 </motion.div>
               ))}
             </motion.div>
-            <p className="mt-6 text-[0.85rem] uf-ink-soft uf-measure">{L.tracks.disclaimer}</p>
-          </Band>
-
-          {/* ── Proof — real testimonials/reviews only ── */}
-          {proof.length > 0 && (
-            <Band id="proof">
-              <Head eyebrow={L.proof.eyebrow} heading={L.proof.heading} />
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 mt-10">
-                {proof.map((p, i) => (
-                  <figure key={i} className="uf-card p-6 flex flex-col">
-                    <Quote className="w-6 h-6" style={{ color: 'var(--clay)', opacity: 0.4 }} aria-hidden="true" />
-                    {p.result ? <span className="mt-3 uf-tag self-start">{p.result}</span> : null}
-                    <blockquote className="mt-3 flex-1" style={{ color: 'var(--ink)' }}>{p.quote}</blockquote>
-                    <figcaption className="mt-5 pt-4 text-[0.9rem] font-semibold" style={{ borderTop: '1px solid var(--line)' }}>
-                      {p.name}{p.city ? <span className="uf-ink-soft font-normal"> · {p.city}</span> : null}
-                    </figcaption>
-                  </figure>
-                ))}
-              </div>
-            </Band>
-          )}
+            <p className="mt-6 text-[0.85rem] uf-ink-soft uf-measure">{L.disclaimer}</p>
+          </Band>}
 
           {/* ── Pricing (no motion) ── */}
           <Pricing clickCta={clickCta} />
 
-          {/* ── Objections ── */}
-          <Band>
-            <Head eyebrow={L.objections.eyebrow} heading={L.objections.heading} />
-            <div className="grid gap-5 lg:grid-cols-2 mt-10">
-              {L.objections.items.map((o, i) => (
-                <div key={i} className="uf-panel p-7">
-                  <h3 className="uf-serif" style={{ fontSize: '1.2rem' }}>{o.q}</h3>
-                  <p className="mt-2 uf-ink-soft">{o.a}</p>
-                </div>
-              ))}
-            </div>
-            <RefundNote className="mt-6" />
-          </Band>
-
           {/* ── FAQ ── */}
           <Band id="faq">
-            <Head eyebrow={L.faq.eyebrow} heading={L.faq.heading} />
-            <div className="mt-10 max-w-3xl">
+            <div className="grid lg:grid-cols-[.8fr_1.2fr] gap-10 lg:gap-16 lg:items-start">
+              <div className="lg:sticky lg:top-24">
+                <Head eyebrow={L.faq.eyebrow} heading={L.faq.heading} lead={L.faq.lead} />
+                <div className="uf-panel p-6 mt-8">
+                  <p className="font-semibold">{L.faq.helpTitle}</p>
+                  <p className="mt-1 text-[0.95rem] uf-ink-soft">{L.faq.helpBody}</p>
+                  <a href={waLink('Hi Unifitz! I have a question before I join.')} target="_blank" rel="noopener noreferrer" onClick={() => track('whatsapp_click', { location: 'faq' })} className="uf-btn uf-btn--ghost mt-4 !py-2.5">
+                    <WhatsAppIcon className="w-5 h-5 text-[#25D366]" /> {L.faq.helpCta}
+                  </a>
+                </div>
+              </div>
               <Faq />
             </div>
           </Band>
@@ -386,7 +341,10 @@ export default function Landing() {
                 <h2 className="uf-h2 mt-3" style={{ fontSize: 'clamp(1.7rem,1.3rem+1.6vw,2.4rem)' }}>{L.masterclass.heading}</h2>
                 <p className="mt-3 uf-lead uf-measure">{L.masterclass.sub}</p>
               </div>
-              <div id="inquiry"><InquiryForm clickCta={clickCta} tz={tz} /></div>
+              <div id="inquiry">
+                <LeadForm idPrefix="iq" source="masterclass" formName="masterclass" goals={GOALS} tz={tz}
+                  copy={L.masterclass} onSuccess={() => clickCta('masterclass_submit')} />
+              </div>
             </div>
           </Band>
 
@@ -426,13 +384,82 @@ function Band({ id, dark, children }) {
   );
 }
 
-function Head({ eyebrow, heading, lead }) {
+function Head({ eyebrow, heading, lead, center }) {
   return (
-    <div>
+    <div className={center ? 'text-center' : ''}>
       <p className="uf-eyebrow">{eyebrow}</p>
       <h2 className="uf-h2 mt-3">{heading}</h2>
-      {lead && <p className="mt-4 uf-lead uf-measure">{lead}</p>}
+      {lead && <p className={`mt-4 uf-lead uf-measure ${center ? 'mx-auto' : ''}`}>{lead}</p>}
     </div>
+  );
+}
+
+// Photo slides and member-quote slides, alternating, in one swipeable row.
+// A quote is its own card — never laid over a photo of someone else.
+function Stories({ photos, quotes }) {
+  const rail = useRef(null);
+  const [edge, setEdge] = useState({ start: true, end: false });
+  const slides = [];
+  for (let i = 0; i < Math.max(photos.length, quotes.length); i++) {
+    if (photos[i]) slides.push({ kind: 'photo', ...photos[i] });
+    if (quotes[i]) slides.push({ kind: 'quote', ...quotes[i] });
+  }
+  const onScroll = () => {
+    const el = rail.current; if (!el) return;
+    setEdge({ start: el.scrollLeft < 8, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 8 });
+  };
+  useEffect(onScroll, [slides.length]);
+  if (!slides.length) return null;
+
+  const go = (dir) => {
+    const el = rail.current; if (!el) return;
+    const card = el.querySelector('li');
+    const step = card ? card.getBoundingClientRect().width + 20 : el.clientWidth * 0.8;
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollBy({ left: dir * step, behavior: smooth ? 'smooth' : 'auto' });
+    track('stories_nav', { dir });
+  };
+  const arrow = 'grid place-items-center w-11 h-11 rounded-full bg-white disabled:opacity-35 hover:border-[var(--clay)] hover:text-[var(--clay)] transition-colors';
+
+  return (
+    <section id="stories" style={{ background: 'var(--cream-2)', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
+      <div className="max-w-6xl mx-auto px-5 md:px-8 py-16 md:py-24">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <Head eyebrow={L.gallery.eyebrow} heading={L.gallery.heading} lead={L.gallery.lead} />
+          <div className="hidden md:flex gap-2 shrink-0">
+            <button type="button" onClick={() => go(-1)} disabled={edge.start} className={arrow} style={{ border: '1px solid var(--line)' }} aria-label="Previous"><ChevronLeft className="w-5 h-5" /></button>
+            <button type="button" onClick={() => go(1)} disabled={edge.end} className={arrow} style={{ border: '1px solid var(--line)' }} aria-label="Next"><ChevronRight className="w-5 h-5" /></button>
+          </div>
+        </div>
+        <div className="mt-10 -mx-5 md:mx-0">
+          <div ref={rail} onScroll={onScroll} className="uf-scroll-x px-5 md:px-0" tabIndex={0} role="region" aria-roledescription="carousel" aria-label="Photos and member stories">
+            <ul className="flex gap-5 pb-1">
+              {slides.map((s, i) => (
+                <li key={i} className="shrink-0 w-[78vw] max-w-[320px] sm:w-[320px]" aria-roledescription="slide" aria-label={`${i + 1} of ${slides.length}`}>
+                  {s.kind === 'photo' ? (
+                    <figure className="uf-photo aspect-[4/5]">
+                      <PhotoInner src={s.img} alt={s.cap} hint={s.cap} />
+                      {s.img && s.cap && (
+                        <figcaption className="absolute inset-x-0 bottom-0 p-4 pt-12 text-left text-[0.9rem] font-medium text-white" style={{ background: 'linear-gradient(to top, rgba(20,14,8,0.78), rgba(20,14,8,0))', lineHeight: 1.45 }}>{s.cap}</figcaption>
+                      )}
+                    </figure>
+                  ) : (
+                    <figure className="uf-card aspect-[4/5] p-7 flex flex-col">
+                      <Quote className="w-7 h-7" style={{ color: 'var(--clay)', opacity: 0.45 }} aria-hidden="true" />
+                      {s.result ? <span className="mt-4 uf-tag self-start">{s.result}</span> : null}
+                      <blockquote className="mt-4 flex-1 uf-serif overflow-hidden" style={{ fontSize: '1.2rem', lineHeight: 1.45, color: 'var(--ink)' }}>{s.quote}</blockquote>
+                      <figcaption className="mt-5 pt-4 text-[0.95rem] font-semibold" style={{ borderTop: '1px solid var(--line)' }}>
+                        {s.name}{s.city ? <span className="uf-ink-soft font-normal"> · {s.city}</span> : null}
+                      </figcaption>
+                    </figure>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -551,10 +578,11 @@ function Pricing({ clickCta }) {
   return (
     <section id="pricing">
       <div className="max-w-6xl mx-auto px-5 md:px-8 py-16 md:py-24">
-        <Head eyebrow={p.eyebrow} heading={p.heading} lead={p.sub} />
+        <Head eyebrow={p.eyebrow} heading={p.heading} lead={p.sub} center />
 
         {/* billing toggle — a pressed-button pair, not tabs (no tabpanels here) */}
-        <div className="mt-8 inline-flex p-1 rounded-full" style={{ background: 'var(--cream-2)', border: '1px solid var(--line)' }} role="group" aria-label="Billing period">
+        <div className="mt-8 flex justify-center">
+        <div className="inline-flex p-1 rounded-full" style={{ background: 'var(--cream-2)', border: '1px solid var(--line)' }} role="group" aria-label="Billing period">
           {p.billing.map(opt => (
             <button key={opt.key} type="button" aria-pressed={billing === opt.key}
               onClick={() => { setBilling(opt.key); track('billing_toggle', { billing: opt.key, market: MARKET }); }}
@@ -564,27 +592,32 @@ function Pricing({ clickCta }) {
             </button>
           ))}
         </div>
+        </div>
 
-        {/* 4 primary tiers, Complete anchor */}
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4 mt-8 items-stretch">
+        {/* 4 primary tiers, Complete anchor. Headline price is always per
+            month so the four cards compare at a glance. */}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 mt-12 items-stretch">
           {p.primary.map(plan => {
             const pr = price(plan.monthly);
             const anchor = plan.anchor;
             return (
-              <div key={plan.name} className="rounded-[22px] p-7 flex flex-col"
-                style={anchor ? { border: '1.5px solid var(--clay)', background: 'var(--cream)' } : { border: '1px solid var(--line)', background: 'var(--cream)' }}>
-                {anchor && <span className="uf-tag self-start mb-3">{p.anchorBadge}</span>}
-                <h3 className="uf-serif" style={{ fontSize: '1.35rem' }}>{plan.name}</h3>
-                <p className="mt-1 text-[0.95rem] uf-ink-soft">{plan.tagline}</p>
-                <p className="mt-4 uf-serif uf-tabular" style={{ fontSize: '2.4rem', lineHeight: 1 }}>
-                  {p.currency ?? '$'}{pr.total}<span className="text-[0.9rem] uf-ink-soft"> {b.months === 1 ? '/mo' : '/quarter'}</span>
+              <div key={plan.name} className={`relative rounded-[22px] p-6 flex flex-col ${anchor ? 'shadow-[0_18px_40px_-24px_rgba(194,65,12,0.55)]' : ''}`}
+                style={anchor ? { border: '2px solid var(--clay)', background: 'var(--cream-2)' } : { border: '1px solid var(--line)', background: 'var(--cream)' }}>
+                {anchor && (
+                  <span className="absolute -top-3 left-6 rounded-full px-3 py-1 text-[0.7rem] font-bold uppercase tracking-[0.08em] whitespace-nowrap" style={{ background: 'var(--clay)', color: '#FFFFFF' }}>{p.anchorBadge}</span>
+                )}
+                <h3 className="font-bold whitespace-nowrap" style={{ fontFamily: 'var(--sans)', fontSize: '1.1rem' }}>{plan.name}</h3>
+                <p className="mt-1 text-[0.9rem] uf-ink-soft lg:min-h-[2.8rem]" style={{ lineHeight: 1.45 }}>{plan.tagline}</p>
+                <p className="mt-5 uf-serif uf-tabular whitespace-nowrap" style={{ fontSize: '2.6rem', lineHeight: 1 }}>
+                  ${pr.perMo}<span className="text-[0.95rem] uf-ink-soft" style={{ fontFamily: 'var(--sans)' }}>/mo</span>
                 </p>
-                <p className="mt-1 h-5 text-[0.85rem]" style={{ color: 'var(--go)' }}>{b.months > 1 ? `$${pr.perMo}/mo, billed quarterly` : ''}</p>
-                <ul className="mt-5 space-y-2.5 text-[0.95rem] flex-1">
-                  {plan.feats.map(f => <li key={f} className="flex items-start gap-2"><Check className="w-4 h-4 shrink-0 mt-1" style={{ color: 'var(--go)' }} /> {f}</li>)}
+                <p className="mt-2 text-[0.8rem] uf-ink-soft">{b.months > 1 ? `$${pr.total} billed every 3 months` : 'Billed monthly'}</p>
+                <hr className="uf-hr my-5" />
+                <ul className="space-y-2.5 text-[0.92rem] flex-1">
+                  {plan.feats.map(f => <li key={f} className="flex items-start gap-2.5"><Check className="w-4 h-4 shrink-0 mt-[3px]" style={{ color: 'var(--go)' }} /> {f}</li>)}
                 </ul>
                 <Link to={planHref(plan.name)} onClick={() => selectPlan(plan.name, pr.total)}
-                  className={`uf-btn uf-btn--full mt-6 ${anchor ? 'uf-btn--primary' : 'uf-btn--ghost'}`}>
+                  className={`uf-btn uf-btn--full mt-6 !px-4 whitespace-nowrap ${anchor ? 'uf-btn--solid' : 'uf-btn--ghost'}`}>
                   {anchor ? L.pricing.anchorCta : L.pricing.primaryCta}<span className="sr-only"> — {plan.name}</span>
                 </Link>
               </div>
@@ -592,155 +625,87 @@ function Pricing({ clickCta }) {
           })}
         </div>
 
-        <button type="button" onClick={() => setShowMore(v => !v)} className="mt-6 inline-flex items-center gap-1.5 min-h-11 font-semibold" style={{ color: 'var(--clay)' }} aria-expanded={showMore} aria-controls="uf-more-plans">
-          {showMore ? p.moreCollapse : p.moreToggle} <ChevronDown className={`w-4 h-4 transition-transform ${showMore ? 'rotate-180' : ''}`} />
-        </button>
+        <div className="mt-8 flex flex-col items-center gap-2">
+          <RefundNote className="text-center max-w-2xl" />
+          <button type="button" onClick={() => setShowMore(v => !v)} className="inline-flex items-center gap-1.5 min-h-11 font-semibold" style={{ color: 'var(--clay)' }} aria-expanded={showMore} aria-controls="uf-more-plans">
+            {showMore ? p.moreCollapse : p.moreToggle} <ChevronDown className={`w-4 h-4 transition-transform ${showMore ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
 
+        {/* More plans: one compact list instead of another grid of boxes. */}
         {showMore && (
-          <div id="uf-more-plans" className="mt-6 grid gap-5 lg:grid-cols-[1.4fr_1fr] items-start">
-            <div className="grid gap-3 sm:grid-cols-2">
+          <div id="uf-more-plans" className="mt-4 max-w-4xl mx-auto">
+            <ul className="uf-card divide-y" style={{ borderColor: 'var(--line)' }}>
               {p.more.map(m => {
                 const pr = price(m.monthly);
                 return (
-                  <div key={m.name} className="uf-panel p-5 flex flex-col">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <h4 className="font-semibold" style={{ fontSize: '1.05rem' }}>{m.name}</h4>
-                      <span className="uf-serif uf-tabular shrink-0" style={{ fontSize: '1.3rem' }}>${pr.total}<span className="text-[0.75rem] uf-ink-soft">{b.months === 1 ? '/mo' : '/qtr'}</span></span>
+                  <li key={m.name} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5" style={{ borderColor: 'var(--line)' }}>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold" style={{ fontSize: '1.02rem' }}>{m.name}</h4>
+                      <p className="text-[0.9rem] uf-ink-soft">{m.note}</p>
                     </div>
-                    <p className="mt-1.5 text-[0.9rem] uf-ink-soft flex-1">{m.note}</p>
-                    <Link to={planHref(m.name)} onClick={() => selectPlan(m.name, pr.total)} className="uf-btn uf-btn--ghost uf-btn--full mt-4 !py-2.5 text-[0.95rem]">{L.pricing.primaryCta}<span className="sr-only"> — {m.name}</span></Link>
-                  </div>
+                    <p className="uf-serif uf-tabular shrink-0" style={{ fontSize: '1.5rem', lineHeight: 1 }}>${pr.perMo}<span className="text-[0.8rem] uf-ink-soft" style={{ fontFamily: 'var(--sans)' }}>/mo</span></p>
+                    <Link to={planHref(m.name)} onClick={() => selectPlan(m.name, pr.total)} className="uf-btn uf-btn--ghost !py-2 !px-5 !min-h-11 text-[0.95rem] whitespace-nowrap shrink-0">{L.pricing.primaryCta}<span className="sr-only"> — {m.name}</span></Link>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
             {/* Founding member — real scarcity, no fake countdown */}
-            <div className="rounded-[22px] p-7" style={{ background: 'var(--cream-2)', border: '1.5px solid var(--clay)' }}>
-              <span className="uf-tag">{p.founding.name}</span>
-              <p className="mt-4 uf-serif uf-tabular" style={{ fontSize: '2.2rem', lineHeight: 1 }}>${p.founding.price}<span className="text-[0.9rem] uf-ink-soft">{p.founding.unit}</span></p>
-              <p className="mt-2 text-[0.85rem] font-semibold" style={{ color: 'var(--clay)' }}>
-                {p.founding.scarcity}{p.founding.seatsLeft != null ? ` · ${p.founding.seatsLeft} seats left` : ''}
-              </p>
-              <ul className="mt-4 space-y-2 text-[0.95rem]">
-                {p.founding.perks.map(k => <li key={k} className="flex items-start gap-2"><Check className="w-4 h-4 shrink-0 mt-1" style={{ color: 'var(--go)' }} /> {k}</li>)}
-              </ul>
-              <Link to={`/auth?mode=signup&plan=${encodeURIComponent(p.founding.name)}&billing=yearly`} onClick={() => selectPlan(p.founding.name, p.founding.price)} className="uf-btn uf-btn--primary uf-btn--full mt-5">{L.pricing.primaryCta}<span className="sr-only"> — {p.founding.name}</span></Link>
+            <div className="mt-5 rounded-[22px] p-6 flex flex-col md:flex-row md:items-center gap-5" style={{ background: 'var(--cream-2)', border: '1.5px solid var(--clay)' }}>
+              <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="uf-tag">{p.founding.name}</span>
+                  <span className="text-[0.85rem] font-semibold" style={{ color: 'var(--clay)' }}>
+                    {p.founding.scarcity}{p.founding.seatsLeft != null ? ` · ${p.founding.seatsLeft} seats left` : ''}
+                  </span>
+                </div>
+                <ul className="mt-3 grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-[0.92rem]">
+                  {p.founding.perks.map(k => <li key={k} className="flex items-start gap-2"><Check className="w-4 h-4 shrink-0 mt-1" style={{ color: 'var(--go)' }} /> {k}</li>)}
+                </ul>
+              </div>
+              <div className="shrink-0 md:text-right">
+                <p className="uf-serif uf-tabular" style={{ fontSize: '2.2rem', lineHeight: 1 }}>${p.founding.price}<span className="text-[0.9rem] uf-ink-soft" style={{ fontFamily: 'var(--sans)' }}>{p.founding.unit}</span></p>
+                <Link to={`/auth?mode=signup&plan=${encodeURIComponent(p.founding.name)}&billing=yearly`} onClick={() => selectPlan(p.founding.name, p.founding.price)} className="uf-btn uf-btn--solid mt-3 whitespace-nowrap">{L.pricing.primaryCta}<span className="sr-only"> — {p.founding.name}</span></Link>
+              </div>
             </div>
           </div>
         )}
-        <RefundNote className="mt-8" />
       </div>
     </section>
   );
 }
 
 function Faq() {
-  const [open, setOpen] = useState(0);
+  const [open, setOpen] = useState('0-0');
   return (
-    <div className="flex flex-col">
-      {L.faq.items.map((f, i) => (
-        <div key={i} style={{ borderBottom: '1px solid var(--line)' }}>
-          <h3 style={{ fontFamily: 'var(--sans)' }}>
-            <button type="button" id={`faq-q-${i}`} className="w-full flex items-center justify-between gap-4 py-5 text-left"
-              onClick={() => { const next = open === i ? -1 : i; setOpen(next); if (next === i) track('faq_open', { question: f.q }); }}
-              aria-expanded={open === i} aria-controls={`faq-a-${i}`}>
-              <span className="font-semibold" style={{ fontSize: '1.05rem', lineHeight: 1.4 }}>{f.q}</span>
-              <ChevronDown className={`w-5 h-5 shrink-0 transition-transform ${open === i ? 'rotate-180' : ''}`} style={{ color: 'var(--clay)' }} />
-            </button>
-          </h3>
-          {/* Answers stay in the DOM (hidden) so crawlers and in-page search see them. */}
-          <p id={`faq-a-${i}`} role="region" aria-labelledby={`faq-q-${i}`} hidden={open !== i} className="pb-5 uf-ink-soft uf-measure">{f.a}</p>
+    <div className="flex flex-col gap-10">
+      {L.faq.groups.map((g, gi) => (
+        <div key={g.name}>
+          <p className="uf-eyebrow">{g.name}</p>
+          <div className="mt-2 flex flex-col">
+            {g.items.map((f, i) => {
+              const id = `${gi}-${i}`;
+              const isOpen = open === id;
+              return (
+                <div key={id} style={{ borderBottom: '1px solid var(--line)' }}>
+                  <h3 style={{ fontFamily: 'var(--sans)' }}>
+                    <button type="button" id={`faq-q-${id}`} className="w-full flex items-center justify-between gap-4 py-4 text-left hover:text-[var(--clay)] transition-colors"
+                      onClick={() => { setOpen(isOpen ? null : id); if (!isOpen) track('faq_open', { question: f.q }); }}
+                      aria-expanded={isOpen} aria-controls={`faq-a-${id}`}>
+                      <span className="font-semibold" style={{ fontSize: '1.02rem', lineHeight: 1.45 }}>{f.q}</span>
+                      <span className="grid place-items-center w-8 h-8 shrink-0 rounded-full" style={{ background: isOpen ? 'var(--clay)' : 'var(--clay-tint)', color: isOpen ? '#FFFFFF' : 'var(--clay-deep)' }}>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                      </span>
+                    </button>
+                  </h3>
+                  {/* Answers stay in the DOM (hidden) so crawlers and in-page search see them. */}
+                  <p id={`faq-a-${id}`} role="region" aria-labelledby={`faq-q-${id}`} hidden={!isOpen} className="pb-5 pr-12 uf-ink-soft text-[0.98rem]">{f.a}</p>
+                </div>
+              );
+            })}
+          </div>
         </div>
       ))}
     </div>
-  );
-}
-
-function InquiryForm({ clickCta, tz }) {
-  const [f, setF] = useState({ name: '', cc: '1', phone: '', goal: GOALS[0], consent: false, company: '' });
-  const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(null);   // null | 'new' | 'dupe'
-  const [err, setErr] = useState({ field: null, msg: '' });
-  const touchedCc = useRef(false);
-
-  // Default the country code to India for IST visitors (unless they picked one).
-  useEffect(() => { if (!touchedCc.current && tz === 'Asia/Kolkata') setF(x => ({ ...x, cc: '91' })); }, [tz]);
-
-  const fail = (field, msg, reason) => { setErr({ field, msg }); track('form_error', { form: 'masterclass', field, reason }); };
-
-  async function submit(e) {
-    e.preventDefault();
-    setErr({ field: null, msg: '' });
-    if (f.company) { setDone('new'); return; }   // honeypot: bots fill hidden fields
-    const name = f.name.trim();
-    if (name.length < 2 || name.length > 80) return fail('name', 'Please enter your name.', 'length');
-    const e164 = toE164(f.cc, f.phone);
-    if (!e164) return fail('phone', 'Please enter a valid phone number for the country selected.', 'format');
-    if (!f.consent) return fail('consent', 'Please tick the box so we can contact you about your seat.', 'consent');
-    setBusy(true);
-    let utm = {};
-    try { utm = JSON.parse(sessionStorage.getItem('uf_utm') || '{}'); } catch { utm = {}; }
-    const { error } = await supabase.from('leads').insert({
-      name, whatsapp: e164, goal: f.goal, consent: true,
-      source: `masterclass${utm.utm_source ? ':' + utm.utm_source : ''}`,
-    });
-    setBusy(false);
-    if (error) {
-      if (error.code === '23505') { setDone('dupe'); return; }      // unique (phone) — already signed up
-      if (error.code === '23514') return fail('phone', 'Please check your name and phone number.', 'db_check');
-      return fail(null, 'Something went wrong on our side. Please try again, or message us on WhatsApp.', 'db_error');
-    }
-    clickCta('masterclass_submit');
-    track('generate_lead', { form: 'masterclass', goal: f.goal, country_code: f.cc, utm_source: utm.utm_source });
-    setDone('new');
-  }
-
-  if (done) return (
-    <div className="uf-card p-7 text-center" role="status">
-      <Check className="w-9 h-9 mx-auto" style={{ color: 'var(--go)' }} />
-      <p className="mt-3 uf-serif" style={{ fontSize: '1.25rem' }}>{L.masterclass.doneTitle}</p>
-      <p className="mt-1 uf-ink-soft text-[0.95rem]">{done === 'dupe' ? L.masterclass.dupeBody : L.masterclass.doneBody}</p>
-      <a href={waLink('Hi Unifitz! I’d like a free masterclass seat.')} target="_blank" rel="noopener noreferrer" onClick={() => track('whatsapp_click', { location: 'masterclass_done' })} className="uf-btn uf-btn--ghost mt-4">Message us <ArrowUpRight className="w-4 h-4" /></a>
-    </div>
-  );
-
-  const errFor = field => (err.field === field ? { 'aria-invalid': true, 'aria-describedby': 'iq-err' } : {});
-  return (
-    <form onSubmit={submit} noValidate className="uf-card p-6 flex flex-col gap-4">
-      <div>
-        <label htmlFor="iq-name" className="uf-label">Your name</label>
-        <input id="iq-name" required maxLength={80} className="uf-input" placeholder="e.g. Ananya" value={f.name} onChange={e => setF(x => ({ ...x, name: e.target.value }))} autoComplete="name" {...errFor('name')} />
-      </div>
-      <div>
-        <label htmlFor="iq-phone" className="uf-label">WhatsApp number</label>
-        <div className="flex gap-2">
-          <select aria-label="Country code" className="uf-input !w-auto shrink-0 !px-3" value={f.cc}
-            onChange={e => { touchedCc.current = true; setF(x => ({ ...x, cc: e.target.value })); }} autoComplete="tel-country-code">
-            {DIAL_CODES.map(d => <option key={d.code} value={d.code}>{d.label}</option>)}
-          </select>
-          <input id="iq-phone" required type="tel" inputMode="tel" maxLength={20} className="uf-input min-w-0" placeholder={PHONE_PH[f.cc]} value={f.phone}
-            onChange={e => setF(x => ({ ...x, phone: e.target.value }))} autoComplete="tel-national" {...errFor('phone')} />
-        </div>
-      </div>
-      <div>
-        <label htmlFor="iq-goal" className="uf-label">What are you working on?</label>
-        <select id="iq-goal" className="uf-input" value={f.goal} onChange={e => setF(x => ({ ...x, goal: e.target.value }))}>
-          {GOALS.map(g => <option key={g} value={g}>{g}</option>)}
-        </select>
-      </div>
-      {/* honeypot — invisible to people, irresistible to bots */}
-      <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
-        <label htmlFor="iq-company">Company</label>
-        <input id="iq-company" tabIndex={-1} autoComplete="off" value={f.company} onChange={e => setF(x => ({ ...x, company: e.target.value }))} />
-      </div>
-      <label className="flex items-start gap-2.5 text-[0.85rem] uf-ink-soft cursor-pointer">
-        <input type="checkbox" required checked={f.consent} onChange={e => setF(x => ({ ...x, consent: e.target.checked }))} className="mt-1 w-4 h-4 shrink-0" style={{ accentColor: 'var(--go)' }} {...errFor('consent')} />
-        <span>{L.masterclass.consent} See our <Link to="/privacy" className="underline underline-offset-2">privacy policy</Link>.</span>
-      </label>
-      {err.msg && <p id="iq-err" className="text-[0.9rem]" style={{ color: '#B23B3B' }} role="alert">{err.msg}</p>}
-      <button type="submit" disabled={busy} className="uf-btn uf-btn--primary uf-btn--full">
-        {busy && <Loader2 className="w-4 h-4 animate-spin" />} {L.masterclass.cta}
-      </button>
-      <p className="text-center text-[0.8rem] uf-ink-soft">No card required</p>
-    </form>
   );
 }

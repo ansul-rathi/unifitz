@@ -29,6 +29,11 @@ const PAGES = [
     title: 'Cancellation & refund policy | Unifitz',
     description: 'How to cancel your Unifitz membership, when renewals stop, and when refunds apply.',
   },
+  {
+    url: '/20minutes-fitness', file: '20minutes-fitness.html',
+    title: '20-Minute Fitness — Join the Founding Batch Waitlist | Unifitz',
+    description: 'A live 20-minute workout, 5 days a week, with two trainers in every session — one to lead, one to check your form. Founding batch starts 1 December. Waitlist is free.',
+  },
 ];
 
 const esc = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');

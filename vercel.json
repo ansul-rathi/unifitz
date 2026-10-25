@@ -1,8 +1,10 @@
 {
   "redirects": [
-    { "source": "/landing", "destination": "/", "permanent": true }
+    { "source": "/landing", "destination": "/", "permanent": true },
+    { "source": "/:alias(20minutesfitness|20-minutes-fitness)", "destination": "/20minutes-fitness", "permanent": true }
   ],
   "rewrites": [
+    { "source": "/20minutes-fitness", "destination": "/20minutes-fitness.html" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/refund", "destination": "/refund.html" },

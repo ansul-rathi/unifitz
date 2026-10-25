@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { MessageCircle, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { waLink } from '../config';
 import { track } from '../lib/track';
+import WhatsAppIcon from './WhatsAppIcon';
 
 // Persistent floating WhatsApp button — bottom-right, gentle pulse, with a
 // dismissible "Chat with us" label that appears after a few seconds.
@@ -33,7 +34,7 @@ export default function FloatingWhatsApp() {
         className="relative inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-xl hover:scale-105 transition-transform duration-200"
       >
         <span className="absolute inset-0 rounded-full bg-[#25D366] motion-safe:animate-ping opacity-30" />
-        <MessageCircle className="relative w-7 h-7" />
+        <WhatsAppIcon className="relative w-7 h-7" />
       </a>
     </div>
   );

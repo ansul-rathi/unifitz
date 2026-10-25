@@ -11,9 +11,7 @@ placeholders in `pnpm dev`), so you can add photos one at a time.
 | Filename | Set in `landing.js` | Where it appears | Ideal shape / size |
 |---|---|---|---|
 | `hero.jpg`      | `hero.img`                  | Hero (replaces the "coming up live" card) | landscape 4:3, ~1200×900 |
-| `gallery-1.jpg` | `gallery.photos[0].img`     | "Inside the classes" — 1st | portrait 4:5, ~800×1000 |
-| `gallery-2.jpg` | `gallery.photos[1].img`     | "Inside the classes" — 2nd | portrait 4:5, ~800×1000 |
-| `gallery-3.jpg` | `gallery.photos[2].img`     | "Inside the classes" — 3rd | portrait 4:5, ~800×1000 |
+| `gallery-1.jpg` … `gallery-6.jpg` | `gallery.photos[0..5].img` | "Real women. Real living rooms." carousel — edit each `cap` to describe that photo; add more entries for more slides | portrait 4:5, ~800×1000 |
 | `coach-1.jpg`   | `instructors.items[0].img`  | Instructors — Zumba & cardio | square 1:1, ~600×600 |
 | `coach-2.jpg`   | `instructors.items[1].img`  | Instructors — Yoga & mobility | square 1:1, ~600×600 |
 | `coach-3.jpg`   | `instructors.items[2].img`  | Instructors — Strength | square 1:1, ~600×600 |

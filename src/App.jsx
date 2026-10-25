@@ -20,6 +20,7 @@ const Privacy = lazy(() => import('./pages/legal/Privacy'));
 const Terms = lazy(() => import('./pages/legal/Terms'));
 const Refund = lazy(() => import('./pages/legal/Refund'));
 const WaitlistLanding = lazy(() => import('./pages/WaitlistLanding'));
+const TwentyMinutes = lazy(() => import('./pages/TwentyMinutes'));
 const ResumeAnsulRathi = lazy(() => import('./pages/resume/AnsulRathi'));
 
 const ClientHome = lazy(() => import('./pages/client/Home'));
@@ -60,7 +61,7 @@ const SITE = 'https://www.unifitz.in';
 // Marketing pages use the landing fonts (Fraunces + Plus Jakarta, in index.html).
 // Everything else is the app UI, which also needs Barlow — loaded on demand so
 // the landing page doesn't pay for two extra font families.
-const MARKETING = /^\/($|privacy|terms|refund)/;
+const MARKETING = /^\/($|privacy|terms|refund|20minutes-fitness)/;
 const NOINDEX = /^\/(auth|onboarding|app|teacher|admin|waitlisting)(\/|$)/;
 const APP_FONTS = 'https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800;900&display=swap';
 
@@ -141,6 +142,10 @@ export default function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/refund" element={<Refund />} />
         <Route path="/waitlisting" element={<WaitlistLanding />} />
+        {/* 20-minute daily series — founding-batch waitlist. Public even when logged in. */}
+        <Route path="/20minutes-fitness" element={<TwentyMinutes />} />
+        <Route path="/20minutesfitness" element={<Navigate to="/20minutes-fitness" replace />} />
+        <Route path="/20-minutes-fitness" element={<Navigate to="/20minutes-fitness" replace />} />
         {/* Shareable open link for the free 5 AM session — public even when logged in. */}
         <Route path="/morning" element={<MorningSession />} />
         {/* Public profile / resume page — shareable, public even when logged in. */}

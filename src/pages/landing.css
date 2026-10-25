@@ -79,6 +79,8 @@
 .uf-btn--primary:hover { background: var(--clay); color: #FFFFFF; }
 .uf-btn--ghost { background: #FFFFFF; color: var(--ink); border-color: var(--line); }
 .uf-btn--ghost:hover { border-color: var(--clay); color: var(--clay); }
+.uf-btn--solid { background: var(--clay); color: #FFFFFF; border-color: var(--clay); }
+.uf-btn--solid:hover { background: var(--clay-deep); border-color: var(--clay-deep); }
 .uf-btn--full { width: 100%; }
 
 /* — flat surfaces — */

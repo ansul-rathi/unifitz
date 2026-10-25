@@ -39,12 +39,13 @@ export default function ClientRefer() {
       const { data: refs } = await supabase.from('referrals').select('*').eq('referrer_id', profile.id).order('created_at', { ascending: false });
       setReferrals(refs ?? []);
 
-      // Attendance count per active friend → "Day X/7".
+      // Verified attendance per active friend → "Day X/7" (same rule as the
+      // server-side reward: self-marked recordings don't count).
       const d = {};
       for (const r of refs ?? []) {
         if (r.status === 'active') {
           const { count } = await supabase.from('attendance').select('id', { count: 'exact', head: true })
-            .eq('user_id', r.referred_id).eq('attended', true);
+            .eq('user_id', r.referred_id).eq('verified', true);
           d[r.referred_id] = count ?? 0;
         }
       }
