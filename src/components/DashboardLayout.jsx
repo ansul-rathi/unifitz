@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   Home, Trophy, TrendingUp, Gift, User, Calendar, Users, Megaphone,
-  LayoutDashboard, ListChecks, UserCog, Share2, IndianRupee, Flame, LogOut, Dumbbell,
+  LayoutDashboard, ListChecks, UserCog, Share2, IndianRupee, Flame, LogOut, 
   Salad, Medal, Mailbox, BarChart3, X, CalendarCheck, Sparkles, ChefHat, Eye, Bell, Menu,
   ClipboardCheck, ChevronRight,
 } from 'lucide-react';
@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { useViewMode } from '../context/ViewModeContext';
 import { supabase } from '../lib/supabase';
 import { Avatar } from './ui';
+import BrandMark from './BrandMark';
 
 const NAV = {
   client: [
@@ -131,10 +132,8 @@ export default function DashboardLayout() {
               </button>
             )}
             <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold text-slate-900">
-              <span className="inline-flex w-8 h-8 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-orange-600 text-white shadow-sm shadow-orange-500/30">
-                <Dumbbell className="w-4.5 h-4.5" />
-              </span>
-              Uni<span className="text-brand-500">fitz</span>
+              <BrandMark className="w-8 h-8" />
+              Unifitz
             </Link>
           </div>
 
@@ -211,8 +210,8 @@ export default function DashboardLayout() {
           <aside className="absolute inset-y-0 left-0 w-72 max-w-[85%] bg-white shadow-2xl flex flex-col">
             <div className="px-5 pt-5 pb-4 flex items-center justify-between">
               <span className="flex items-center gap-2 font-display text-xl font-bold text-slate-900">
-                <span className="inline-flex w-8 h-8 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-orange-600 text-white shadow-sm shadow-orange-500/30"><Dumbbell className="w-4.5 h-4.5" /></span>
-                Uni<span className="text-brand-500">fitz</span>
+                <BrandMark className="w-8 h-8" />
+                Unifitz
               </span>
               <button onClick={() => setDrawerOpen(false)} aria-label="Close menu" className="p-1.5 rounded-lg hover:bg-slate-100"><X className="w-5 h-5" /></button>
             </div>
@@ -390,10 +389,8 @@ export default function DashboardLayout() {
         {/* Logo */}
         <div className="px-6 pt-7 pb-6">
           <Link to="/" className="flex items-center gap-2.5 font-display text-2xl font-bold text-slate-900">
-            <span className="inline-flex w-10 h-10 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-orange-600 text-white shadow-lg shadow-orange-500/30">
-              <Dumbbell className="w-5 h-5" />
-            </span>
-            Uni<span className="text-brand-500">fitz</span>
+            <BrandMark className="w-10 h-10" />
+            Unifitz
           </Link>
         </div>
 

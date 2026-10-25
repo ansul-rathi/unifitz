@@ -7,7 +7,7 @@ import { ToastProvider } from './context/ToastContext';
 import { ViewModeProvider } from './context/ViewModeContext';
 import './index.css';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const app = (
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
@@ -20,3 +20,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
+// Marketing pages (/, /privacy, …) ship prerendered HTML (scripts/prerender.mjs)
+// — hydrate it so the content stays on screen. Everything else is the empty
+// SPA shell (app.html) and renders from scratch.
+const root = document.getElementById('root');
+if (root.hasChildNodes()) ReactDOM.hydrateRoot(root, app);
+else ReactDOM.createRoot(root).render(app);

@@ -132,7 +132,7 @@ export default function ClientSeries() {
                     </button>
                   ) : (
                     <div className="space-y-2">
-                      <button onClick={() => openPay(c)} className="btn-primary w-full text-sm">
+                      <button onClick={() => setPayFor(c)} className="btn-primary w-full text-sm">
                         Enroll · ₹{c.price} <ArrowRight className="w-4 h-4" />
                       </button>
                       {c.free_session_count > 0 && (

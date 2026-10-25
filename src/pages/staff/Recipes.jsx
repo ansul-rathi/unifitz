@@ -6,6 +6,7 @@ import { useToast } from '../../context/ToastContext';
 import { compressImage } from '../../lib/compressImage';
 import { Card, Spinner, EmptyState } from '../../components/ui';
 import Select from '../../components/Select';
+import RecipeImage from '../../components/RecipeImage';
 
 const kcal = r => r.base_calories ?? r.calories ?? null;
 const protein = r => r.base_protein_g ?? r.protein_g ?? null;
@@ -121,7 +122,7 @@ export default function StaffRecipes() {
             {filtered.map(r => (
               <li key={r.id} className="flex items-center gap-3 px-4 py-3">
                 <div className="w-14 h-10 rounded-lg overflow-hidden bg-emerald-100 flex items-center justify-center shrink-0">
-                  {r.image_url ? <img src={r.image_url} alt="" loading="lazy" className="w-full h-full object-cover" /> : <Salad className="w-4 h-4 text-emerald-600" />}
+                  <RecipeImage src={r.image_url} lazy iconClass="w-4 h-4 text-emerald-600" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-sm truncate">{r.title}</p>
@@ -148,7 +149,7 @@ export default function StaffRecipes() {
         <div className="fixed inset-0 z-[70] bg-slate-900/60 flex items-end sm:items-center justify-center p-0 sm:p-6" role="dialog" aria-modal="true" onClick={() => setView(null)}>
           <div className="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-y-auto animate-fade-up" onClick={e => e.stopPropagation()}>
             <div className="relative aspect-[16/9] bg-gradient-to-br from-emerald-200 to-emerald-400 flex items-center justify-center">
-              {view.image_url ? <img src={view.image_url} alt={view.title} className="w-full h-full object-cover" /> : <Salad className="w-12 h-12 text-emerald-700" />}
+              <RecipeImage src={view.image_url} alt={view.title} iconClass="w-12 h-12 text-emerald-700" />
               <button onClick={() => setView(null)} aria-label="Close" className="absolute top-3 right-3 p-2 rounded-full bg-white/85 text-slate-700 hover:bg-white"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-5 md:p-6">

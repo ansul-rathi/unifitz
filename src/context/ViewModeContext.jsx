@@ -6,7 +6,8 @@ const ViewModeContext = createContext({ preview: false, setPreview: () => {} });
 const KEY = 'uf_preview_student';
 
 export function ViewModeProvider({ children }) {
-  const [preview, setPreviewState] = useState(() => localStorage.getItem(KEY) === '1');
+  // typeof guard: this provider also renders during the build-time prerender (Node).
+  const [preview, setPreviewState] = useState(() => typeof localStorage !== 'undefined' && localStorage.getItem(KEY) === '1');
   const setPreview = useCallback(v => {
     setPreviewState(v);
     if (v) localStorage.setItem(KEY, '1');

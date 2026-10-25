@@ -31,7 +31,7 @@ export default function ClientRefer() {
 
   const code = profile.referral_code;
   const link = `${window.location.origin}/auth?mode=signup&ref=${code}`;
-  const shareText = `Hey! I've been working out with UniFitz — live Zumba, Yoga and Strength classes on Zoom, and it's genuinely fun. Book a free demo class with my code ${code} and we both earn rewards: ${link}`;
+  const shareText = `Hey! I've been working out with Unifitz — live Zumba, Yoga and Strength classes on Zoom, and it's genuinely fun. Book a free demo class with my code ${code} and we both earn rewards: ${link}`;
   const waText = encodeURIComponent(shareText);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function ClientRefer() {
 
   async function nativeShare() {
     if (navigator.share) {
-      try { await navigator.share({ title: 'UniFitz', text: shareText }); } catch { /* cancelled */ }
+      try { await navigator.share({ title: 'Unifitz', text: shareText }); } catch { /* cancelled */ }
     } else {
       copy(link, 'Link copied');
     }
@@ -111,7 +111,7 @@ export default function ClientRefer() {
       {/* Reward milestone */}
       <Card className="p-5 md:p-6">
         <div className="flex items-center justify-between gap-3">
-          <h3 className="font-bold text-lg flex items-center gap-2"><Sparkles className="w-5 h-5 text-violet-500" /> Free 1-on-1 consult</h3>
+          <h2 className="font-bold text-lg flex items-center gap-2"><Sparkles className="w-5 h-5 text-violet-500" /> Free 1-on-1 consult</h2>
           <span className="text-sm font-bold text-slate-900">{Math.min(earned, REWARD_GOAL)}/{REWARD_GOAL}</span>
         </div>
         <div className="mt-3"><ProgressBar value={Math.min(earned, REWARD_GOAL)} max={REWARD_GOAL} /></div>
@@ -124,7 +124,7 @@ export default function ClientRefer() {
 
       {/* How it works */}
       <Card className="p-5 md:p-6">
-        <h3 className="font-bold text-lg">How it works</h3>
+        <h2 className="font-bold text-lg">How it works</h2>
         <ol className="mt-3 space-y-3">
           {[
             'Your friend signs up with your code.',
@@ -148,7 +148,7 @@ export default function ClientRefer() {
 
       {/* My referrals */}
       <Card className="p-5 md:p-6">
-        <h3 className="font-bold text-lg">Your referrals</h3>
+        <h2 className="font-bold text-lg">Your referrals</h2>
         {referrals.length === 0 ? (
           <EmptyState icon={Gift} title="No referrals yet" hint="Share your code — your first reward is one friend away." />
         ) : (

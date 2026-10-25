@@ -53,7 +53,7 @@ export default function AdminReferrals() {
 
       <div className="grid gap-5 lg:grid-cols-3">
         <Card className="p-5 lg:col-span-2">
-          <h3 className="font-bold text-lg">All referrals</h3>
+          <h2 className="font-bold text-lg">All referrals</h2>
           {rows.length === 0 ? (
             <EmptyState icon={Gift} title="No referrals yet" />
           ) : (
@@ -107,8 +107,9 @@ export default function AdminReferrals() {
           </Card>
 
           <Card className="p-5">
-            <h3 className="font-bold text-lg">Reward rules</h3>
+            <h2 id="reward-rules" className="font-bold text-lg">Reward rules</h2>
             <textarea
+              aria-labelledby="reward-rules"
               rows="5"
               className="input mt-3 text-sm"
               value={rules}

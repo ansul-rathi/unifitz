@@ -11,16 +11,18 @@
   --cream-3: #FFEEDD;    /* image-placeholder fill */
   --ink: #20293A;        /* dark slate text */
   --ink-soft: #5B6472;   /* muted body */
-  --ink-faint: #98A2B0;  /* captions */
+  --ink-faint: #5F6877;  /* captions — ≥4.5:1 on every cream tint */
 
-  /* — brand hue: orange — */
-  --clay: #EA580C;       /* orange-600 (brand-600) */
-  --clay-deep: #C2410C;  /* orange-700 */
+  /* — brand hue: orange. Text/buttons use orange-700 (5.18:1 on white);
+       orange-600 #EA580C is only 3.55:1, so it's kept for decorative fills. — */
+  --clay: #C2410C;       /* orange-700 (brand-700) */
+  --clay-deep: #9A3412;  /* orange-800 */
   --clay-tint: #FFE7D3;  /* soft orange chip fill */
+  --clay-bright: #EA580C;/* decorative only — never body text */
 
   /* — conversion accent: orange (buttons) — */
-  --go: #EA580C;
-  --go-deep: #C2410C;
+  --go: #C2410C;
+  --go-deep: #9A3412;
 
   /* — small marks — */
   --gold: #F59E0B;       /* stars */
@@ -125,9 +127,37 @@
   outline: 3px solid var(--clay); outline-offset: 2px; border-radius: 6px;
 }
 
-.uf-scroll-x { overflow-x: auto; scrollbar-width: none; }
+.uf-scroll-x { overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; }
 .uf-scroll-x::-webkit-scrollbar { display: none; }
+.uf-scroll-x > * > * { scroll-snap-align: start; }
+/* right-edge fade = "there's more this way" affordance on small screens */
+.uf-fade-edge { position: relative; }
+.uf-fade-edge::after {
+  content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 48px; pointer-events: none;
+  background: linear-gradient(to right, rgba(255,247,237,0), var(--cream-2));
+}
+@media (min-width: 768px) { .uf-fade-edge::after { display: none; } }
+
+/* — skip link: hidden until keyboard focus — */
+.uf-skip {
+  position: absolute; left: 1rem; top: -100px; z-index: 100;
+  background: var(--ink); color: #fff; padding: 0.75rem 1rem; border-radius: 10px; font-weight: 700;
+}
+.uf-skip:focus { top: 1rem; }
+
+/* — hero entrance: CSS only, and never on the LCP text (it paints immediately) — */
+@keyframes uf-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.uf-rise { animation: uf-rise .35s cubic-bezier(.16,1,.3,1) both; }
+
+/* — long-form legal / policy pages — */
+.uf-prose { max-width: 70ch; }
+.uf-prose h2 { font-size: 1.5rem; margin-top: 2.5rem; }
+.uf-prose h3 { font-size: 1.15rem; margin-top: 1.5rem; }
+.uf-prose p, .uf-prose li { color: var(--ink-soft); margin-top: 0.75rem; }
+.uf-prose ul { list-style: disc; padding-left: 1.25rem; }
+.uf-prose a { color: var(--clay); text-decoration: underline; text-underline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) {
   .uf * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  .uf-scroll-x { scroll-behavior: auto; }
 }

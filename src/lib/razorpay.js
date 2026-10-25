@@ -29,11 +29,11 @@ export async function payWithRazorpay({ challengeId, profile, email, planId }) {
       key: data.key_id || RZP_KEY,
       amount: data.amount,
       currency: data.currency,
-      name: 'UniFit',
+      name: 'Unifitz',
       description: data.name,
       order_id: data.order_id,
       prefill: { name: profile?.full_name, email, contact: profile?.phone },
-      theme: { color: '#F97316' },
+      theme: { color: '#C2410C' },
       handler: async (resp) => {
         const { data: v, error: vErr } = await supabase.functions.invoke('razorpay-verify', {
           body: {

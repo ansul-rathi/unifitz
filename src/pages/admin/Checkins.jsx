@@ -206,7 +206,7 @@ export default function AdminCheckins() {
             <div className="flex items-center gap-2">
               <button onClick={() => setDate(d => shiftDay(d, -1))} aria-label="Previous day"
                 className="w-10 h-10 grid place-items-center rounded-xl border border-slate-200 text-slate-600 hover:border-brand-400"><ChevronLeft className="w-4 h-4" /></button>
-              <input type="date" className="input !w-44" value={date} max={iso(new Date())} onChange={e => setDate(e.target.value)} />
+              <input type="date" aria-label="Check-in date" className="input !w-44" value={date} max={iso(new Date())} onChange={e => setDate(e.target.value)} />
               <button onClick={() => setDate(d => shiftDay(d, 1))} disabled={isToday} aria-label="Next day"
                 className="w-10 h-10 grid place-items-center rounded-xl border border-slate-200 text-slate-600 hover:border-brand-400 disabled:opacity-40"><ChevronRight className="w-4 h-4" /></button>
             </div>
@@ -214,7 +214,7 @@ export default function AdminCheckins() {
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input className="input !pl-10" placeholder="Search member…" value={q} onChange={e => setQ(e.target.value)} />
             </div>
-            <select className="input sm:w-40" value={status} onChange={e => setStatus(e.target.value)}>
+            <select aria-label="Filter by status" className="input sm:w-40" value={status} onChange={e => setStatus(e.target.value)}>
               <option value="all">All members</option>
               <option value="submitted">Submitted</option>
               <option value="missed">Missed</option>
@@ -319,7 +319,7 @@ export default function AdminCheckins() {
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input className="input !pl-10" placeholder="Search member…" value={q} onChange={e => setQ(e.target.value)} />
             </div>
-            <select className="input sm:w-44" value={week} onChange={e => setWeek(e.target.value)}>
+            <select aria-label="Week" className="input sm:w-44" value={week} onChange={e => setWeek(e.target.value)}>
               <option value="all">All weeks</option>
               {weeks.map(w => <option key={w} value={w}>Week {w}</option>)}
             </select>

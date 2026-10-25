@@ -17,12 +17,47 @@ export const BUSINESS = {
   country: 'India',
   addressLine: 'Jaipur, Rajasthan, India',
   url: 'https://www.unifitz.in',
+  // Only verified Unifitz-owned profiles. A null entry hides its footer icon and
+  // keeps it out of structured data. (The old /unifit handles weren't ours.)
   socials: {
-    instagram: 'https://instagram.com/unifit',
-    facebook: 'https://facebook.com/unifit',
-    youtube: 'https://youtube.com/@unifit',
+    instagram: null,
+    facebook: null,
+    youtube: null,
   },
+  // Legal entity shown in the footer + policy pages. null → "Unifitz, Jaipur…".
+  legalName: null,
+  // Grievance officer (India DPDP Act / IT Rules). null → falls back to `email`.
+  grievanceOfficer: null,
+  // Full-refund window for a member's FIRST payment, in days. null → the
+  // policy pages state "cancel anytime, no partial refunds" only.
+  refundDays: null,
+  // Hours WhatsApp/email is answered, shown next to contact links.
+  supportHours: 'Replies within 24 hours, Mon–Sat',
 };
+
+// Bump when the masterclass consent wording changes; stored with each lead.
+export const CONSENT_VERSION = '2026-10-25';
+
+// Country codes offered on public phone fields (US market first, NRI spread).
+// `len` = valid national-number lengths, used for validation.
+export const DIAL_CODES = [
+  { code: '1', label: 'US/CA +1', len: [10] },
+  { code: '91', label: 'IN +91', len: [10] },
+  { code: '44', label: 'UK +44', len: [10] },
+  { code: '971', label: 'UAE +971', len: [9] },
+  { code: '61', label: 'AU +61', len: [9] },
+  { code: '65', label: 'SG +65', len: [8] },
+];
+
+// National number + dial code → E.164 ("+15551234567"), or null if invalid.
+export function toE164(dialCode, national) {
+  const cc = DIAL_CODES.find(d => d.code === dialCode);
+  let digits = String(national ?? '').replace(/\D/g, '');
+  if (digits.startsWith('0')) digits = digits.replace(/^0+/, '');       // UK/IN trunk 0
+  if (digits.startsWith(dialCode) && digits.length > (cc?.len[0] ?? 0)) digits = digits.slice(dialCode.length);
+  if (!cc || !cc.len.includes(digits.length)) return null;
+  return `+${dialCode}${digits}`;
+}
 
 export const WA_PREFILL = "Hi Unifitz! I'd like to know more about your plans.";
 
@@ -36,11 +71,13 @@ export function waSendLink(text = WA_PREFILL) {
 }
 
 // Message a SPECIFIC member's number (admin follow-ups) — distinct from the
-// business-number links above. Normalizes to wa.me digits: strips non-digits and
-// assumes India (91) when no country code is present. Returns null if unusable.
+// business-number links above. Normalizes to wa.me digits: strips non-digits.
+// E.164 numbers ("+1…") are used as-is; legacy bare 10-digit numbers (stored
+// before the country picker existed) are assumed Indian (91). Null if unusable.
 export function waTo(phone, text = '') {
-  const digits = String(phone ?? '').replace(/\D/g, '');
-  if (digits.length < 10) return null;
-  const withCc = digits.length === 10 ? `91${digits}` : digits;
+  const raw = String(phone ?? '').trim();
+  const digits = raw.replace(/\D/g, '');
+  if (digits.length < 8) return null;
+  const withCc = raw.startsWith('+') ? digits : digits.length === 10 ? `91${digits}` : digits;
   return `https://wa.me/${withCc}?text=${encodeURIComponent(text)}`;
 }

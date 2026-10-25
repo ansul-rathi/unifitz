@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Users, Pause, Play, UserMinus, Phone, Loader2 } from 'lucide-react';
+import { Users, Pause, Play, UserMinus, Phone, Loader2, AlertTriangle, RotateCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../context/ToastContext';
 import { Card, Avatar, EmptyState } from './ui';
 import { fmtDateTime, fmtDate } from '../lib/datetime';
 
 const expired = m => m.expires_at && new Date(m.expires_at) < new Date();
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // Enrolled-member panel for a series, shared by the admin + teacher detail pages.
 // Members come from the series_members() SECURITY DEFINER RPC (phone is admin-only).
@@ -22,13 +23,24 @@ export default function SeriesMembers({ challengeId, isAdmin, onChanged }) {
   const [rows, setRows] = useState([]);
   const [tab, setTab] = useState('live');
   const [busyId, setBusyId] = useState(null);
+  const [failed, setFailed] = useState(false);
 
+  // The RPC has returned intermittent 502s under load (audit U-44): retry
+  // transient failures with backoff, and on a final failure keep the last good
+  // list and say so — never show a misleading "No members yet".
   const load = useCallback(async () => {
-    const { data, error } = await supabase.rpc('series_members', { p_challenge: challengeId });
-    if (error) toast(error.message, 'error');
-    setRows(data ?? []);
+    let res;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt) await sleep(600 * 2 ** (attempt - 1));
+      res = await supabase.rpc('series_members', { p_challenge: challengeId });
+      if (!res.error) break;
+      if (res.error.code && /^(42|22|PGRST2)/.test(res.error.code)) break;   // permission/bad input: don't retry
+    }
     setLoading(false);
-  }, [challengeId, toast]);
+    if (res.error) { setFailed(true); return; }
+    setFailed(false);
+    setRows(res.data ?? []);
+  }, [challengeId]);
   useEffect(() => { load(); }, [load]);
 
   async function setStatus(m, status, msg) {
@@ -58,9 +70,18 @@ export default function SeriesMembers({ challengeId, isAdmin, onChanged }) {
         </div>
       </div>
 
+      {failed && (
+        <div role="alert" className="mt-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden="true" />
+          <span className="flex-1">{rows.length ? 'Couldn’t refresh the member list — showing the last loaded version.' : 'Couldn’t load members right now.'}</span>
+          <button type="button" onClick={() => { setLoading(true); load(); }} className="inline-flex items-center gap-1.5 font-semibold hover:underline">
+            <RotateCw className="w-3.5 h-3.5" aria-hidden="true" /> Retry
+          </button>
+        </div>
+      )}
       {loading ? (
         <div className="py-8 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-slate-400" /></div>
-      ) : shown.length === 0 ? (
+      ) : failed && !rows.length ? null : shown.length === 0 ? (
         <EmptyState icon={Users} title={`No ${tab} members yet`} />
       ) : (
         <ul className="mt-4 space-y-2">

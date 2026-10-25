@@ -1,9 +1,9 @@
 // Branded, consultation-grade PDF of the personalized plan, with clickable
-// recipe links. Text + drawn tables only (no images) — a styled "UniFit"
+// recipe links. Text + drawn tables only (no images) — a "Unifitz"
 // wordmark. Follows the professional diet-plan spec: cover summary, macro +
 // micronutrient targets, full-day meals, 7-day rotation, substitutions,
 // grocery list, lifestyle, workout alignment, progress tracking, red flags.
-import { jsPDF } from 'jspdf';
+// jsPDF (~130 KB gz) is loaded on demand — only when a member taps "Download".
 import { BUSINESS } from '../config';
 import { SLOT_LABELS } from './dietEngine';
 
@@ -15,7 +15,8 @@ const SHADE = [255, 237, 213]; // orange-100 header fill
 
 const GOAL_LABEL = { lose_weight: 'Fat loss', gain_muscle: 'Muscle gain', maintain: 'Maintenance', stay_fit: 'Maintenance' };
 
-export function downloadDietPdf({ profile, track, targets, day, rules, workout }) {
+export async function downloadDietPdf({ profile, track, targets, day, rules, workout }) {
+  const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
   const M = 48;
@@ -84,9 +85,7 @@ export function downloadDietPdf({ profile, track, targets, day, rules, workout }
 
   // ── Wordmark ───────────────────────────────────────────────────────
   doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.setTextColor(...SLATE);
-  doc.text('Uni', M, y);
-  const uniW = doc.getTextWidth('Uni');
-  doc.setTextColor(...ORANGE); doc.text('Fit', M + uniW, y);
+  doc.setTextColor(...ORANGE); doc.text('Unifitz', M, y);
   line(10);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...MUTED);
   doc.text('Your Personalized Diet Plan — Nutrition Consultation', M, y); line(22);
@@ -268,7 +267,7 @@ export function downloadDietPdf({ profile, track, targets, day, rules, workout }
 
   const safeName = (profile.full_name || 'member').replace(/\s+/g, '-');
   const date = new Date().toISOString().slice(0, 10);
-  doc.save(`UniFit-Diet-Plan-${safeName}-${date}.pdf`);
+  doc.save(`Unifitz-Diet-Plan-${safeName}-${date}.pdf`);
 }
 
 // Categorize the week's meal items into a shopping list. Keyword-based —

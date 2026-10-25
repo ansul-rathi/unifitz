@@ -211,7 +211,7 @@ export default function DailyCheckin({ profile, checkin, onSaved }) {
     <div className="space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-bold text-lg">Daily check-in</h3>
+          <h2 className="font-bold text-lg">Daily check-in</h2>
           <p className="text-sm text-slate-500 mt-0.5">
             Logging <span className="font-semibold text-slate-700">{label}</span>
             {backdated && <span className="text-slate-400"> · {parseDay(date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>}
@@ -248,9 +248,9 @@ export default function DailyCheckin({ profile, checkin, onSaved }) {
       <div className="bg-white rounded-2xl border border-emerald-200 shadow-sm p-4 md:p-5">
         {header}
         <div className="mt-4 flex items-center justify-between gap-3">
-          <h4 className="font-bold text-sm inline-flex items-center gap-2">
+          <h3 className="font-bold text-sm inline-flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-500" /> {relative ? `${label}'s check-in done` : `Check-in done for ${label}`}
-          </h4>
+          </h3>
           <button onClick={() => setEditing(true)} className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-brand-600">
             <Pencil className="w-4 h-4" /> Edit
           </button>

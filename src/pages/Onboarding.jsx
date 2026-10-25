@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, ArrowRight, ArrowLeft, Loader2, Flame, HeartPulse } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Loader2, Flame, HeartPulse } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { calcBMI, bmiCategory, calcTDEE, ACTIVITY_LABELS } from '../lib/calc';
 import Select from '../components/Select';
 import HeightField from '../components/HeightField';
+import BrandMark from '../components/BrandMark';
 
 const GOALS = [
   { value: 'lose_weight', label: 'Lose weight' },
@@ -74,7 +75,7 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-slate-50 flex flex-col items-center px-4 py-10">
       <div className="flex items-center gap-2 font-display text-2xl font-bold text-slate-900 mb-2">
-        <Dumbbell className="w-7 h-7 text-brand-500" /> Uni<span className="text-brand-500">Fitz</span>
+        <BrandMark className="w-8 h-8" /> Unifitz
       </div>
       <p className="text-sm text-slate-500 mb-1">Let's set your starting point — takes 1 minute</p>
       {/* Wrong account? switch the email/id you signed in with */}

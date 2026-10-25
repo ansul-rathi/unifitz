@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, PlayCircle, Video, CalendarClock, Clock, Layers, Loader2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, ExternalLink, PlayCircle, CalendarClock, Clock, Layers, Loader2, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { fmtDateTime } from '../../lib/datetime';
 import { Card, Spinner, Avatar } from '../../components/ui';
 
-// Turn a recording URL into an embeddable player. Falls back to an iframe (with
-// an "open in new tab" escape hatch) for hosts we don't specially handle.
+// Turn a recording URL into an embeddable player. Hosts we don't specially
+// handle (Zoom share pages, etc.) are NOT iframed: they refuse framing and
+// their own CSP floods the console — we show an "open recording" card instead.
 function embedFor(url) {
   if (!url) return null;
   try {
@@ -16,11 +17,11 @@ function embedFor(url) {
     const host = u.hostname.replace(/^www\./, '');
     if (host.includes('youtube.com')) {
       const id = u.searchParams.get('v');
-      if (id) return { type: 'iframe', src: `https://www.youtube.com/embed/${id}` };
+      if (id) return { type: 'iframe', src: `https://www.youtube-nocookie.com/embed/${id}` };
     }
     if (host === 'youtu.be') {
       const id = u.pathname.slice(1);
-      if (id) return { type: 'iframe', src: `https://www.youtube.com/embed/${id}` };
+      if (id) return { type: 'iframe', src: `https://www.youtube-nocookie.com/embed/${id}` };
     }
     if (host.includes('drive.google.com')) {
       const m = u.pathname.match(/\/d\/([^/]+)/);
@@ -33,10 +34,10 @@ function embedFor(url) {
     if (/\.(mp4|webm|mov|m4v)(\?|$)/i.test(u.pathname)) {
       return { type: 'video', src: url };
     }
-    // Zoom + anything else: best-effort embed, may be blocked by the host.
-    return { type: 'iframe', src: url, mayBlock: true };
+    // Zoom + anything else: link out (see note above).
+    return { type: 'external', src: url, host: host.includes('zoom.us') ? 'Zoom' : host };
   } catch {
-    return { type: 'iframe', src: url, mayBlock: true };
+    return { type: 'external', src: url, host: 'the host site' };
   }
 }
 
@@ -74,9 +75,12 @@ export default function SessionPlayer() {
             return;
           }
         }
+        // Access confirmed — show the player now; teacher + attendance load
+        // in the background instead of holding the spinner (was 7–10 s).
+        setLoading(false);
         if (c?.teacher_id) {
-          const { data: t } = await supabase.from('profiles').select('full_name, avatar_url').eq('id', c.teacher_id).maybeSingle();
-          setTeacher(t ?? null);
+          supabase.from('profiles').select('full_name, avatar_url').eq('id', c.teacher_id).maybeSingle()
+            .then(({ data: t }) => setTeacher(t ?? null));
         }
         // Watching the recording credits attendance (RPC checks enrolment; ignore if not).
         if (s.completed && !markedRef.current) {
@@ -87,6 +91,7 @@ export default function SessionPlayer() {
           if (!error) toast('Attendance recorded ✓');
           // Not enrolled → RPC refuses; that's expected for previews, stay silent.
         }
+        return;
       }
       setLoading(false);
     })();
@@ -141,6 +146,14 @@ export default function SessionPlayer() {
           </div>
         ) : embed?.type === 'video' ? (
           <video src={embed.src} controls playsInline className="absolute inset-0 w-full h-full" />
+        ) : embed?.type === 'external' ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center text-white bg-gradient-to-br from-slate-900 to-slate-800">
+            <PlayCircle className="w-12 h-12 text-brand-400" aria-hidden="true" />
+            <p className="font-semibold">This recording plays on {embed.host}</p>
+            <a href={embed.src} target="_blank" rel="noopener noreferrer" className="btn-primary !py-2.5 text-sm">
+              <ExternalLink className="w-4 h-4" /> Open recording
+            </a>
+          </div>
         ) : (
           <iframe
             src={embed.src}
@@ -148,6 +161,7 @@ export default function SessionPlayer() {
             className="absolute inset-0 w-full h-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
             allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
           />
         )}
       </div>
@@ -182,14 +196,9 @@ export default function SessionPlayer() {
 
           {url && (
             <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-3.5">
-              <a href={url} target="_blank" rel="noreferrer" className="btn-secondary !py-2 text-sm">
+              <a href={url} target="_blank" rel="noopener noreferrer" className="btn-secondary !py-2 text-sm">
                 <ExternalLink className="w-4 h-4" /> Open in new tab
               </a>
-              {embed?.mayBlock && (
-                <p className="text-xs text-slate-400 inline-flex items-center gap-1.5">
-                  <Video className="w-3.5 h-3.5" /> If the video doesn't load above, use "Open in new tab".
-                </p>
-              )}
             </div>
           )}
         </Card>

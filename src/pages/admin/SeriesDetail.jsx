@@ -476,6 +476,7 @@ export default function AdminSeriesDetail() {
                   <SessionThumb poster={s.poster_url} day={s.day_number} live={s.is_live_next} size="w-20 h-12" />
                   <div className="flex-1 min-w-0">
                     <input
+                      aria-label={`Day ${s.day_number} session title`}
                       defaultValue={s.title}
                       onBlur={e => e.target.value !== s.title && patchSession(s.id, { title: e.target.value }, 'Title saved')}
                       className="w-full font-bold text-sm bg-transparent focus:bg-slate-50 rounded px-1 -mx-1 outline-none"
@@ -486,7 +487,7 @@ export default function AdminSeriesDetail() {
                     </p>
                   </div>
                   <SessionStatusPill session={s} className="shrink-0" />
-                  {isAdmin && <button onClick={() => deleteSession(s.id)} title="Delete" className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 shrink-0"><Trash2 className="w-4 h-4" /></button>}
+                  {isAdmin && <button onClick={() => deleteSession(s.id)} title="Delete session" aria-label="Delete session" className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 shrink-0"><Trash2 className="w-4 h-4" /></button>}
                 </div>
 
                 {/* Lifecycle checklist — auto-updates from the Zoom webhook */}
@@ -503,9 +504,9 @@ export default function AdminSeriesDetail() {
                     onSave={v => patchLink(s.id, 'recording_link', v, 'Recording link saved')}
                     className="input !py-1.5 !px-2.5 text-xs flex-1 min-w-[180px]"
                   />
-                  {s.recording_link && <a href={s.recording_link} target="_blank" rel="noreferrer" className="btn-secondary !py-1.5 !px-2.5 text-xs"><PlayCircle className="w-4 h-4" /></a>}
+                  {s.recording_link && <a href={s.recording_link} target="_blank" rel="noopener noreferrer" aria-label="Open recording" title="Open recording" className="btn-secondary !py-1.5 !px-2.5 text-xs"><PlayCircle className="w-4 h-4" /></a>}
                   {s.zoom_meeting_id
-                    ? <button onClick={() => { navigator.clipboard.writeText(s.zoom_join_url || ''); toast('Join link copied'); }} className="btn-secondary !py-1.5 !px-2.5 text-xs"><Copy className="w-4 h-4 text-sky-500" /></button>
+                    ? <button onClick={() => { navigator.clipboard.writeText(s.zoom_join_url || ''); toast('Join link copied'); }} aria-label="Copy Zoom join link" title="Copy Zoom join link" className="btn-secondary !py-1.5 !px-2.5 text-xs"><Copy className="w-4 h-4 text-sky-500" /></button>
                     : <button onClick={() => createZoom(s.id)} disabled={busy} className="btn-secondary !py-1.5 !px-2.5 text-xs"><Video className="w-4 h-4 text-sky-500" /> Zoom</button>}
                   {/* Join link — auto-filled when the Zoom meeting is created; editable. */}
                   <LinkInput
@@ -524,14 +525,14 @@ export default function AdminSeriesDetail() {
                   </button>
                   {!s.is_live_next && !s.completed && (
                     <button onClick={async () => { await supabase.from('sessions').update({ is_live_next: false }).eq('challenge_id', id); patchSession(s.id, { is_live_next: true }, 'Pinned live'); }}
-                      className="btn-secondary !py-1.5 !px-2.5 text-xs"><Radio className="w-4 h-4 text-red-500" /></button>
+                      aria-label="Pin as next live session" title="Pin as next live session" className="btn-secondary !py-1.5 !px-2.5 text-xs"><Radio className="w-4 h-4 text-red-500" /></button>
                   )}
                   {/* Image controls */}
-                  <label title="Upload image" className="btn-secondary !py-1.5 !px-2.5 text-xs cursor-pointer">
+                  <label title="Upload image" aria-label="Upload session image" className="btn-secondary !py-1.5 !px-2.5 text-xs cursor-pointer">
                     <Upload className="w-4 h-4 text-slate-500" />
                     <input type="file" accept="image/*" className="hidden" onChange={e => uploadSessionImage(s, e.target.files?.[0])} />
                   </label>
-                  <button onClick={() => aiSessionImage(s)} disabled={!!aiBusy} title="Generate AI image" className="btn-secondary !py-1.5 !px-2.5 text-xs">
+                  <button onClick={() => aiSessionImage(s)} disabled={!!aiBusy} title="Generate AI image" aria-label="Generate AI session image" className="btn-secondary !py-1.5 !px-2.5 text-xs">
                     {aiBusy === s.id ? <Loader2 className="w-4 h-4 animate-spin text-violet-500" /> : <Sparkles className="w-4 h-4 text-violet-500" />}
                   </button>
                 </div>

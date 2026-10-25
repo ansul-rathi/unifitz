@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Dumbbell, Loader2, CheckCircle2, ShieldCheck, ArrowLeft, Mail } from 'lucide-react';
+import { Loader2, CheckCircle2, ShieldCheck, ArrowLeft, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../context/ToastContext';
 import { ALLOW_SIGNUP_VIA_OTP } from '../config';
+import { track } from '../lib/track';
+import BrandMark from '../components/BrandMark';
 
 const RESEND_SECONDS = 45;
 const REDIRECT_TO = `${window.location.origin}/auth/confirm`;
@@ -13,8 +15,23 @@ const REDIRECT_TO = `${window.location.origin}/auth/confirm`;
 // Unset (e.g. production) → the master path is disabled and only real OTP works.
 const MASTER_CODE = import.meta.env.VITE_MASTER_CODE || null;
 
+// Plan picked on the landing pricing table (?plan=Complete&billing=quarterly).
+// Kept in sessionStorage so it survives the OTP round-trip / email-link tab,
+// and saved to the new user's metadata so staff can see what she chose.
+const PLAN_KEY = 'uf_plan';
+function readPlan(params) {
+  const plan = params.get('plan');
+  if (plan) {
+    const picked = { plan: plan.slice(0, 60), billing: (params.get('billing') || 'monthly').slice(0, 20) };
+    try { sessionStorage.setItem(PLAN_KEY, JSON.stringify(picked)); } catch { /* private mode */ }
+    return picked;
+  }
+  try { return JSON.parse(sessionStorage.getItem(PLAN_KEY) || 'null'); } catch { return null; }
+}
+
 export default function Auth() {
   const [params] = useSearchParams();
+  const [picked] = useState(() => readPlan(params));
   const [mode, setMode] = useState(params.get('mode') === 'signup' ? 'signup' : 'login');
   const [step, setStep] = useState('enter'); // 'enter' | 'code'
   const [form, setForm] = useState({ name: '', email: '', phone: '', referral: params.get('ref') ?? '' });
@@ -54,21 +71,9 @@ export default function Auth() {
     if (mode === 'signup' && !form.name.trim()) return toast('Enter your name', 'error');
     setBusy(true);
     try {
-      // Gate on whether the email already has an account so login never
-      // silently creates one, and signup never double-registers.
-      const { data: exists, error: chkErr } = await supabase.rpc('email_exists', { p_email: email });
-      if (chkErr) throw chkErr;
-      if (mode === 'login' && !exists) {
-        toast('Email does not exist — please sign up', 'error');
-        setMode('signup');
-        return;
-      }
-      if (mode === 'signup' && exists) {
-        toast('Email already registered — please log in', 'error');
-        setMode('login');
-        return;
-      }
-
+      // No "does this email exist?" pre-check (that was an account-enumeration
+      // oracle). Login never creates a user; signing up with an existing email
+      // simply emails that account a login code. Either way the UI reads the same.
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -80,14 +85,17 @@ export default function Auth() {
               full_name: form.name.trim(),
               phone: form.phone.trim(),
               referral_code: form.referral.trim().toUpperCase(),
+              ...(picked && { selected_plan: picked.plan, selected_billing: picked.billing }),
             },
           }),
         },
       });
-      if (error) throw error;
+      // Login for an email with no account: GoTrue refuses (otp_disabled) and
+      // sends nothing. Proceed exactly as if it had, so the page reveals nothing.
+      if (error && !(mode === 'login' && error.code === 'otp_disabled')) throw error;
       setStep('code');
       setCooldown(RESEND_SECONDS);
-      toast('Code sent — check your email');
+      toast('Check your email for a 6-digit code');
     } catch (err) {
       toast(err.message || 'Could not send code', 'error');
     } finally {
@@ -114,6 +122,7 @@ export default function Auth() {
       }
       const { error } = await supabase.auth.verifyOtp({ email: form.email.trim(), token, type: 'email' });
       if (error) throw error;
+      track(mode === 'signup' ? 'sign_up' : 'login', { method: 'email_otp', ...(picked && { plan: picked.plan, billing: picked.billing }) });
       // Session is now set — App routes redirect by role / into onboarding.
       toast('Signed in!');
     } catch (err) {
@@ -135,10 +144,8 @@ export default function Auth() {
       <div aria-hidden="true" className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[42rem] h-[42rem] rounded-full bg-gradient-to-br from-orange-200/50 to-brand-100/40 blur-3xl" />
 
       <Link to="/" className="relative flex items-center gap-2.5 font-display text-2xl font-bold text-slate-900 mb-8">
-        <span className="inline-flex w-10 h-10 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-orange-600 text-white shadow-lg shadow-orange-500/30">
-          <Dumbbell className="w-5 h-5" />
-        </span>
-        Uni<span className="text-brand-500">fitz</span>
+        <BrandMark className="w-10 h-10" />
+        Unifitz
       </Link>
 
       <div className="relative w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-[0_8px_40px_rgba(234,88,12,0.08)] p-6 md:p-8">
@@ -146,6 +153,12 @@ export default function Auth() {
           <>
             <h1 className="font-display text-2xl font-extrabold text-slate-900">{mode === 'login' ? 'Welcome back' : 'Create your account'}</h1>
             <p className="mt-1 text-sm text-slate-500">{mode === 'login' ? 'Log in to your live classes and progress.' : 'Join live, women-only classes — no password needed.'}</p>
+            {picked && (
+              <p className="mt-4 flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2.5 text-sm text-slate-700">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-brand-700" />
+                <span>Plan selected: <strong>{picked.plan}</strong>{picked.billing !== 'monthly' && <> · billed {picked.billing}</>}</span>
+              </p>
+            )}
 
             {/* Tabs */}
             <div className="grid grid-cols-2 bg-orange-50 rounded-xl p-1 my-6 border border-orange-100">
@@ -209,7 +222,8 @@ export default function Auth() {
             </span>
             <h2 className="mt-4 text-xl font-bold">Enter your code</h2>
             <p className="mt-1 text-sm text-slate-600">
-              We sent a 6-digit code to <strong className="text-slate-900">{form.email.trim()}</strong>. It expires in an hour.
+              {mode === 'login' ? 'If there’s an account for ' : 'We sent a 6-digit code to '}
+              <strong className="text-slate-900">{form.email.trim()}</strong>{mode === 'login' ? ', a 6-digit code is on its way.' : '.'} It expires in an hour.
             </p>
 
             <input
@@ -232,7 +246,13 @@ export default function Auth() {
             <button onClick={resend} disabled={cooldown > 0} className="btn-secondary w-full mt-2 disabled:opacity-60">
               {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend code'}
             </button>
-            <p className="mt-4 text-xs text-slate-400 text-center">Didn't get it? Check spam, or tap the login link in the same email.</p>
+            <p className="mt-4 text-xs text-slate-500 text-center">Didn't get it? Check spam, or tap the login link in the same email.</p>
+            {mode === 'login' && (
+              <p className="mt-2 text-xs text-slate-500 text-center">
+                New to Unifitz?{' '}
+                <button type="button" onClick={() => { setMode('signup'); setStep('enter'); setCode(''); }} className="font-semibold text-brand-700 hover:underline">Create an account</button>
+              </p>
+            )}
           </>
         )}
       </div>

@@ -4,15 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Live Online Fitness Classes for Women | Unifitz</title>
-    <meta name="description" content="Live, instructor-led fitness classes for women — Zumba, Yoga, Strength & Meditation over Zoom. Small cohorts where the instructor knows your name. Real weekly schedule in your timezone." />
+    <meta name="description" content="Live Zoom fitness classes for women 30–50: Zumba, Yoga, Strength and Meditation in small cohorts. A real weekly timetable, shown in your timezone." />
     <link rel="canonical" href="https://www.unifitz.in/" />
-    <meta name="keywords" content="live online fitness classes women, live zoom yoga, women's strength training online, PCOS workout program, Indian women fitness USA" />
-    <!-- Open Graph / Twitter (overridden client-side with live data) -->
+    <meta name="theme-color" content="#C2410C" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <!-- Open Graph / Twitter -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Unifitz" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:url" content="https://www.unifitz.in/" />
     <meta property="og:title" content="Unifitz — Live Online Fitness Classes for Women" />
     <meta property="og:description" content="Live, instructor-led classes for women. Small cohorts, real schedule, the instructor knows your name." />
     <meta property="og:image" content="https://www.unifitz.in/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Unifitz — live online fitness classes for women" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Unifitz — Live Online Fitness Classes for Women" />
     <meta name="twitter:description" content="Live, instructor-led classes for women. Small cohorts, real schedule, the instructor knows your name." />
@@ -20,13 +29,56 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://wgoyflrhdswftharsbzc.supabase.co" />
-    <!-- Fonts loaded non-render-blocking (preload→stylesheet). Weights trimmed to what's used. -->
+    <!-- Landing fonts only (serif + sans), non-render-blocking. The app UI's
+         Barlow families load on app routes (see RouteMeta in App.jsx). -->
     <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'"
-      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800;900&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" />
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" />
     <noscript>
       <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800;900&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" />
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" />
     </noscript>
+    <!-- Entity data in the raw HTML (not client-injected) so every crawler sees it.
+         Add verified social profile URLs to sameAs as they go live. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.unifitz.in/#org",
+            "name": "Unifitz",
+            "url": "https://www.unifitz.in/",
+            "logo": "https://www.unifitz.in/icon-512.png",
+            "email": "hello@unifitz.in",
+            "address": { "@type": "PostalAddress", "addressLocality": "Jaipur", "addressRegion": "Rajasthan", "addressCountry": "IN" },
+            "sameAs": []
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.unifitz.in/#website",
+            "url": "https://www.unifitz.in/",
+            "name": "Unifitz",
+            "publisher": { "@id": "https://www.unifitz.in/#org" }
+          },
+          {
+            "@type": "Service",
+            "@id": "https://www.unifitz.in/#service",
+            "name": "Live online fitness classes for women",
+            "serviceType": "Online fitness classes",
+            "description": "Live, instructor-led Zumba, Yoga, Strength and Meditation classes for women over Zoom, in small cohorts.",
+            "provider": { "@id": "https://www.unifitz.in/#org" },
+            "areaServed": { "@type": "Country", "name": "United States" },
+            "audience": { "@type": "PeopleAudience", "audienceType": "Women aged 30–50" },
+            "offers": [
+              { "@type": "Offer", "name": "Starter", "price": "39", "priceCurrency": "USD", "url": "https://www.unifitz.in/#pricing" },
+              { "@type": "Offer", "name": "Regular", "price": "59", "priceCurrency": "USD", "url": "https://www.unifitz.in/#pricing" },
+              { "@type": "Offer", "name": "Starter + Diet", "price": "69", "priceCurrency": "USD", "url": "https://www.unifitz.in/#pricing" },
+              { "@type": "Offer", "name": "Complete", "price": "89", "priceCurrency": "USD", "url": "https://www.unifitz.in/#pricing" }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

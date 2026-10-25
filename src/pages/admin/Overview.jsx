@@ -98,7 +98,7 @@ export default function AdminOverview() {
 
       <Card className="p-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold">Attendance trend (per session)</h3>
+          <h2 className="font-bold">Attendance trend (per session)</h2>
           <Link to="/admin/reports" className="text-sm font-semibold text-brand-600 inline-flex items-center gap-1">Full reports <ArrowRight className="w-4 h-4" /></Link>
         </div>
         <ResponsiveContainer width="100%" height={260}>

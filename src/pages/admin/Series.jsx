@@ -250,7 +250,7 @@ export default function AdminSeries() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-bold truncate">{c.name}</h3>
+                        <h2 className="font-bold truncate">{c.name}</h2>
                         <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
                           c.status === 'active' ? 'bg-emerald-100 text-emerald-700' : c.status === 'upcoming' ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600'
                         }`}>{c.status}</span>
@@ -355,7 +355,7 @@ export default function AdminSeries() {
         <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-end md:items-center justify-center p-0 md:p-6" role="dialog" aria-modal="true">
           <form onSubmit={save} className="bg-white w-full max-w-lg rounded-t-2xl md:rounded-2xl p-6 max-h-[88vh] overflow-y-auto animate-fade-up space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-lg">{editing.id ? 'Edit series' : 'New series'}</h3>
+              <h2 className="font-bold text-lg">{editing.id ? 'Edit series' : 'New series'}</h2>
               <button type="button" onClick={() => setEditing(null)} aria-label="Close" className="p-1.5 rounded-lg hover:bg-slate-100"><X className="w-5 h-5" /></button>
             </div>
             <input required placeholder="Series name" className="input" value={editing.name} onChange={e => setEditing(x => ({ ...x, name: e.target.value }))} />
@@ -445,7 +445,7 @@ export default function AdminSeries() {
         <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-end md:items-center justify-center p-0 md:p-6" role="dialog" aria-modal="true">
           <div className="bg-white w-full max-w-lg rounded-t-2xl md:rounded-2xl p-6 max-h-[88vh] overflow-y-auto animate-fade-up">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-lg">{sessionsFor.name} — sessions</h3>
+              <h2 className="font-bold text-lg">{sessionsFor.name} — sessions</h2>
               <button onClick={() => setSessionsFor(null)} aria-label="Close" className="p-1.5 rounded-lg hover:bg-slate-100"><X className="w-5 h-5" /></button>
             </div>
             <ul className="mt-3 divide-y divide-slate-100 max-h-60 overflow-y-auto">

@@ -56,7 +56,7 @@ export default function TeacherAnnouncements() {
 
       <Card className="p-5 md:p-6">
         <form onSubmit={post} className="space-y-3">
-          <select required className="input" value={form.challenge_id} onChange={e => setForm(f => ({ ...f, challenge_id: e.target.value }))}>
+          <select required aria-label="Batch to post to" className="input" value={form.challenge_id} onChange={e => setForm(f => ({ ...f, challenge_id: e.target.value }))}>
             <option value="">Post to batch…</option>
             {challenges.map(c => <option key={c.id} value={c.id}>{c.name} — {c.batch_name}</option>)}
           </select>

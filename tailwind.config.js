@@ -15,6 +15,8 @@ export default {
           700: '#C2410C',
         },
       },
+      // w-4.5 / h-4.5 (18px) is used for inline arrow icons; not in the default scale.
+      spacing: { 4.5: '1.125rem' },
       fontFamily: {
         sans: ['Barlow', 'system-ui', 'sans-serif'],
         display: ['Barlow Condensed', 'Arial Narrow', 'sans-serif'],

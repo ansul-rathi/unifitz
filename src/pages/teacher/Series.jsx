@@ -57,7 +57,7 @@ export default function TeacherSeries() {
                     : <div className="w-full aspect-[16/7] bg-gradient-to-br from-brand-400 to-orange-600 flex items-center justify-center"><Layers className="w-8 h-8 text-white/80" /></div>}
                   <div className="p-5 flex flex-col flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-bold">{c.name}</h3>
+                      <h2 className="font-bold">{c.name}</h2>
                       <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${c.status === 'active' ? 'bg-emerald-100 text-emerald-700' : c.status === 'upcoming' ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600'}`}>{c.status}</span>
                       {!c.is_published && <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-900 text-white">Hidden</span>}
                     </div>

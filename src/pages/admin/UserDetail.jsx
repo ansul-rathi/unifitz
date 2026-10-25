@@ -128,7 +128,8 @@ export default function AdminUserDetail() {
               ? <a href={wa} target="_blank" rel="noreferrer" className="btn-primary !py-2 !px-3 text-sm bg-emerald-500 hover:bg-emerald-600"><MessageCircle className="w-4 h-4" /> WhatsApp</a>
               : <span className="text-xs text-slate-400 self-center">No phone on file</span>}
             {p.role === 'client' && <button onClick={() => patchProfile({ role: 'teacher' }, 'Promoted to teacher')} title="Promote to teacher" className="btn-secondary !py-2 !px-3 text-sm"><GraduationCap className="w-4 h-4" /></button>}
-            <button onClick={() => patchProfile({ is_active: !p.is_active }, p.is_active ? 'Deactivated' : 'Reactivated')} className={`btn-secondary !py-2 !px-3 text-sm ${p.is_active ? 'text-red-500' : 'text-emerald-600'}`}>
+            <button onClick={() => patchProfile({ is_active: !p.is_active }, p.is_active ? 'Deactivated' : 'Reactivated')}
+              aria-label={p.is_active ? 'Deactivate account' : 'Reactivate account'} title={p.is_active ? 'Deactivate account' : 'Reactivate account'} className={`btn-secondary !py-2 !px-3 text-sm ${p.is_active ? 'text-red-500' : 'text-emerald-600'}`}>
               {p.is_active ? <Ban className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
             </button>
           </div>
@@ -221,7 +222,7 @@ export default function AdminUserDetail() {
         <h2 className="font-bold text-lg">Follow-ups ({d.follows.length})</h2>
         <form onSubmit={addFollowUp} className="mt-3 grid sm:grid-cols-[1fr_auto_auto_auto] gap-2 items-start">
           <textarea rows="1" placeholder="Log a follow-up note…" className="input !py-2 text-sm" value={fu.note} onChange={e => setFu(x => ({ ...x, note: e.target.value }))} />
-          <select className="input !py-2 text-sm sm:w-32" value={fu.channel} onChange={e => setFu(x => ({ ...x, channel: e.target.value }))}>
+          <select aria-label="Follow-up channel" className="input !py-2 text-sm sm:w-32" value={fu.channel} onChange={e => setFu(x => ({ ...x, channel: e.target.value }))}>
             <option value="whatsapp">WhatsApp</option><option value="call">Call</option><option value="other">Other</option>
           </select>
           <input type="date" className="input !py-2 text-sm" value={fu.next_at} onChange={e => setFu(x => ({ ...x, next_at: e.target.value }))} title="Next follow-up date" />

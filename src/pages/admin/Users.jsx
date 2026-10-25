@@ -50,7 +50,7 @@ export default function AdminUsers() {
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input className="input !pl-10" placeholder="Search by name or phone…" value={q} onChange={e => setQ(e.target.value)} />
         </div>
-        <select className="input sm:w-44" value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
+        <select aria-label="Filter by role" className="input sm:w-44" value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
           {['all', 'client', 'teacher', 'admin'].map(r => <option key={r} value={r}>{r === 'all' ? 'All roles' : r}</option>)}
         </select>
       </div>
@@ -116,11 +116,13 @@ export default function AdminUsers() {
               <p className="text-xs text-slate-500">{u.role} · {u.is_active ? 'active' : 'deactivated'}</p>
             </div>
             {u.role === 'client' && (
-              <button onClick={e => { e.stopPropagation(); patch(u.id, { role: 'teacher' }, 'Promoted to teacher'); }} className="p-2 rounded-lg bg-sky-50 text-sky-600">
+              <button onClick={e => { e.stopPropagation(); patch(u.id, { role: 'teacher' }, 'Promoted to teacher'); }}
+                aria-label={`Promote ${u.full_name} to teacher`} title="Promote to teacher" className="p-2 rounded-lg bg-sky-50 text-sky-600">
                 <GraduationCap className="w-4 h-4" />
               </button>
             )}
             <button onClick={e => { e.stopPropagation(); patch(u.id, { is_active: !u.is_active }, u.is_active ? 'Deactivated' : 'Reactivated'); }}
+              aria-label={`${u.is_active ? 'Deactivate' : 'Reactivate'} ${u.full_name}`} title={u.is_active ? 'Deactivate' : 'Reactivate'}
               className={`p-2 rounded-lg ${u.is_active ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
               {u.is_active ? <Ban className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
             </button>

@@ -96,9 +96,9 @@ export default function ClientBadges() {
         <span className="pointer-events-none absolute -bottom-12 -left-8 w-44 h-44 rounded-full bg-violet-500/20 blur-3xl" />
         <div className="relative flex items-start justify-between gap-4">
           <div>
-            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-brand-300">
-              <Sparkles className="w-4 h-4" /> Achievements
-            </p>
+            <h1 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-brand-300">
+              <Sparkles className="w-4 h-4" aria-hidden="true" /> Achievements
+            </h1>
             <p className="mt-3 font-display text-5xl md:text-6xl font-extrabold leading-none">
               {profile.points ?? 0}<span className="text-2xl text-slate-400 font-bold ml-2">pts</span>
             </p>

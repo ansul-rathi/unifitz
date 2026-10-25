@@ -204,7 +204,7 @@ export default function ClientHome() {
       {/* Recordings — hidden entirely when there are none */}
       {recordings.length > 0 && (
       <Card className="p-5 md:p-6">
-        <h3 className="font-bold text-lg">Recordings</h3>
+        <h2 className="font-bold text-lg">Recordings</h2>
           <ul className="mt-3 divide-y divide-slate-100">
             {recordings.map(s => (
               <li key={s.id} className="flex items-center gap-3 py-3">

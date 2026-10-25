@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Dumbbell, Loader2, MailWarning } from 'lucide-react';
+import { Loader2, MailWarning } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import BrandMark from '../components/BrandMark';
 
 // Landing page for email confirmation / magic links.
 // Exchanges the link token for a session, then hands off to the role/onboarding
@@ -46,7 +47,7 @@ export default function AuthConfirm() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-slate-50 flex flex-col items-center justify-center px-4 py-10">
       <Link to="/" className="flex items-center gap-2 font-display text-2xl font-bold text-slate-900 mb-8">
-        <Dumbbell className="w-7 h-7 text-brand-500" /> Uni<span className="text-brand-500">Fitz</span>
+        <BrandMark className="w-8 h-8" /> Unifitz
       </Link>
 
       {state === 'working' ? (

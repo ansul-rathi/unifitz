@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"EXIT $?\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" localhost:4179/waitlisting)",
+      "Bash(node -e 'const r=JSON.parse\\(require\\(\"fs\"\\).readFileSync\\(0\\)\\);const c={};for\\(const f of r\\)for\\(const m of f.messages\\){const k=f.filePath.replace\\(process.cwd\\(\\)+\"/\",\"\"\\)+\"  \"+m.ruleId+\" \\(\"+\\(m.severity==2?\"err\":\"warn\"\\)+\"\\)\";c[k]=\\(c[k]||0\\)+1}for\\(const[k,v]of Object.entries\\(c\\)\\)console.log\\(v,k\\)')"
+    ]
+  }
+}

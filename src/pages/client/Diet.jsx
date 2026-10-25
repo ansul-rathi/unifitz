@@ -49,10 +49,10 @@ export default function ClientDiet() {
     }
   }
 
-  function downloadPdf() {
+  async function downloadPdf() {
     setBusy(true);
     try {
-      downloadDietPdf({ profile, track, targets, day, rules, workout });
+      await downloadDietPdf({ profile, track, targets, day, rules, workout });
     } catch (e) {
       toast(e.message || 'Could not generate PDF', 'error');
     } finally {
@@ -158,7 +158,7 @@ export default function ClientDiet() {
             <span className="font-display text-2xl font-extrabold text-emerald-400">₹499</span>
           </p>
         </div>
-        <a href={waSendLink('Hi UniFit! I want a customized diet plan for my goal (starting ₹499).')} target="_blank" rel="noreferrer"
+        <a href={waSendLink('Hi Unifitz! I want a customized diet plan for my goal (starting ₹499).')} target="_blank" rel="noreferrer"
           className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1fb855] text-white font-bold px-5 py-3 rounded-xl text-sm transition-colors duration-200">
           <MessageCircle className="w-4 h-4" /> Get my custom plan on WhatsApp
         </a>

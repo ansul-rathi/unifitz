@@ -67,11 +67,11 @@ export default function AdminRevenue() {
         <>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
             <StatCard icon={IndianRupee} label="Gross collected" value={`₹${gross.toLocaleString('en-IN')}`} sub="verified + online" />
-            <StatCard icon={IndianRupee} label="UniFitz (20%)" value={`₹${unifitz.toLocaleString('en-IN')}`} accent="text-brand-500" />
+            <StatCard icon={IndianRupee} label="Unifitz (20%)" value={`₹${unifitz.toLocaleString('en-IN')}`} accent="text-brand-500" />
             <StatCard icon={Users} label="Teacher pool (80%)" value={`₹${teacherPool.toLocaleString('en-IN')}`} accent="text-emerald-500" />
           </div>
           <Card className="p-5">
-            <h3 className="font-bold mb-3">Revenue by series</h3>
+            <h2 className="font-bold mb-3">Revenue by series</h2>
             {chartData.length === 0 ? <EmptyState icon={IndianRupee} title="No paid enrollments yet" /> : (
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={chartData}>
@@ -107,7 +107,7 @@ export default function AdminRevenue() {
 
           {/* All payments log */}
           <Card className="p-5">
-            <h3 className="font-bold mb-3">All payments</h3>
+            <h2 className="font-bold mb-3">All payments</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-left text-xs uppercase tracking-wide text-slate-500 border-b border-slate-100">
@@ -138,7 +138,7 @@ export default function AdminRevenue() {
 
       {tab === 'payouts' && (
         <Card className="p-5">
-          <h3 className="font-bold mb-1">Teacher payouts <span className="text-sm font-normal text-slate-400">(80% pool, split per series)</span></h3>
+          <h2 className="font-bold mb-1">Teacher payouts <span className="text-sm font-normal text-slate-400">(80% pool, split per series)</span></h2>
           {teacherSplit.length === 0 ? <EmptyState icon={Users} title="No payouts yet" /> : (
             <ol className="mt-3 space-y-2.5">
               {teacherSplit.map((t, i) => (

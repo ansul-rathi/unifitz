@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Search, Salad, Flame, Drumstick, Utensils, X, Leaf, Beef, SlidersHorizontal, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Card, Spinner, EmptyState } from '../../components/ui';
+import RecipeImage from '../../components/RecipeImage';
 
 const TRACKS = [
   { key: 'all', label: 'All' },
@@ -137,7 +138,7 @@ export default function ClientRecipes() {
             <button key={r.id} onClick={() => setOpen(r)} className="text-left">
               <Card className="overflow-hidden h-full flex flex-col hover:shadow-md transition-shadow duration-200">
                 <div className="aspect-[16/10] bg-gradient-to-br from-emerald-200 to-emerald-400 flex items-center justify-center">
-                  {r.image_url ? <img src={r.image_url} alt={r.title} loading="lazy" className="w-full h-full object-cover" /> : <Salad className="w-8 h-8 text-emerald-700" />}
+                  <RecipeImage src={r.image_url} alt={r.title} lazy iconClass="w-8 h-8 text-emerald-700" />
                 </div>
                 <div className="p-3 flex flex-col flex-1">
                   <p className="font-bold text-sm leading-snug line-clamp-2">{r.title}</p>
@@ -161,7 +162,7 @@ export default function ClientRecipes() {
         <div className="fixed inset-0 z-[70] bg-slate-900/60 flex items-end sm:items-center justify-center p-0 sm:p-6" role="dialog" aria-modal="true" onClick={() => setOpen(null)}>
           <div className="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-y-auto animate-fade-up" onClick={e => e.stopPropagation()}>
             <div className="relative aspect-[16/9] bg-gradient-to-br from-emerald-200 to-emerald-400 flex items-center justify-center">
-              {open.image_url ? <img src={open.image_url} alt={open.title} className="w-full h-full object-cover" /> : <Salad className="w-12 h-12 text-emerald-700" />}
+              <RecipeImage src={open.image_url} alt={open.title} iconClass="w-12 h-12 text-emerald-700" />
               <button onClick={() => setOpen(null)} aria-label="Close" className="absolute top-3 right-3 p-2 rounded-full bg-white/85 text-slate-700 hover:bg-white"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-5 md:p-6">

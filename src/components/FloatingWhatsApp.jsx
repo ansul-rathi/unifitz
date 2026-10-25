@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { MessageCircle, X } from 'lucide-react';
 import { waLink } from '../config';
+import { track } from '../lib/track';
 
 // Persistent floating WhatsApp button — bottom-right, gentle pulse, with a
 // dismissible "Chat with us" label that appears after a few seconds.
@@ -26,8 +27,9 @@ export default function FloatingWhatsApp() {
       <a
         href={waLink()}
         target="_blank"
-        rel="noreferrer"
-        aria-label="Chat on WhatsApp"
+        rel="noopener noreferrer"
+        onClick={() => track('whatsapp_click', { location: 'floating' })}
+        aria-label="Chat with Unifitz on WhatsApp"
         className="relative inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-xl hover:scale-105 transition-transform duration-200"
       >
         <span className="absolute inset-0 rounded-full bg-[#25D366] motion-safe:animate-ping opacity-30" />

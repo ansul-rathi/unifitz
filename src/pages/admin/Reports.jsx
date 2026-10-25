@@ -141,7 +141,7 @@ export default function AdminReports() {
       {/* Growth + engagement */}
       <div id="engagement" className="grid gap-5 lg:grid-cols-2">
         <Card className="p-5">
-          <h3 className="font-bold mb-3">New signups per week</h3>
+          <h2 className="font-bold mb-3">New signups per week</h2>
           {d.signupTrend.length ? (
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={d.signupTrend}>
@@ -152,7 +152,7 @@ export default function AdminReports() {
           ) : <EmptyState icon={UserPlus} title="No signups yet" />}
         </Card>
         <Card id="attendance" className="p-5">
-          <h3 className="font-bold mb-3">Attendance per session</h3>
+          <h2 className="font-bold mb-3">Attendance per session</h2>
           {d.sessByDay.length ? (
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={d.sessByDay}>
@@ -167,7 +167,7 @@ export default function AdminReports() {
       {/* Revenue + enrollment + program mix */}
       <div className="grid gap-5 lg:grid-cols-3">
         <Card className="p-5">
-          <h3 className="font-bold mb-3">Revenue by series</h3>
+          <h2 className="font-bold mb-3">Revenue by series</h2>
           {d.revenueSeries.length ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={d.revenueSeries}><CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" /><XAxis dataKey="name" fontSize={11} /><YAxis fontSize={11} width={44} tickFormatter={v => `₹${v / 1000}k`} /><Tooltip formatter={v => `₹${v.toLocaleString('en-IN')}`} /><Bar dataKey="revenue" fill="#22C55E" radius={[6, 6, 0, 0]} /></BarChart>
@@ -175,7 +175,7 @@ export default function AdminReports() {
           ) : <EmptyState icon={IndianRupee} title="No paid revenue yet" />}
         </Card>
         <Card className="p-5">
-          <h3 className="font-bold mb-3">Enrollment by series</h3>
+          <h2 className="font-bold mb-3">Enrollment by series</h2>
           {d.enrollSeries.length ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={d.enrollSeries}><CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" /><XAxis dataKey="name" fontSize={11} /><YAxis allowDecimals={false} fontSize={11} width={28} /><Tooltip /><Bar dataKey="enrolled" fill="#0EA5E9" radius={[6, 6, 0, 0]} /></BarChart>
@@ -183,7 +183,7 @@ export default function AdminReports() {
           ) : <EmptyState icon={Users} title="No enrollments yet" />}
         </Card>
         <Card className="p-5">
-          <h3 className="font-bold mb-3">Program mix</h3>
+          <h2 className="font-bold mb-3">Program mix</h2>
           {d.programPie.length ? (
             <ResponsiveContainer width="100%" height={220}>
               <PieChart><Pie data={d.programPie} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label>{d.programPie.map((e, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}</Pie><Legend /></PieChart>
@@ -195,7 +195,7 @@ export default function AdminReports() {
       {/* Lists */}
       <div className="grid gap-5 lg:grid-cols-3">
         <Card id="at-risk" className="p-5">
-          <h3 className="font-bold flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-red-500" /> At-risk members ({d.atRisk.length})</h3>
+          <h2 className="font-bold flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-red-500" /> At-risk members ({d.atRisk.length})</h2>
           {d.atRisk.length ? (
             <ul className="mt-3 space-y-2">
               {d.atRisk.slice(0, 8).map(m => (
@@ -205,7 +205,7 @@ export default function AdminReports() {
           ) : <p className="mt-3 text-sm text-slate-400">No at-risk members. 🎉</p>}
         </Card>
         <Card className="p-5">
-          <h3 className="font-bold flex items-center gap-2"><Flame className="w-5 h-5 text-brand-500" /> Top members (points)</h3>
+          <h2 className="font-bold flex items-center gap-2"><Flame className="w-5 h-5 text-brand-500" /> Top members (points)</h2>
           <ol className="mt-3 space-y-2">
             {d.topMembers.map((m, i) => (
               <li key={m.id} className="flex items-center gap-3"><span className="w-5 text-sm font-bold text-slate-400">{i + 1}</span><Avatar name={m.full_name} url={m.avatar_url} size="w-8 h-8" /><span className="text-sm font-semibold flex-1 truncate">{m.full_name}</span><span className="text-sm font-bold text-brand-600">{m.points ?? 0}</span></li>
@@ -213,7 +213,7 @@ export default function AdminReports() {
           </ol>
         </Card>
         <Card className="p-5">
-          <h3 className="font-bold flex items-center gap-2"><Gift className="w-5 h-5 text-emerald-500" /> Top referrers</h3>
+          <h2 className="font-bold flex items-center gap-2"><Gift className="w-5 h-5 text-emerald-500" /> Top referrers</h2>
           {d.topReferrers.length ? (
             <ol className="mt-3 space-y-2">
               {d.topReferrers.map((r, i) => (

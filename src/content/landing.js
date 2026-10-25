@@ -9,8 +9,11 @@
 //
 // Honesty rules (from the brief):
 //   • No invented member counts / transformation numbers.
-//   • Anything unproven is a literal "TODO:PROOF" string.
-//   • Missing images are "TODO:ASSET".
+//   • Anything unproven is `null` with a TODO:PROOF comment next to it.
+//   • Missing images are `img: null` with a TODO:ASSET comment.
+// Null fields never render in production (the block hides itself); in
+// `pnpm dev` they show as labelled placeholders so gaps stay visible. This
+// keeps placeholder text out of the shipped bundle entirely.
 // ══════════════════════════════════════════════════════════════
 
 export const MARKET = 'US';
@@ -48,12 +51,16 @@ export const CONTENT = {
         { label: 'Instructors', href: '#instructors' },
         { label: 'Pricing', href: '#pricing' },
       ],
-      cta: 'See this week’s classes',
+      cta: 'Choose your plan',
+      ctaHref: '#pricing',
     },
 
     // Hero — Direction A (accountability). Outcome + mechanism.
     hero: {
-      img: '/landing/hero.jpg',
+      // TODO:ASSET — real class-in-progress frame. Drop public/landing/hero.jpg
+      // (4:3, ~1200×900) then set: img: '/landing/hero.jpg'. Until then the
+      // hero card shows the next live class instead of a photo.
+      img: null,
       eyebrow: 'Live classes for women',
       h1: 'The class that notices when you’re not there.',
       sub: 'Live, instructor-led Zumba, Yoga, Strength and Meditation — from home, on your timezone, in small cohorts where the instructor actually knows your name. Not another video library you’ll forget by Friday.',
@@ -62,7 +69,9 @@ export const CONTENT = {
       scheduleCta: 'See this week’s classes',
       scheduleHref: '#timetable',
       // Micro-proof: NO invented numbers. Honest, specific, verifiable.
-      microProof: 'Live classes six days a week · TODO:PROOF — active members, classes run',
+      // TODO:PROOF — append real "N members · N classes run" once known.
+      microProof: 'Live classes six days a week · mornings and evenings',
+      cardNote: 'Small cohorts · cameras optional · your instructor knows your name',
       secondary: {
         label: 'Grab a free masterclass seat',
         href: '#masterclass',
@@ -77,6 +86,7 @@ export const CONTENT = {
       sub: 'Every class below is live on Zoom this week. Pick your timezone and the times convert instantly.',
       tzPrefix: 'Times shown for',
       tzLabel: 'Show times in',
+      swipeHint: 'Swipe to see the whole week →',
       schedule: SCHEDULE,
       cta: 'Choose your plan',
       ctaHref: '#pricing',
@@ -106,11 +116,14 @@ export const CONTENT = {
     gallery: {
       eyebrow: 'Inside the classes',
       heading: 'Real women. Real living rooms. Real Mondays.',
-      note: 'TODO:ASSET — replace with real class screenshots / member photos: women 30–50, mid-class, at home. No stock athleisure.',
+      note: null,
+      // TODO:ASSET — real class screenshots / member photos (women 30–50,
+      // mid-class, at home; no stock). Add public/landing/gallery-N.jpg and set
+      // img: '/landing/gallery-N.jpg'. The section hides until ≥1 img is set.
       photos: [
-        { img: '/landing/gallery-1.jpg', cap: 'A live Strength cohort, mid-set.' },
-        { img: '/landing/gallery-2.jpg', cap: 'Morning Yoga — cameras on, coach cueing.' },
-        { img: '/landing/gallery-3.jpg', cap: 'The post-class check-in.' },
+        { img: null, cap: 'A live Strength cohort, mid-set.' },
+        { img: null, cap: 'Morning Yoga — cameras on, coach cueing.' },
+        { img: null, cap: 'The post-class check-in.' },
       ],
     },
 
@@ -125,16 +138,20 @@ export const CONTENT = {
       ],
     },
 
-    // Highest-leverage trust block. TODO:ASSET faces, TODO:PROOF creds.
+    // Highest-leverage trust block. A card renders only once `name` is set;
+    // the whole section (and its nav link) hides while none are.
+    // TODO:PROOF — Ansul's real instructors: full name, certification (e.g.
+    // "RYT-200, Yoga Alliance"), years teaching. TODO:ASSET — square photo at
+    // public/landing/coach-N.jpg, then img: '/landing/coach-N.jpg'.
     instructors: {
       eyebrow: 'The people, not a platform',
       heading: 'Real instructors, with names and faces.',
-      note: 'TODO:PROOF + TODO:ASSET — replace the four cards below with Ansul’s real instructors: photo, full name, certification, and years teaching.',
+      note: null,
       items: [
-        { img: '/landing/coach-1.jpg', name: 'TODO:PROOF — Instructor name', cred: 'TODO:PROOF — certification', years: 'TODO:PROOF — yrs', focus: 'Zumba & cardio' },
-        { img: '/landing/coach-2.jpg', name: 'TODO:PROOF — Instructor name', cred: 'TODO:PROOF — certification', years: 'TODO:PROOF — yrs', focus: 'Yoga & mobility' },
-        { img: '/landing/coach-3.jpg', name: 'TODO:PROOF — Instructor name', cred: 'TODO:PROOF — certification', years: 'TODO:PROOF — yrs', focus: 'Strength & post-40' },
-        { img: '/landing/coach-4.jpg', name: 'TODO:PROOF — Instructor name', cred: 'TODO:PROOF — certification', years: 'TODO:PROOF — yrs', focus: 'Meditation & breath' },
+        { img: null, name: null, cred: null, years: null, focus: 'Zumba & cardio' },
+        { img: null, name: null, cred: null, years: null, focus: 'Yoga & mobility' },
+        { img: null, name: null, cred: null, years: null, focus: 'Strength & post-40' },
+        { img: null, name: null, cred: null, years: null, focus: 'Meditation & breath' },
       ],
     },
 
@@ -147,24 +164,21 @@ export const CONTENT = {
         { name: 'Post-40 Strength', d: 'Protecting bone, muscle and joints — the strength work that matters most after 40.' },
         { name: 'Postpartum Return', d: 'A gentle, progressive way back to movement after birth, at a pace that respects your body.' },
       ],
+      // Health-claim disclaimer (FTC / ASCI). Shown under the tracks + footer.
+      disclaimer: 'Unifitz classes are general fitness, not medical treatment. Talk to your doctor before starting — especially with PCOS/PCOD, during pregnancy, after giving birth, or with any health condition.',
     },
 
     proof: {
       eyebrow: 'From our members',
       heading: 'The women already showing up.',
-      // Live approved reviews come from Supabase. If none, render these
-      // styled placeholders — never an invented quote or number.
-      placeholders: [
-        { quote: 'TODO:PROOF — a real member’s words, with a specific change (a symptom, an inches number, a habit she kept).', name: 'TODO:PROOF', city: 'TODO:PROOF' },
-        { quote: 'TODO:PROOF — a real member’s words, with a specific change.', name: 'TODO:PROOF', city: 'TODO:PROOF' },
-        { quote: 'TODO:PROOF — a real member’s words, with a specific change.', name: 'TODO:PROOF', city: 'TODO:PROOF' },
-      ],
+      // Live approved testimonials/reviews come from Supabase only. With none,
+      // the section hides — never an invented quote or number.
     },
 
     pricing: {
       eyebrow: 'Membership',
       heading: 'One membership. Cancel anytime.',
-      sub: 'Quarterly billing saves ~12% and is our most popular — but month-to-month is always here.',
+      sub: 'Quarterly billing saves 12% — and month-to-month is always here too.',
       billing: [
         { key: 'monthly', label: 'Monthly', factor: 1, months: 1, save: null },
         { key: 'quarterly', label: 'Quarterly', factor: 0.88, months: 3, save: 'Save 12%' },
@@ -188,16 +202,20 @@ export const CONTENT = {
         price: 799,
         unit: '/year',
         cap: 50,
-        // Real scarcity only. NO fake countdown. Show remaining when known.
-        scarcity: 'Limited to 50 founding members · TODO:PROOF — seats remaining',
+        // Real scarcity only. NO fake countdown.
+        scarcity: 'Limited to 50 founding members',
+        seatsLeft: null, // TODO:PROOF — set a real number to show "N seats left"
         perks: ['A full year, locked at the lowest price we’ll ever offer', 'Everything in Complete', 'Priority seat in every class', 'Direct line to Ansul & the instructors'],
       },
       primaryCta: 'Choose plan',
       anchorCta: 'Choose Complete',
+      // Factual (it has every feature), unlike "Most popular" which needs data.
+      anchorBadge: 'Everything included',
       moreToggle: 'See all plans',
       moreCollapse: 'Show fewer',
-      // TODO:CONFIRM refund/cancellation policy wording with Ansul.
-      refund: 'Cancel anytime from your account. TODO:CONFIRM — refund window (e.g. full refund in the first 7 days).',
+      // Refund window (if any) comes from BUSINESS.refundDays in config.js.
+      refund: 'Cancel anytime from your account — your plan runs to the end of the period you’ve paid for.',
+      refundLink: 'Cancellation & refund policy',
     },
 
     objections: {
@@ -205,7 +223,7 @@ export const CONTENT = {
       heading: 'What you’re actually wondering.',
       items: [
         { q: '“I’ll join and stop in two weeks, like last time.”', a: 'That’s exactly what live cohorts fix. Your instructor sees who’s on the call and who isn’t — you’re not disappearing into a dashboard. Being expected is the mechanism that lasted where willpower didn’t.' },
-        { q: '“Is this a real business, or one person with a Zoom link?”', a: 'Real instructors with names, faces and credentials (above), a full weekly schedule you can see before you pay, and a plain-language cancellation policy. Nothing hidden until checkout.' },
+        { q: '“Is this a real business, or one person with a Zoom link?”', a: 'A full weekly timetable you can see before you pay — with the instructor for every class — published prices, and a plain-language cancellation policy. Nothing hidden until checkout. Message us on WhatsApp and a real person answers.' },
         { q: '“The timings won’t work for me.”', a: 'The timetable above is already converted to your timezone. There are morning and evening cohorts across the week — you pick what fits, and you can switch.' },
         { q: '“Will this actually help my PCOD / post-40 weight?”', a: 'We run named tracks for exactly this — PCOS/PCOD Care, Weight-Loss Intensive and Post-40 Strength — programmed for the condition, not generic HIIT that backfires.' },
         { q: '“Online means they can’t correct my form.”', a: 'It’s live two-way video in small cohorts. The instructor watches you and calls out corrections by name — the opposite of a recording talking at you.' },
@@ -223,7 +241,7 @@ export const CONTENT = {
         { q: 'Are the classes really women-only?', a: 'Yes. Every class and every instructor-led session is women-only by design.' },
         { q: 'How does billing work?', a: 'Choose monthly or quarterly (quarterly saves ~12%). You’re billed upfront for the period and can cancel anytime — no contract.' },
         { q: 'Can I switch plans or tracks?', a: 'Anytime, from your account. Move between Starter, Regular, Complete or a condition track whenever your goals change.' },
-        { q: 'What’s the cancellation / refund policy?', a: 'Cancel anytime; changes apply at your next billing date. TODO:CONFIRM — exact refund window with Ansul.' },
+        { q: 'What’s the cancellation / refund policy?', a: 'Cancel anytime from your account. Your plan stays active until the end of the period you’ve paid for, and you won’t be charged again. The full policy is linked at the bottom of this page.' },
       ],
     },
 
@@ -232,6 +250,10 @@ export const CONTENT = {
       heading: 'Sit in on one live class, free.',
       sub: 'A single, seat-limited live class — real instructor, real cohort. No card, no auto-enroll. Come see if it’s for you.',
       cta: 'Claim a free seat',
+      consent: 'I agree to be contacted on WhatsApp or by phone about my free class. I can opt out anytime.',
+      doneTitle: 'You’re on the list.',
+      doneBody: 'We’ll message you on WhatsApp with the next class date and your Zoom link.',
+      dupeBody: 'You’re already on the list — we’ll be in touch on WhatsApp soon.',
     },
 
     finalCta: {
@@ -247,6 +269,12 @@ export const CONTENT = {
       tagline: 'Live, instructor-led fitness classes for women. Small cohorts, real schedule, a coach who knows your name.',
       tzNote: 'Class times on this page are shown in your device’s timezone.',
       explore: 'Explore',
+      legal: 'Legal',
+      legalLinks: [
+        { label: 'Privacy policy', to: '/privacy' },
+        { label: 'Terms of service', to: '/terms' },
+        { label: 'Cancellation & refunds', to: '/refund' },
+      ],
     },
   },
 };

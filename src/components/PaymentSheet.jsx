@@ -158,7 +158,7 @@ export default function PaymentSheet({ series, profile, email, onClose, onEnroll
                 </div>
               )}
 
-              <a href={waLink(`Hi UniFit! I need help enrolling in "${series.name}".`)} target="_blank" rel="noreferrer"
+              <a href={waLink(`Hi Unifitz! I need help enrolling in "${series.name}".`)} target="_blank" rel="noreferrer"
                 className="mt-4 flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-emerald-600">
                 <MessageCircle className="w-3.5 h-3.5" /> Trouble paying? Message us on WhatsApp
               </a>

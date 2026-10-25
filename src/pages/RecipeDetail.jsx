@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Dumbbell, ArrowLeft, Salad, Flame, Drumstick, Utensils, Loader2 } from 'lucide-react';
+import { ArrowLeft, Salad, Flame, Drumstick, Utensils, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import BrandMark from '../components/BrandMark';
+import RecipeImage from '../components/RecipeImage';
 
 // Public recipe page — opened from the diet plan + PDF links (no login needed).
 export default function RecipeDetail() {
@@ -21,8 +23,8 @@ export default function RecipeDetail() {
     <div className="min-h-screen bg-slate-50">
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold uppercase text-slate-900">
-            <Dumbbell className="w-6 h-6 text-brand-500" /> Uni<span className="text-brand-500">Fitz</span>
+          <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold text-slate-900">
+            <BrandMark className="w-7 h-7" /> Unifitz
           </Link>
           <Link to="/app/diet" className="text-sm font-semibold text-slate-500 hover:text-brand-600 inline-flex items-center gap-1">
             <ArrowLeft className="w-4 h-4" /> Diet plan
@@ -40,7 +42,7 @@ export default function RecipeDetail() {
         ) : (
           <article className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
             <div className="aspect-[16/9] bg-gradient-to-br from-emerald-200 to-emerald-400 flex items-center justify-center">
-              {recipe.image_url ? <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover" /> : <Salad className="w-12 h-12 text-emerald-700" />}
+              <RecipeImage src={recipe.image_url} alt={recipe.title} iconClass="w-12 h-12 text-emerald-700" />
             </div>
             <div className="p-5 md:p-7">
               <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">

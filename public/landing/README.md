@@ -1,27 +1,31 @@
 # Landing page photos — drop your files here
 
-Put your screenshots / photos in **this folder** (`public/landing/`) using the
-exact filenames below. Vite serves `public/` at the site root, so a file at
-`public/landing/hero.jpg` is used by the page as `/landing/hero.jpg` — no code
-change needed. Any file that's missing simply shows a tasteful placeholder, so
-you can add them one at a time.
+Put photos in **this folder** (`public/landing/`), then switch them on in
+`src/content/landing.js` by setting the matching `img:` field (it's `null`
+until then). Vite serves `public/` at the site root, so
+`public/landing/hero.jpg` is referenced as `'/landing/hero.jpg'`.
 
-| Filename | Where it appears | Ideal shape / size |
-|---|---|---|
-| `hero.jpg`      | Hero (top-right frame)        | landscape 4:3, ~1200×900 |
-| `gallery-1.jpg` | "Inside the classes" — 1st    | portrait 4:5, ~800×1000 |
-| `gallery-2.jpg` | "Inside the classes" — 2nd    | portrait 4:5, ~800×1000 |
-| `gallery-3.jpg` | "Inside the classes" — 3rd    | portrait 4:5, ~800×1000 |
-| `coach-1.jpg`   | Instructors — Zumba & cardio  | square 1:1, ~600×600 |
-| `coach-2.jpg`   | Instructors — Yoga & mobility | square 1:1, ~600×600 |
-| `coach-3.jpg`   | Instructors — Strength        | square 1:1, ~600×600 |
-| `coach-4.jpg`   | Instructors — Meditation      | square 1:1, ~600×600 |
+Sections without real content stay hidden on the live site (and show labelled
+placeholders in `pnpm dev`), so you can add photos one at a time.
+
+| Filename | Set in `landing.js` | Where it appears | Ideal shape / size |
+|---|---|---|---|
+| `hero.jpg`      | `hero.img`                  | Hero (replaces the "coming up live" card) | landscape 4:3, ~1200×900 |
+| `gallery-1.jpg` | `gallery.photos[0].img`     | "Inside the classes" — 1st | portrait 4:5, ~800×1000 |
+| `gallery-2.jpg` | `gallery.photos[1].img`     | "Inside the classes" — 2nd | portrait 4:5, ~800×1000 |
+| `gallery-3.jpg` | `gallery.photos[2].img`     | "Inside the classes" — 3rd | portrait 4:5, ~800×1000 |
+| `coach-1.jpg`   | `instructors.items[0].img`  | Instructors — Zumba & cardio | square 1:1, ~600×600 |
+| `coach-2.jpg`   | `instructors.items[1].img`  | Instructors — Yoga & mobility | square 1:1, ~600×600 |
+| `coach-3.jpg`   | `instructors.items[2].img`  | Instructors — Strength | square 1:1, ~600×600 |
+| `coach-4.jpg`   | `instructors.items[3].img`  | Instructors — Meditation | square 1:1, ~600×600 |
+
+Instructor cards also need `name` (and ideally `cred` + `years`) — a card with
+no name never renders, and the section + its nav link appear once ≥1 is named.
 
 ## Tips
-- **Format:** `.jpg` (or convert to `.webp` for smaller size — if you do, also
-  update the filename in `src/content/landing.js`).
-- **Compress** before adding (e.g. squoosh.app) — aim < 200 KB each so the page
-  stays fast. Images are lazy-loaded automatically.
-- **Filenames must match exactly** (lowercase, hyphens). To use different names
-  or more photos, edit the `img:` paths in `src/content/landing.js`.
-- Use **real women 30–50, mid-class, at home** — not stock athleisure.
+- **Format:** `.webp` (or `.avif`) is ~30–50% smaller than `.jpg`:
+  `cwebp -q 80 hero.jpg -o hero.webp`, then use the `.webp` path.
+- **Compress** to < 200 KB each (hero < 150 KB — it's the first thing that paints).
+- The hero image loads eagerly with high priority; all others lazy-load.
+- Use **real women 30–50, mid-class, at home** — not stock athleisure. Get
+  written permission from anyone recognisable.

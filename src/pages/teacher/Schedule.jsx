@@ -238,7 +238,7 @@ export default function TeacherSchedule() {
     setUnmatched(parts ?? []);
   }
 
-  // Reconcile a Zoom participant that couldn't auto-match to a UniFit user.
+  // Reconcile a Zoom participant that couldn't auto-match to a Unifitz user.
   // Audit trail: record who matched and when (matched_by / matched_at).
   async function reconcile(participantId, userId) {
     if (!userId) return;
@@ -537,7 +537,7 @@ export default function TeacherSchedule() {
               </button>
             </div>
 
-            {/* Unmatched Zoom participants — reconcile to a UniFit member */}
+            {/* Unmatched Zoom participants — reconcile to a Unifitz member */}
             {unmatched.length > 0 && (
               <div className="mt-6 border-t border-slate-100 pt-4">
                 <h4 className="font-bold text-sm text-amber-700">Unmatched Zoom participants ({unmatched.length})</h4>
