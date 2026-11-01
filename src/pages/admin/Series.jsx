@@ -39,7 +39,7 @@ export default function AdminSeries() {
 
   async function load() {
     const [{ data: ch }, { data: t }, { data: enr }, { data: ses }, { data: pays }, { data: cts }, { data: profs }] = await Promise.all([
-      supabase.from('challenges').select('*').order('created_at'),
+      supabase.from('challenges').select('*').eq('is_recurring', false).order('created_at'),
       supabase.from('profiles').select('id, full_name').eq('role', 'teacher'),
       supabase.from('enrollments').select('challenge_id'),
       supabase.from('sessions').select('challenge_id, completed'),

@@ -20,7 +20,7 @@ export default function AddStudentModal({ open, onClose, onCreated }) {
       toast(`${f.full_name} added — linked to your referrals`);
       setF({ full_name: '', email: '', phone: '', password: '' });
       onClose();
-      onCreated?.();
+      onCreated?.(data.user_id);
     } catch (err) {
       toast(err.message || 'Could not create student', 'error');
     } finally {

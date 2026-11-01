@@ -30,10 +30,12 @@ const PAGES = [
     description: 'How to cancel your Unifitz membership, when renewals stop, and when refunds apply.',
   },
   {
-    url: '/20minutes-fitness', file: '20minutes-fitness.html',
-    title: '20-Minute Fitness — Join the Founding Batch Waitlist | Unifitz',
-    description: 'A live 20-minute workout, 5 days a week, with two trainers in every session — one to lead, one to check your form. Founding batch starts 1 December. Waitlist is free.',
+    url: '/delete-account', file: 'delete-account.html',
+    title: 'Delete your Unifitz account | Unifitz',
+    description: 'How to delete your Unifitz account and data, what gets deleted and how long it takes.',
   },
+  // title/description/image + FAQ JSON-LD come from content/twentyMinutes.js (see entry-server ffwMeta).
+  { url: '/20minutes-fitness', file: '20minutes-fitness.html', ffw: true },
 ];
 
 const esc = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -46,7 +48,9 @@ const sub = (html, pattern, value) => {
 };
 
 const template = await readFile(path.join(dist, 'index.html'), 'utf8');
-const { render, faqJsonLd } = await import(path.join(ssrDir, 'entry-server.js'));
+const { render, faqJsonLd, ffwFaqJsonLd, ffwMeta } = await import(path.join(ssrDir, 'entry-server.js'));
+const jsonLd = data => `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>\n  </head>`;
+for (const p of PAGES) if (p.ffw) Object.assign(p, ffwMeta, { jsonLd: ffwFaqJsonLd });
 
 // SPA shell: no hardcoded canonical (RouteMeta sets one per route at runtime),
 // and the app UI's Barlow fonts requested up front instead of after mount.
@@ -60,7 +64,7 @@ for (const page of PAGES) {
   if (!body || body.length < 500) throw new Error(`prerender: suspiciously empty output for ${page.url}`);
   let html = sub(template, '<div id="root"></div>', `<div id="root">${body}</div>`);
   if (page.url === '/') {
-    html = sub(html, '</head>', `<script type="application/ld+json">${JSON.stringify(faqJsonLd).replace(/</g, '\\u003c')}</script>\n  </head>`);
+    html = sub(html, '</head>', jsonLd(faqJsonLd));
   } else {
     const canonical = SITE + page.url;
     html = sub(html, /<title>[^<]*<\/title>/, `<title>${esc(page.title)}</title>`);
@@ -69,6 +73,16 @@ for (const page of PAGES) {
     html = sub(html, /<meta property="og:url" content="[^"]*"/, `<meta property="og:url" content="${canonical}"`);
     html = sub(html, /<meta property="og:title" content="[^"]*"/, `<meta property="og:title" content="${esc(page.title)}"`);
     html = sub(html, /<meta property="og:description" content="[^"]*"/, `<meta property="og:description" content="${esc(page.description)}"`);
+    // Ad landing pages also get their own share card + structured data.
+    if (page.image) {
+      const img = SITE + page.image;
+      html = sub(html, /<meta property="og:image" content="[^"]*"/, `<meta property="og:image" content="${img}"`);
+      html = sub(html, /<meta property="og:image:alt" content="[^"]*"/, `<meta property="og:image:alt" content="${esc(page.imageAlt)}"`);
+      html = sub(html, /<meta name="twitter:title" content="[^"]*"/, `<meta name="twitter:title" content="${esc(page.title)}"`);
+      html = sub(html, /<meta name="twitter:description" content="[^"]*"/, `<meta name="twitter:description" content="${esc(page.description)}"`);
+      html = sub(html, /<meta name="twitter:image" content="[^"]*"/, `<meta name="twitter:image" content="${img}"`);
+    }
+    if (page.jsonLd) html = sub(html, '</head>', jsonLd(page.jsonLd));
   }
   await writeFile(path.join(dist, page.file), html);
   console.log(`prerendered ${page.url.padEnd(9)} → dist/${page.file} (${(html.length / 1024).toFixed(1)} KB)`);

@@ -14,12 +14,17 @@ const buttonVariants = cva(
         ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
         danger: 'bg-red-500 text-white hover:bg-red-600',
         outline: 'border border-slate-300 text-slate-700 hover:bg-slate-50',
+        // brand-700: AA contrast with white text (brand-500 is decorative only).
+        brand: 'bg-brand-700 text-white hover:bg-[#9A3412] shadow-sm',
+        link: 'text-brand-700 underline underline-offset-4 hover:text-[#9A3412] p-0 h-auto',
       },
       size: {
         default: 'px-5 py-3',
         sm: 'px-3.5 py-2 text-xs',
         lg: 'px-7 py-3.5 text-base',
+        xl: 'h-12 px-6 text-[1.0625rem] rounded-full',
         icon: 'w-9 h-9 p-0',
+        inline: 'p-0',
       },
     },
     defaultVariants: { variant: 'default', size: 'default' },

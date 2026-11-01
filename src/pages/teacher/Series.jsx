@@ -15,8 +15,8 @@ export default function TeacherSeries() {
     (async () => {
       // Series this teacher runs — lead teacher_id OR co-teacher.
       const [{ data: own }, { data: ct }] = await Promise.all([
-        supabase.from('challenges').select('*').eq('teacher_id', profile.id),
-        supabase.from('challenge_teachers').select('challenges(*)').eq('teacher_id', profile.id),
+        supabase.from('challenges').select('*').eq('teacher_id', profile.id).eq('is_recurring', false),
+        supabase.from('challenge_teachers').select('challenges!inner(*)').eq('teacher_id', profile.id).eq('challenges.is_recurring', false),
       ]);
       const map = new Map();
       for (const c of own ?? []) map.set(c.id, c);

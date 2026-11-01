@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { disablePush } from '../lib/push';
 
 const AuthContext = createContext(null);
 
@@ -36,7 +37,10 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe();
   }, [loadProfile]);
 
-  const signOut = () => supabase.auth.signOut();
+  const signOut = async () => {
+    await disablePush(); // stop this browser's pushes while the session can still say so
+    return supabase.auth.signOut();
+  };
 
   return (
     <AuthContext.Provider value={{ session, profile, loading, signOut, patchProfile, refreshProfile: () => session && loadProfile(session.user.id) }}>

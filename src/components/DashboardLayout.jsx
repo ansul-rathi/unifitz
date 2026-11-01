@@ -4,11 +4,12 @@ import {
   Home, Trophy, TrendingUp, Gift, User, Calendar, Users, Megaphone,
   LayoutDashboard, ListChecks, UserCog, Share2, IndianRupee, Flame, LogOut, 
   Salad, Medal, Mailbox, BarChart3, X, CalendarCheck, Sparkles, ChefHat, Eye, Bell, Menu,
-  ClipboardCheck, ChevronRight,
+  ClipboardCheck, ChevronRight, Repeat,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useViewMode } from '../context/ViewModeContext';
 import { supabase } from '../lib/supabase';
+import { refreshPush } from '../lib/push';
 import { Avatar } from './ui';
 import BrandMark from './BrandMark';
 
@@ -21,14 +22,17 @@ const NAV = {
     { to: '/app/recipes', label: 'Recipes', icon: ChefHat },
     { to: '/app/badges', label: 'Badges', icon: Medal },
     { to: '/app/refer', label: 'Refer & Earn', icon: Gift },
+    { to: '/app/notifications', label: 'Notifications', icon: Bell },
     { to: '/app/profile', label: 'Profile', icon: User },
   ],
   teacher: [
     { to: '/teacher', label: 'Schedule', icon: Calendar, end: true },
+    { to: '/teacher/live', label: 'Live Classes', icon: Repeat },
     { to: '/teacher/series', label: 'Series', icon: ListChecks },
     { to: '/teacher/students', label: 'My Students', icon: Users },
     { to: '/teacher/announcements', label: 'Announce', icon: Megaphone },
     { to: '/teacher/recipes', label: 'Recipes', icon: ChefHat },
+    { to: '/teacher/notifications', label: 'Notifications', icon: Bell },
     { to: '/teacher/profile', label: 'Profile', icon: User },
   ],
   admin: [
@@ -36,6 +40,7 @@ const NAV = {
     { to: '/admin/notifications', label: 'Notifications', icon: Bell },
     { to: '/admin/reports', label: 'Reports', icon: BarChart3 },
     { to: '/admin/series', label: 'Series', icon: ListChecks },
+    { to: '/admin/live', label: 'Live Classes', icon: Repeat },
     { to: '/admin/users', label: 'Users', icon: UserCog },
     { to: '/admin/checkins', label: 'Check-ins', icon: ClipboardCheck },
     { to: '/admin/referrals', label: 'Referrals', icon: Share2 },
@@ -49,6 +54,9 @@ const NAV = {
 
 const HOME_BASE = { client: '/app', teacher: '/teacher', admin: '/admin' };
 
+// Reached from the header (bell, avatar) on mobile instead of the bottom tabs.
+const HEADER_ONLY = ['/app/refer', '/app/profile', '/app/notifications', '/teacher/notifications', '/teacher/profile'];
+
 export default function DashboardLayout() {
   const { profile, signOut } = useAuth();
   const { preview, setPreview } = useViewMode();
@@ -56,7 +64,7 @@ export default function DashboardLayout() {
   const [streak, setStreak] = useState(null);
   const [showStreak, setShowStreak] = useState(false);
   const [pendingCash, setPendingCash] = useState(0); // admin: cash payments awaiting verification
-  const [unread, setUnread] = useState(0); // admin: unread activity notifications
+  const [unread, setUnread] = useState(0); // unread notifications (admin feed or personal inbox)
   const [drawerOpen, setDrawerOpen] = useState(false); // admin mobile hamburger nav
   const [accountOpen, setAccountOpen] = useState(false); // client mobile account sheet
 
@@ -64,11 +72,10 @@ export default function DashboardLayout() {
   // While a staff member previews the student app, render the client nav/shell.
   const effectiveRole = preview && isStaff ? 'client' : profile.role;
   const items = NAV[effectiveRole] ?? NAV.client;
-  // Mobile/tablet bottom tabs drop Profile + Refer for clients (reached via the
-  // header avatar instead). Desktop sidebar keeps the full list unchanged.
-  const bottomItems = effectiveRole === 'client'
-    ? items.filter(i => !['/app/refer', '/app/profile'].includes(i.to))
-    : items;
+  // Mobile/tablet bottom tabs drop the items the header already reaches
+  // (bell, avatar). Desktop sidebar keeps the full list unchanged.
+  const bottomItems = items.filter(i => !HEADER_ONLY.includes(i.to));
+  const inboxPath = `${HOME_BASE[profile.role] ?? '/app'}/notifications`;
   // Admin has too many nav items for bottom tabs (they overflowed and hid
   // Notifications). On mobile the admin shell uses a hamburger drawer instead.
   const useDrawer = effectiveRole === 'admin';
@@ -96,22 +103,33 @@ export default function DashboardLayout() {
     return () => supabase.removeChannel(channel);
   }, [profile.role]);
 
-  // Admin: live unread-notification count for the Notifications nav badge.
+  // Browser push: if this browser already allowed notifications, keep its
+  // token registered for the signed-in user (enabling is on the Notifications page).
+  useEffect(() => { refreshPush(); }, [profile.id]);
+
+  // Live unread-notification count for the bell + Notifications nav badge.
+  // RLS scopes it: admins count the activity feed, everyone else their inbox.
   useEffect(() => {
-    if (profile.role !== 'admin') return;
     const fetchUnread = () => supabase
       .from('notifications').select('id', { count: 'exact', head: true }).eq('is_read', false)
       .then(({ count }) => setUnread(count ?? 0));
     fetchUnread();
-    const channel = supabase.channel('admin-unread-notifications')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, fetchUnread)
+    const channel = supabase.channel('unread-notifications')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, payload => {
+        fetchUnread();
+        // New website lead: its own louder tone so it isn't missed. Browsers
+        // may block it until the page has been clicked once — then it's silent.
+        if (profile.role === 'admin' && payload.eventType === 'INSERT' && payload.new?.type === 'lead') {
+          new Audio('/sounds/new-lead.wav').play().catch(() => {});
+        }
+      })
       .subscribe();
     return () => supabase.removeChannel(channel);
-  }, [profile.role]);
+  }, [profile.id, profile.role]);
 
   const badgeFor = to => {
     if (to === '/admin/revenue' && pendingCash > 0) return pendingCash;
-    if (to === '/admin/notifications' && unread > 0) return unread;
+    if (to === inboxPath && unread > 0) return unread;
     return null;
   };
 
@@ -138,8 +156,8 @@ export default function DashboardLayout() {
           </div>
 
           <div className="flex items-center gap-3">
-            {useDrawer && (
-              <Link to="/admin/notifications" aria-label="Notifications" title="Notifications" className="relative p-2 rounded-lg text-slate-600 hover:bg-slate-100">
+            {!preview && (
+              <Link to={inboxPath} aria-label="Notifications" title="Notifications" className="relative p-2 rounded-lg text-slate-600 hover:bg-slate-100">
                 <Bell className="w-5 h-5" />
                 {unread > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold">{unread}</span>

@@ -16,9 +16,11 @@ const Onboarding = lazy(() => import('./pages/Onboarding'));
 const RecipeDetail = lazy(() => import('./pages/RecipeDetail'));
 const StaffProfile = lazy(() => import('./pages/StaffProfile'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const Notifications = lazy(() => import('./pages/Notifications'));
 const Privacy = lazy(() => import('./pages/legal/Privacy'));
 const Terms = lazy(() => import('./pages/legal/Terms'));
 const Refund = lazy(() => import('./pages/legal/Refund'));
+const DeleteAccount = lazy(() => import('./pages/legal/DeleteAccount'));
 const WaitlistLanding = lazy(() => import('./pages/WaitlistLanding'));
 const TwentyMinutes = lazy(() => import('./pages/TwentyMinutes'));
 const ResumeAnsulRathi = lazy(() => import('./pages/resume/AnsulRathi'));
@@ -27,6 +29,7 @@ const ClientHome = lazy(() => import('./pages/client/Home'));
 const ClientSeries = lazy(() => import('./pages/client/Series'));
 const ClientSeriesDetail = lazy(() => import('./pages/client/SeriesDetail'));
 const SessionPlayer = lazy(() => import('./pages/client/SessionPlayer'));
+const ClientLiveClass = lazy(() => import('./pages/client/LiveClass'));
 const ClientProgress = lazy(() => import('./pages/client/Progress'));
 const ClientDiet = lazy(() => import('./pages/client/Diet'));
 const ClientBadges = lazy(() => import('./pages/client/Badges'));
@@ -35,6 +38,8 @@ const ClientRecipes = lazy(() => import('./pages/client/Recipes'));
 const ClientProfile = lazy(() => import('./pages/client/Profile'));
 
 const StaffRecipes = lazy(() => import('./pages/staff/Recipes'));
+const LiveClasses = lazy(() => import('./pages/staff/LiveClasses'));
+const LiveClassDetail = lazy(() => import('./pages/staff/LiveClassDetail'));
 
 const TeacherSchedule = lazy(() => import('./pages/teacher/Schedule'));
 const TeacherStudents = lazy(() => import('./pages/teacher/Students'));
@@ -46,7 +51,6 @@ const AdminSeries = lazy(() => import('./pages/admin/Series'));
 const AdminUsers = lazy(() => import('./pages/admin/Users'));
 const AdminCheckins = lazy(() => import('./pages/admin/Checkins'));
 const AdminUserDetail = lazy(() => import('./pages/admin/UserDetail'));
-const AdminNotifications = lazy(() => import('./pages/admin/Notifications'));
 const AdminReferrals = lazy(() => import('./pages/admin/Referrals'));
 const AdminRevenue = lazy(() => import('./pages/admin/Revenue'));
 const AdminBadges = lazy(() => import('./pages/admin/Badges'));
@@ -141,6 +145,7 @@ export default function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/refund" element={<Refund />} />
+        <Route path="/delete-account" element={<DeleteAccount />} />
         <Route path="/waitlisting" element={<WaitlistLanding />} />
         {/* 20-minute daily series — founding-batch waitlist. Public even when logged in. */}
         <Route path="/20minutes-fitness" element={<TwentyMinutes />} />
@@ -170,6 +175,8 @@ export default function App() {
           <Route path="challenges" element={<RedirectToSeries base="/app/series" />} />
           <Route path="challenges/:id" element={<RedirectToSeries base="/app/series" />} />
           <Route path="session/:id" element={<SessionPlayer />} />
+          <Route path="live/:id" element={<ClientLiveClass />} />
+          <Route path="notifications" element={<Notifications />} />
           <Route path="progress" element={<ClientProgress />} />
           <Route path="diet" element={<ClientDiet />} />
           <Route path="recipes" element={<ClientRecipes />} />
@@ -180,6 +187,9 @@ export default function App() {
 
         <Route path="/teacher" element={<Protected role="teacher"><DashboardLayout /></Protected>}>
           <Route index element={<TeacherSchedule />} />
+          <Route path="live" element={<LiveClasses />} />
+          <Route path="live/:id" element={<LiveClassDetail />} />
+          <Route path="notifications" element={<Notifications />} />
           <Route path="students" element={<TeacherStudents />} />
           <Route path="announcements" element={<TeacherAnnouncements />} />
           <Route path="series" element={<TeacherSeries />} />
@@ -191,7 +201,9 @@ export default function App() {
 
         <Route path="/admin" element={<Protected role="admin"><DashboardLayout /></Protected>}>
           <Route index element={<AdminOverview />} />
-          <Route path="notifications" element={<AdminNotifications />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="live" element={<LiveClasses />} />
+          <Route path="live/:id" element={<LiveClassDetail />} />
           <Route path="reports" element={<AdminReports />} />
           <Route path="series" element={<AdminSeries />} />
           <Route path="series/:id" element={<AdminSeriesDetail />} />

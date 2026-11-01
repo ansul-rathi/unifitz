@@ -11,6 +11,11 @@ import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { ViewModeProvider } from './context/ViewModeContext';
 import { L } from './content/landing';
+import { T as T20, FFW } from './content/twentyMinutes';
+import { FAQ_ITEMS } from './lib/ffw';
+
+// Head for /20minutes-fitness, from the page's own copy.
+export const ffwMeta = { title: T20.meta.title, description: T20.meta.description, image: FFW.ogImage, imageAlt: 'FFW — 20-minute live workouts by Unifitz' };
 
 const tree = url => (
   <React.StrictMode>
@@ -44,8 +49,10 @@ export async function render(url) {
 }
 
 // FAQPage structured data, generated from the same copy the page renders.
-export const faqJsonLd = {
+const faqPage = items => ({
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: L.faq.groups.flatMap(g => g.items).map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
-};
+  mainEntity: items.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+});
+export const faqJsonLd = faqPage(L.faq.groups.flatMap(g => g.items));
+export const ffwFaqJsonLd = faqPage(FAQ_ITEMS);

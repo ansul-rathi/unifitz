@@ -45,7 +45,7 @@ export default function Privacy() {
       <p>Some classes are recorded so members can catch up. Recordings are available only to members of that class and our staff. Cameras are always optional — keep yours off, or ask your instructor if you’d prefer not to appear in a recording.</p>
 
       <h2>How long we keep it</h2>
-      <p>We keep account information while your account is active and for up to 3 years afterwards, unless the law requires longer (for example, payment and tax records). Free-class enquiries that don’t become memberships are deleted within 12 months. You can ask us to delete your information sooner.</p>
+      <p>We keep account information while your account is active and for up to 3 years afterwards, unless the law requires longer (for example, payment and tax records). Free-class enquiries that don’t become memberships are deleted within 12 months. You can delete your account yourself from your Profile in the app or on the website — see <Link to="/delete-account">how to delete your account</Link>.</p>
 
       <h2>Your rights</h2>
       <p>Depending on where you live (including under India’s Digital Personal Data Protection Act, 2023 and US state privacy laws such as California’s CCPA), you may have the right to access, correct, delete or get a copy of your personal information, to withdraw consent, and to nominate someone to exercise your rights. To make a request, email <a href={`mailto:${CONTACT}`}>{CONTACT}</a>. We’ll respond within 30 days and won’t treat you differently for exercising your rights.</p>

@@ -8,6 +8,7 @@ import { calcBMI, bmiCategory, calcTDEE, ACTIVITY_LABELS } from '../../lib/calc'
 import { Card, Avatar } from '../../components/ui';
 import Select from '../../components/Select';
 import HeightField from '../../components/HeightField';
+import { DeletionBanner, DeleteAccountButton } from '../../components/AccountDeletion';
 
 const GOAL_LABELS = { lose_weight: 'Lose weight', gain_muscle: 'Gain muscle', stay_fit: 'Stay fit' };
 
@@ -104,6 +105,7 @@ export default function ClientProfile() {
     <>
       {/* ═══ MOBILE (< sm) — grouped, scannable ═══ */}
       <div className="sm:hidden space-y-4">
+        <DeletionBanner />
         {/* Header */}
         <Card className="p-5">
           <div className="flex items-center gap-4">
@@ -171,11 +173,13 @@ export default function ClientProfile() {
           <button onClick={signOut} className="w-full flex items-center justify-center gap-2 bg-white rounded-2xl border border-slate-200 px-4 py-3.5 text-red-600 font-semibold text-sm hover:bg-red-50 transition-colors duration-200">
             <LogOut className="w-4 h-4" /> Sign out
           </button>
+          <DeleteAccountButton />
         </div>
       </div>
 
       {/* ═══ TABLET / DESKTOP (sm+) — two-column layout ═══ */}
       <div className="hidden sm:block max-w-5xl">
+        <div className="mb-5 empty:hidden"><DeletionBanner /></div>
         <div className="flex items-center justify-between mb-5">
           <h1 className="text-2xl md:text-3xl font-bold">Profile</h1>
           <button onClick={startEdit} className="btn-primary !py-2 !px-4 text-sm"><Pencil className="w-4 h-4" /> Edit profile</button>
@@ -212,6 +216,7 @@ export default function ClientProfile() {
             <button onClick={signOut} className="w-full flex items-center justify-center gap-2 bg-white rounded-2xl border border-slate-200 px-4 py-3.5 text-red-600 font-semibold text-sm hover:bg-red-50 transition-colors duration-200">
               <LogOut className="w-4 h-4" /> Sign out
             </button>
+            <DeleteAccountButton />
           </div>
 
           {/* Right — grouped details */}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, MotionConfig } from 'framer-motion';
 import {
@@ -17,7 +17,6 @@ import './landing.css';
 
 const PRIMARY = 'Choose your plan';        // repeated verbatim ≥4×
 const MARKET = 'US';
-const CURRENCY = 'USD';
 // Dev-only placeholders for unfilled content. `import.meta.env.DEV` is a
 // build-time constant, so every `DEV &&` branch is stripped from production.
 const DEV = import.meta.env.DEV;
@@ -360,7 +359,7 @@ export default function Landing() {
           </Band>
         </main>
 
-        <SiteFooter />
+        <SiteFooter clearStickyBar />
 
         {/* Sticky mobile CTA (after hero) + WhatsApp */}
         {scrolled && (
@@ -556,23 +555,98 @@ function RefundNote({ className = '' }) {
   );
 }
 
+// "Starter Quarterly package" — what the WhatsApp prefill names.
+const packageName = (plan, billingKey) =>
+  `${plan.name} ${plan.pkg || L.pricing.billing.find(x => x.key === billingKey).pkg} package`;
+
+// Plan details popup. No prices — the CTA hands off to WhatsApp with the
+// package name prefilled so the team can quote it.
+function PlanModal({ plan, billing, setBilling, onClose }) {
+  const p = L.pricing;
+  const closeRef = useRef(null);
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', onKey);
+    closeRef.current?.focus();
+    return () => { document.body.style.overflow = prev; document.removeEventListener('keydown', onKey); };
+  }, [onClose]);
+
+  const pkg = packageName(plan, billing);
+  const href = waLink(`Hi Unifitz! I'd like to join the ${pkg}. Please share the details.`);
+  const items = plan.feats || plan.perks || (plan.note ? [plan.note] : []);
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-5" role="dialog" aria-modal="true" aria-labelledby="uf-plan-title">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="relative w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-t-[26px] sm:rounded-[26px] p-6 md:p-8"
+        style={{ background: 'var(--cream)', border: '1px solid var(--line)', boxShadow: '0 30px 60px -30px rgba(0,0,0,0.45)' }}>
+        <button ref={closeRef} type="button" onClick={onClose} aria-label="Close" className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--cream-2)' }}>
+          <X className="w-5 h-5" />
+        </button>
+
+        <span className="uf-tag">{plan.anchor ? p.anchorBadge : p.eyebrow}</span>
+        <h3 id="uf-plan-title" className="mt-3 uf-serif" style={{ fontSize: '2rem', lineHeight: 1.1 }}>{plan.name}</h3>
+        {plan.tagline && <p className="mt-2 uf-ink-soft">{plan.tagline}</p>}
+        {plan.bestFor && (
+          <p className="mt-4 rounded-2xl px-4 py-3 text-[0.92rem]" style={{ background: 'var(--cream-2)' }}>
+            <span className="font-bold" style={{ color: 'var(--clay)' }}>Best for: </span>{plan.bestFor}
+          </p>
+        )}
+
+        <ul className="mt-5 space-y-2.5 text-[0.95rem]">
+          {items.map(f => <li key={f} className="flex items-start gap-2.5"><Check className="w-4 h-4 shrink-0 mt-[3px]" style={{ color: 'var(--go)' }} /> {f}</li>)}
+        </ul>
+
+        {!plan.pkg && (
+          <div className="mt-6">
+            <p className="text-[0.8rem] font-bold uppercase tracking-[0.08em] uf-ink-soft">Billing</p>
+            <div className="mt-2 grid grid-cols-2 gap-2" role="group" aria-label="Billing period">
+              {p.billing.map(opt => (
+                <button key={opt.key} type="button" aria-pressed={billing === opt.key} onClick={() => setBilling(opt.key)}
+                  className="rounded-2xl px-4 py-3 min-h-11 text-left font-bold"
+                  style={billing === opt.key ? { border: '2px solid var(--go)', background: 'var(--cream-2)' } : { border: '1px solid var(--line)' }}>
+                  {opt.label}
+                  {opt.save && <span className="block text-[0.75rem] font-semibold" style={{ color: 'var(--go)' }}>{opt.save}</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <hr className="uf-hr my-6" />
+        <ol className="space-y-2 text-[0.9rem] uf-ink-soft">
+          {p.modalSteps.map((s, i) => (
+            <li key={s} className="flex items-start gap-3">
+              <span className="w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-[0.75rem] font-bold" style={{ background: 'var(--clay)', color: '#FFFFFF' }}>{i + 1}</span>{s}
+            </li>
+          ))}
+        </ol>
+
+        <a href={href} target="_blank" rel="noopener noreferrer"
+          onClick={() => track('whatsapp_click', { location: 'plan_modal', plan: plan.name, billing: plan.pkg ? 'yearly' : billing, market: MARKET })}
+          className="uf-btn uf-btn--solid uf-btn--full mt-6">
+          <WhatsAppIcon className="w-5 h-5" /> {p.modalCta}
+        </a>
+        <p className="mt-3 text-center text-[0.8rem] uf-ink-soft">Enquiring about: <strong>{pkg}</strong> · {p.modalNote}</p>
+      </div>
+    </div>
+  );
+}
+
 function Pricing({ clickCta }) {
   const p = L.pricing;
   const [billing, setBilling] = useState(p.defaultBilling);
   const [showMore, setShowMore] = useState(false);
-  const b = p.billing.find(x => x.key === billing);
+  const [open, setOpen] = useState(null);
+  const closeModal = useCallback(() => setOpen(null), []);
 
-  const price = (monthly) => {
-    const total = Math.round(monthly * b.months * b.factor);
-    const perMo = Math.round(monthly * b.factor);
-    return { total, perMo };
-  };
-  // Carry the choice through signup: /auth reads plan + billing.
-  const planHref = (name) => `/auth?mode=signup&plan=${encodeURIComponent(name)}&billing=${billing}`;
-  // GA4 ecommerce: picking a plan is select_item (begin_checkout fires at payment).
-  const selectPlan = (name, value) => {
-    track('select_item', { item_list_name: 'pricing', currency: CURRENCY, value, items: [{ item_id: name, item_name: name, item_variant: billing, price: value }], market: MARKET });
-    clickCta('pricing', { plan: name });
+  // GA4: picking a plan is select_item; the WhatsApp tap is the conversion.
+  const selectPlan = (plan) => {
+    track('select_item', { item_list_name: 'pricing', items: [{ item_id: plan.name, item_name: plan.name, item_variant: plan.pkg ? 'yearly' : billing }], market: MARKET });
+    clickCta('pricing', { plan: plan.name });
+    setOpen(plan);
   };
 
   return (
@@ -594,32 +668,29 @@ function Pricing({ clickCta }) {
         </div>
         </div>
 
-        {/* 4 primary tiers, Complete anchor. Headline price is always per
-            month so the four cards compare at a glance. */}
+        {/* 4 primary tiers, Complete anchor. No prices — the big "hook" line
+            (3×, 5×, All-in) is what the cards compare on. */}
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 mt-12 items-stretch">
           {p.primary.map(plan => {
-            const pr = price(plan.monthly);
             const anchor = plan.anchor;
             return (
-              <div key={plan.name} className={`relative rounded-[22px] p-6 flex flex-col ${anchor ? 'shadow-[0_18px_40px_-24px_rgba(194,65,12,0.55)]' : ''}`}
+              <div key={plan.name} className={`group relative rounded-[22px] p-6 flex flex-col transition-transform duration-200 hover:-translate-y-1 ${anchor ? 'shadow-[0_18px_40px_-24px_rgba(194,65,12,0.55)]' : 'hover:shadow-[0_18px_40px_-28px_rgba(0,0,0,0.35)]'}`}
                 style={anchor ? { border: '2px solid var(--clay)', background: 'var(--cream-2)' } : { border: '1px solid var(--line)', background: 'var(--cream)' }}>
                 {anchor && (
                   <span className="absolute -top-3 left-6 rounded-full px-3 py-1 text-[0.7rem] font-bold uppercase tracking-[0.08em] whitespace-nowrap" style={{ background: 'var(--clay)', color: '#FFFFFF' }}>{p.anchorBadge}</span>
                 )}
                 <h3 className="font-bold whitespace-nowrap" style={{ fontFamily: 'var(--sans)', fontSize: '1.1rem' }}>{plan.name}</h3>
                 <p className="mt-1 text-[0.9rem] uf-ink-soft lg:min-h-[2.8rem]" style={{ lineHeight: 1.45 }}>{plan.tagline}</p>
-                <p className="mt-5 uf-serif uf-tabular whitespace-nowrap" style={{ fontSize: '2.6rem', lineHeight: 1 }}>
-                  ${pr.perMo}<span className="text-[0.95rem] uf-ink-soft" style={{ fontFamily: 'var(--sans)' }}>/mo</span>
-                </p>
-                <p className="mt-2 text-[0.8rem] uf-ink-soft">{b.months > 1 ? `$${pr.total} billed every 3 months` : 'Billed monthly'}</p>
+                <p className="mt-5 uf-serif whitespace-nowrap" style={{ fontSize: '2.6rem', lineHeight: 1, color: anchor ? 'var(--clay)' : 'var(--ink)' }}>{plan.hook}</p>
+                <p className="mt-2 text-[0.8rem] uf-ink-soft">{plan.hookSub}</p>
                 <hr className="uf-hr my-5" />
                 <ul className="space-y-2.5 text-[0.92rem] flex-1">
                   {plan.feats.map(f => <li key={f} className="flex items-start gap-2.5"><Check className="w-4 h-4 shrink-0 mt-[3px]" style={{ color: 'var(--go)' }} /> {f}</li>)}
                 </ul>
-                <Link to={planHref(plan.name)} onClick={() => selectPlan(plan.name, pr.total)}
+                <button type="button" onClick={() => selectPlan(plan)}
                   className={`uf-btn uf-btn--full mt-6 !px-4 whitespace-nowrap ${anchor ? 'uf-btn--solid' : 'uf-btn--ghost'}`}>
-                  {anchor ? L.pricing.anchorCta : L.pricing.primaryCta}<span className="sr-only"> — {plan.name}</span>
-                </Link>
+                  {anchor ? L.pricing.anchorCta : L.pricing.primaryCta} <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" /><span className="sr-only"> — {plan.name}</span>
+                </button>
               </div>
             );
           })}
@@ -636,19 +707,15 @@ function Pricing({ clickCta }) {
         {showMore && (
           <div id="uf-more-plans" className="mt-4 max-w-4xl mx-auto">
             <ul className="uf-card divide-y" style={{ borderColor: 'var(--line)' }}>
-              {p.more.map(m => {
-                const pr = price(m.monthly);
-                return (
-                  <li key={m.name} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5" style={{ borderColor: 'var(--line)' }}>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold" style={{ fontSize: '1.02rem' }}>{m.name}</h4>
-                      <p className="text-[0.9rem] uf-ink-soft">{m.note}</p>
-                    </div>
-                    <p className="uf-serif uf-tabular shrink-0" style={{ fontSize: '1.5rem', lineHeight: 1 }}>${pr.perMo}<span className="text-[0.8rem] uf-ink-soft" style={{ fontFamily: 'var(--sans)' }}>/mo</span></p>
-                    <Link to={planHref(m.name)} onClick={() => selectPlan(m.name, pr.total)} className="uf-btn uf-btn--ghost !py-2 !px-5 !min-h-11 text-[0.95rem] whitespace-nowrap shrink-0">{L.pricing.primaryCta}<span className="sr-only"> — {m.name}</span></Link>
-                  </li>
-                );
-              })}
+              {p.more.map(m => (
+                <li key={m.name} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5" style={{ borderColor: 'var(--line)' }}>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold" style={{ fontSize: '1.02rem' }}>{m.name}</h4>
+                    <p className="text-[0.9rem] uf-ink-soft">{m.note}</p>
+                  </div>
+                  <button type="button" onClick={() => selectPlan(m)} className="uf-btn uf-btn--ghost !py-2 !px-5 !min-h-11 text-[0.95rem] whitespace-nowrap shrink-0">{L.pricing.primaryCta}<span className="sr-only"> — {m.name}</span></button>
+                </li>
+              ))}
             </ul>
             {/* Founding member — real scarcity, no fake countdown */}
             <div className="mt-5 rounded-[22px] p-6 flex flex-col md:flex-row md:items-center gap-5" style={{ background: 'var(--cream-2)', border: '1.5px solid var(--clay)' }}>
@@ -664,13 +731,13 @@ function Pricing({ clickCta }) {
                 </ul>
               </div>
               <div className="shrink-0 md:text-right">
-                <p className="uf-serif uf-tabular" style={{ fontSize: '2.2rem', lineHeight: 1 }}>${p.founding.price}<span className="text-[0.9rem] uf-ink-soft" style={{ fontFamily: 'var(--sans)' }}>{p.founding.unit}</span></p>
-                <Link to={`/auth?mode=signup&plan=${encodeURIComponent(p.founding.name)}&billing=yearly`} onClick={() => selectPlan(p.founding.name, p.founding.price)} className="uf-btn uf-btn--solid mt-3 whitespace-nowrap">{L.pricing.primaryCta}<span className="sr-only"> — {p.founding.name}</span></Link>
+                <button type="button" onClick={() => selectPlan(p.founding)} className="uf-btn uf-btn--solid whitespace-nowrap">{L.pricing.primaryCta}<span className="sr-only"> — {p.founding.name}</span></button>
               </div>
             </div>
           </div>
         )}
       </div>
+      {open && <PlanModal plan={open} billing={billing} setBilling={setBilling} onClose={closeModal} />}
     </section>
   );
 }

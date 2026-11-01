@@ -171,35 +171,41 @@ export const CONTENT = {
 
     pricing: {
       eyebrow: 'Membership',
-      heading: 'One membership. Cancel anytime.',
-      sub: 'Quarterly billing saves 12% — and month-to-month is always here too.',
+      heading: 'Find the plan that fits your week.',
+      sub: 'Pick a plan, tap “Choose plan” and our team shares the details on WhatsApp — no forms, no pressure.',
+      // No prices on the page: picking a plan opens a details popup whose CTA
+      // opens WhatsApp prefilled with "<plan> <billing> package".
       billing: [
-        { key: 'monthly', label: 'Monthly', factor: 1, months: 1, save: null },
-        { key: 'quarterly', label: 'Quarterly', factor: 0.88, months: 3, save: 'Save 12%' },
+        { key: 'monthly', label: 'Monthly', pkg: 'Monthly', save: null },
+        { key: 'quarterly', label: 'Quarterly', pkg: 'Quarterly', save: 'Best value' },
       ],
       defaultBilling: 'quarterly',
-      // 4 primary tiers, Complete elevated as the $89 anchor.
+      // 4 primary tiers, Complete elevated as the anchor. `hook`/`hookSub` is
+      // the big line on the card where the price used to be.
       primary: [
-        { name: 'Starter', monthly: 39, tagline: '3 days a week to build the habit.', feats: ['3 live classes / week', 'Full weekly timetable', 'Class recordings'] },
-        { name: 'Regular', monthly: 59, tagline: 'Show up 5 days a week.', feats: ['5 live classes / week', 'Full weekly timetable', 'Class recordings'] },
-        { name: 'Starter + Diet', monthly: 69, tagline: 'Classes plus a plan for your plate.', feats: ['3 live classes / week', 'Weekly custom diet plan', 'Class recordings'] },
-        { name: 'Complete', monthly: 89, anchor: true, tagline: 'Classes, diet and a coach who checks in.', feats: ['5 live classes / week', 'Weekly custom diet plan', 'Progress dashboard', '1 coaching call / month'] },
+        { name: 'Starter', hook: '3×', hookSub: 'live classes a week', tagline: '3 days a week to build the habit.', bestFor: 'Beginners, or anyone getting back into a routine.', feats: ['3 live classes / week', 'Full weekly timetable', 'Class recordings'] },
+        { name: 'Regular', hook: '5×', hookSub: 'live classes a week', tagline: 'Show up 5 days a week.', bestFor: 'You’ve got the habit and want faster, steadier progress.', feats: ['5 live classes / week', 'Full weekly timetable', 'Class recordings'] },
+        { name: 'Starter + Diet', hook: '3× + diet', hookSub: 'classes plus your meal plan', tagline: 'Classes plus a plan for your plate.', bestFor: 'Weight goals where food matters as much as movement.', feats: ['3 live classes / week', 'Weekly custom diet plan', 'Class recordings'] },
+        { name: 'Complete', hook: 'All-in', hookSub: 'classes, diet & coaching', anchor: true, tagline: 'Classes, diet and a coach who checks in.', bestFor: 'The full transformation — with someone keeping you on track.', feats: ['5 live classes / week', 'Weekly custom diet plan', 'Progress dashboard', '1 coaching call / month'] },
       ],
       more: [
-        { name: 'PCOS / PCOD Care', monthly: 109, note: 'Condition-specific weekly programming + symptom log.' },
-        { name: 'Weight-Loss Intensive', monthly: 109, note: '5-day structure, weekly weigh-in, coach on the trend.' },
-        { name: 'Duo', monthly: 139, note: 'Two people, one membership — do it with a friend.' },
-        { name: '1:1 Personal Coaching', monthly: 229, note: 'Private sessions, weekly plan, ongoing messaging.' },
+        { name: 'PCOS / PCOD Care', note: 'Condition-specific weekly programming + symptom log.' },
+        { name: 'Weight-Loss Intensive', note: '5-day structure, weekly weigh-in, coach on the trend.' },
+        { name: 'Duo', note: 'Two people, one membership — do it with a friend.' },
+        { name: '1:1 Personal Coaching', note: 'Private sessions, weekly plan, ongoing messaging.' },
       ],
+      // Shown in the plan popup under the feature list.
+      modalSteps: ['Tap the button — WhatsApp opens with your plan already typed', 'Our team replies with pricing, batch timings and the next start date', 'Join your first live class'],
+      modalCta: 'Continue on WhatsApp',
+      modalNote: 'A real person on the team replies, usually the same day.',
       founding: {
         name: 'Founding Member',
-        price: 799,
-        unit: '/year',
+        pkg: 'Yearly',
         cap: 50,
         // Real scarcity only. NO fake countdown.
         scarcity: 'Limited to 50 founding members',
         seatsLeft: null, // TODO:PROOF — set a real number to show "N seats left"
-        perks: ['A full year, locked at the lowest price we’ll ever offer', 'Everything in Complete', 'Priority seat in every class', 'Direct line to Ansul & the instructors'],
+        perks: ['A full year at our best-ever rate, locked in', 'Everything in Complete', 'Priority seat in every class', 'Direct line to Ansul & the instructors'],
       },
       primaryCta: 'Choose plan',
       anchorCta: 'Get Complete',
@@ -253,7 +259,7 @@ export const CONTENT = {
         {
           name: 'Plans & billing',
           items: [
-            { q: 'How does billing work?', a: 'Pick monthly or quarterly (quarterly saves 12%). You’re billed upfront for the period, in US dollars, and there’s no long-term contract.' },
+            { q: 'How does billing work?', a: 'Pick monthly or quarterly (quarterly is the best value). Message us on WhatsApp with the plan you like and we’ll share the pricing — you’re billed upfront for the period and there’s no long-term contract.' },
             { q: 'Can I switch plans later?', a: 'Yes, anytime from your account — move between Starter, Regular, Complete or a specialised plan as your goals change.' },
             { q: 'How do I cancel?', a: 'Cancel anytime from your account. Your plan stays active until the end of the period you’ve paid for and you won’t be charged again. The full policy is linked at the bottom of this page.' },
             { q: 'Can I try a class before I pay?', a: 'Yes — claim a free seat in our live masterclass below. No card needed.' },
@@ -290,9 +296,10 @@ export const CONTENT = {
       explore: 'Explore',
       legal: 'Legal',
       legalLinks: [
-        { label: 'Privacy policy', to: '/privacy' },
-        { label: 'Terms of service', to: '/terms' },
-        { label: 'Cancellation & refunds', to: '/refund' },
+        // `short` = mobile footer label (keeps the row on one line).
+        { label: 'Privacy policy', short: 'Privacy', to: '/privacy' },
+        { label: 'Terms of service', short: 'Terms', to: '/terms' },
+        { label: 'Cancellation & refunds', short: 'Refunds', to: '/refund' },
       ],
     },
   },

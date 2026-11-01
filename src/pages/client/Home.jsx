@@ -11,6 +11,8 @@ import { registerForSession } from '../../lib/zoom';
 import { fmtDateTime } from '../../lib/datetime';
 import { Card, Spinner, CountdownTimer, SessionThumb } from '../../components/ui';
 import DailyCheckin from '../../components/DailyCheckin';
+import MyLiveClasses from '../../components/MyLiveClasses';
+import { DeletionBanner } from '../../components/AccountDeletion';
 
 // Local calendar date — toISOString() would roll the day over at UTC midnight,
 // which is the wrong day for anyone not on UTC.
@@ -53,7 +55,8 @@ export default function ClientHome() {
     const live = (sessions ?? []).find(s => s.is_live_next && !s.completed && !s.recording_link);
     setLiveSession(live ?? null);
     if (live?.scheduled_at) setIsLiveNow(new Date(live.scheduled_at) <= new Date());
-    setRecordings((sessions ?? []).filter(s => s.session_type === 'recording' || s.completed));
+    // Live-class dates (occurrence_date) have no recordings — they live on the class page.
+    setRecordings((sessions ?? []).filter(s => !s.occurrence_date && (s.session_type === 'recording' || s.completed)));
     setAnnouncement(anns?.[0] ?? null);
     setCheckin(chk ?? null);
     const last = weekly?.[0]?.created_at;
@@ -124,6 +127,7 @@ export default function ClientHome() {
   return (
     <div className="space-y-5">
       <h1 className="text-2xl md:text-3xl font-bold">Hi {profile.full_name.split(' ')[0]}, ready to move?</h1>
+      <DeletionBanner />
 
       {/* Announcement banner */}
       {announcement && (
@@ -132,6 +136,9 @@ export default function ClientHome() {
           <p className="text-sm text-amber-900">{announcement.message}</p>
         </div>
       )}
+
+      {/* Live classes this member is on the roster of — join + rate */}
+      <MyLiveClasses profile={profile} onJoin={() => saveCheckin({ attended_session: true })} />
 
       {/* Daily check-in — quick self-report of the habits that add up */}
       <DailyCheckin profile={profile} checkin={checkin} onSaved={setCheckin} />

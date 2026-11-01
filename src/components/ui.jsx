@@ -1,7 +1,7 @@
 // Small shared UI primitives used across all dashboards.
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2, Music, Flower2, Brain, Dumbbell, Weight, Activity, ChevronRight } from 'lucide-react';
+import { Loader2, Music, Flower2, Brain, Dumbbell, Weight, Activity, ChevronRight, Star } from 'lucide-react';
 
 // Class types + their at-a-glance icons (tooltip reinforces, icon stands alone).
 export const CLASS_TYPES = [
@@ -113,6 +113,23 @@ export function Avatar({ name, url, size = 'w-9 h-9' }) {
   return (
     <span className={`${size} rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm shrink-0`}>
       {(name || '?').charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
+// 1–5 stars. Read-only unless onChange is given.
+export function StarRating({ value = 0, onChange, size = 'w-5 h-5', label = 'Rating' }) {
+  return (
+    <span className="inline-flex items-center gap-0.5" role={onChange ? 'radiogroup' : 'img'} aria-label={onChange ? label : `${value} of 5 stars`}>
+      {[1, 2, 3, 4, 5].map(n => {
+        const star = <Star className={`${size} ${n <= value ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`} />;
+        return onChange ? (
+          <button key={n} type="button" role="radio" aria-checked={n === value} aria-label={`${n} star${n > 1 ? 's' : ''}`}
+            onClick={() => onChange(n)} className="p-0.5 rounded hover:scale-110 transition-transform duration-150">
+            {star}
+          </button>
+        ) : <span key={n}>{star}</span>;
+      })}
     </span>
   );
 }

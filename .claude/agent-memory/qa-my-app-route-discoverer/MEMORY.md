@@ -1,0 +1,1 @@
+- [Route conventions](route-conventions.md) — Protected(role) in App.jsx is the only gate; staff pages shared teacher+admin; /app preview bypass

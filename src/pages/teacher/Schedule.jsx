@@ -10,8 +10,9 @@ import { compressImage } from '../../lib/compressImage';
 import { createZoomMeeting, generateSessionImage } from '../../lib/zoom';
 import { DEFAULT_SESSION_DURATION_MIN, DEFAULT_CATEGORY, sessionFormError } from '../../lib/seriesConstants';
 import { fmtDateTime } from '../../lib/datetime';
-import { Card, Spinner, EmptyState, Avatar, SessionThumb, CategoryIcon, CLASS_TYPES } from '../../components/ui';
+import { Card, Spinner, EmptyState, SessionThumb, CategoryIcon, CLASS_TYPES } from '../../components/ui';
 import { SessionStatusPill } from '../../components/SessionStatus';
+import AttendanceSheet from '../../components/AttendanceSheet';
 
 // Fresh Add-session defaults — today's date, 7:00 PM start.
 function freshAdd() {
@@ -39,9 +40,6 @@ export default function TeacherSchedule() {
   const [challenges, setChallenges] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [attendanceFor, setAttendanceFor] = useState(null); // session being marked
-  const [roster, setRoster] = useState([]);
-  const [marked, setMarked] = useState(new Set());
-  const [unmatched, setUnmatched] = useState([]);
   const [busy, setBusy] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [add, setAdd] = useState(freshAdd);
@@ -55,6 +53,7 @@ export default function TeacherSchedule() {
 
   const load = useCallback(async () => {
     // Series this teacher runs — lead teacher_id OR co-teacher (challenge_teachers).
+    // Live classes (recurring) have their own page and calendar.
     const [{ data: own }, { data: ct }] = await Promise.all([
       supabase.from('challenges').select('*').eq('teacher_id', profile.id),
       supabase.from('challenge_teachers').select('challenge_id, challenges(*)').eq('teacher_id', profile.id),
@@ -62,7 +61,7 @@ export default function TeacherSchedule() {
     const map = new Map();
     for (const c of own ?? []) map.set(c.id, c);
     for (const r of ct ?? []) if (r.challenges) map.set(r.challenges.id, r.challenges);
-    const ch = [...map.values()];
+    const ch = [...map.values()].filter(c => !c.is_recurring);
     setChallenges(ch);
 
     const ids = ch.map(c => c.id);
@@ -223,47 +222,6 @@ export default function TeacherSchedule() {
     setDragging(false);
     const file = e.dataTransfer.files?.[0];
     if (file) uploadPoster(posterFor, file);
-  }
-
-  async function openAttendance(session) {
-    setAttendanceFor(session);
-    const [{ data: enr }, { data: existing }, { data: parts }] = await Promise.all([
-      // Names + avatars only — no student contact details exposed to teachers.
-      supabase.rpc('series_roster', { p_challenge: session.challenge_id }),
-      supabase.from('attendance').select('user_id').eq('session_id', session.id).eq('attended', true),
-      supabase.from('session_participants').select('*').eq('session_id', session.id).is('user_id', null),
-    ]);
-    setRoster(enr ?? []);
-    setMarked(new Set((existing ?? []).map(a => a.user_id)));
-    setUnmatched(parts ?? []);
-  }
-
-  // Reconcile a Zoom participant that couldn't auto-match to a Unifitz user.
-  // Audit trail: record who matched and when (matched_by / matched_at).
-  async function reconcile(participantId, userId) {
-    if (!userId) return;
-    const { error } = await supabase.from('session_participants')
-      .update({ user_id: userId, matched_by: profile.id, matched_at: new Date().toISOString() })
-      .eq('id', participantId);
-    if (error) return toast(error.message, 'error');
-    setUnmatched(u => u.filter(p => p.id !== participantId));
-    toast('Participant matched — re-runs at next meeting.ended, or mark manually here');
-  }
-
-  async function saveAttendance() {
-    setBusy(true);
-    const rows = roster.map(r => ({
-      session_id: attendanceFor.id,
-      user_id: r.user_id,
-      attended: marked.has(r.user_id),
-      marked_by: profile.id,
-      source: 'manual',
-    }));
-    const { error } = await supabase.from('attendance').upsert(rows, { onConflict: 'session_id,user_id' });
-    setBusy(false);
-    if (error) return toast(error.message, 'error');
-    toast(`Attendance saved — ${marked.size}/${roster.length} present`);
-    setAttendanceFor(null);
   }
 
   async function addSession(e) {
@@ -488,7 +446,7 @@ export default function TeacherSchedule() {
                       onClick={() => patchSession(s.id, { completed: true, is_live_next: false, session_type: 'recording', recording_link: s.recording_link ?? s.zoom_link }, 'Marked completed')}
                       tone="text-emerald-500" />
                   )}
-                  <button onClick={() => openAttendance(s)} title="Mark attendance" aria-label="Mark attendance"
+                  <button onClick={() => setAttendanceFor(s)} title="Mark attendance" aria-label="Mark attendance"
                     className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-brand-500 hover:bg-brand-600 text-white transition-colors duration-200">
                     <ClipboardCheck className="w-4 h-4" />
                   </button>
@@ -499,74 +457,7 @@ export default function TeacherSchedule() {
         </div>
       )}
 
-      {/* Attendance modal */}
-      {attendanceFor && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-end md:items-center justify-center p-0 md:p-6" role="dialog" aria-modal="true">
-          <div className="bg-white w-full max-w-md rounded-t-2xl md:rounded-2xl p-5 md:p-6 max-h-[85vh] overflow-y-auto animate-fade-up">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-lg">Attendance — Day {attendanceFor.day_number}</h3>
-              <button onClick={() => setAttendanceFor(null)} aria-label="Close" className="p-1.5 rounded-lg hover:bg-slate-100">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <p className="text-xs text-slate-500 mt-1">{attendanceFor.title}</p>
-            <ul className="mt-4 space-y-1.5">
-              {roster.map(r => (
-                <li key={r.user_id}>
-                  <label className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-slate-50 cursor-pointer transition-colors duration-150">
-                    <input
-                      type="checkbox"
-                      checked={marked.has(r.user_id)}
-                      onChange={() => setMarked(m => {
-                        const next = new Set(m);
-                        next.has(r.user_id) ? next.delete(r.user_id) : next.add(r.user_id);
-                        return next;
-                      })}
-                      className="w-5 h-5 accent-brand-500"
-                    />
-                    <Avatar name={r.full_name} url={r.avatar_url} size="w-8 h-8" />
-                    <span className="text-sm font-semibold">{r.full_name}</span>
-                  </label>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-4 flex gap-2">
-              <button onClick={() => setAttendanceFor(null)} disabled={busy} className="btn-secondary">Cancel</button>
-              <button onClick={saveAttendance} disabled={busy} className="btn-primary flex-1">
-                {busy && <Loader2 className="w-4 h-4 animate-spin" />} Save ({marked.size}/{roster.length} present)
-              </button>
-            </div>
-
-            {/* Unmatched Zoom participants — reconcile to a Unifitz member */}
-            {unmatched.length > 0 && (
-              <div className="mt-6 border-t border-slate-100 pt-4">
-                <h4 className="font-bold text-sm text-amber-700">Unmatched Zoom participants ({unmatched.length})</h4>
-                <p className="text-xs text-slate-500 mt-0.5">These joined without a matching email. Assign each to a member.</p>
-                <ul className="mt-3 space-y-2">
-                  {unmatched.map(p => (
-                    <li key={p.id} className="flex items-center gap-2">
-                      <span className="flex-1 text-sm truncate">
-                        {p.zoom_participant_name || p.zoom_participant_email || 'Unknown'}
-                      </span>
-                      <select
-                        defaultValue=""
-                        onChange={e => reconcile(p.id, e.target.value)}
-                        className="input !py-1.5 !px-2 text-xs w-40"
-                        aria-label="Assign participant to member"
-                      >
-                        <option value="">Assign to…</option>
-                        {roster.map(r => (
-                          <option key={r.user_id} value={r.user_id}>{r.full_name}</option>
-                        ))}
-                      </select>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {attendanceFor && <AttendanceSheet session={attendanceFor} onClose={() => setAttendanceFor(null)} />}
 
       {/* Poster view / edit modal */}
       {posterFor && (

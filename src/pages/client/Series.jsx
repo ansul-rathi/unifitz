@@ -20,7 +20,7 @@ export default function ClientSeries() {
 
   async function load() {
     const [{ data: ch }, { data: enr }, { data: pays }, { data: ses }, { data: att }] = await Promise.all([
-      supabase.from('challenges').select('*').order('start_date'),
+      supabase.from('challenges').select('*').eq('is_recurring', false).order('start_date'),
       supabase.from('enrollments').select('challenge_id').eq('user_id', profile.id),
       supabase.from('payments').select('challenge_id, status').eq('user_id', profile.id).eq('status', 'pending_verification'),
       supabase.from('sessions').select('id, challenge_id, completed'),
